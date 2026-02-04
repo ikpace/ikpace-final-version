@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { BookOpen, TrendingUp, Award, Clock, Flame, Target, Sparkles, Bell } from 'lucide-react'
+import VideoPlayer from '../components/VideoPlayer'
+import { videoConfig } from '../config/videos'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -155,44 +157,30 @@ export default function Dashboard() {
           <div className="card">
             <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
               <BookOpen className="mr-2" size={24} />
-              Welcome Video
+              {videoConfig.welcome.title}
             </h3>
-            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="iKPACE Welcome Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
-            </div>
+            <VideoPlayer
+              videoId={videoConfig.welcome.youtubeId}
+              title={videoConfig.welcome.title}
+              className="mb-4"
+            />
             <p className="text-sm text-gray-600">
-              Watch this video to learn about iKPACE and how to get started with your courses!
+              {videoConfig.welcome.description}
             </p>
           </div>
 
           <div className="card">
             <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
               <Target className="mr-2" size={24} />
-              Orientation Video
+              {videoConfig.orientation.title}
             </h3>
-            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                title="iKPACE Orientation Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
-            </div>
+            <VideoPlayer
+              videoId={videoConfig.orientation.youtubeId}
+              title={videoConfig.orientation.title}
+              className="mb-4"
+            />
             <p className="text-sm text-gray-600">
-              This video will guide you through onboarding and help you unlock the full potential of the eHub at ALX. Be sure to refer back to this video to help you along your orientation experience.
+              {videoConfig.orientation.description}
             </p>
           </div>
         </div>

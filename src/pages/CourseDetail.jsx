@@ -128,10 +128,16 @@ export default function CourseDetail() {
 
   const handleEnroll = () => {
     if (!user) {
-      navigate('/login')
+      navigate('/login', { state: { from: `/courses/${slug}` } })
       return
     }
-    setShowPayment(true)
+
+    if (enrollment?.payment_status === 'completed') {
+      navigate(`/learn/${course.id}`)
+      return
+    }
+
+    navigate(`/enroll/${slug}`)
   }
 
   const handlePaymentSuccess = async (reference) => {
@@ -235,7 +241,7 @@ export default function CourseDetail() {
                   <div className="text-4xl font-bold text-primary mb-2">
                     ${course.price}
                   </div>
-                  <div className="text-gray-600">per month</div>
+                  <div className="text-gray-600">One-time payment</div>
                 </div>
 
                 {enrollment ? (

@@ -13,6 +13,10 @@ import Community from './pages/Community'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile from './pages/Profile'
 import Certificates from './pages/Certificates'
+import Enrollment from './pages/Enrollment'
+import Checkout from './pages/Checkout'
+import PaymentSuccess from './pages/PaymentSuccess'
+import ProtectedCourseRoute from './components/ProtectedCourseRoute'
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
@@ -62,6 +66,9 @@ function AppContent() {
         <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:slug" element={<CourseDetail />} />
+        <Route path="/enroll/:slug" element={<Enrollment />} />
+        <Route path="/checkout/:courseId" element={<Checkout />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -71,7 +78,9 @@ function AppContent() {
 
         <Route path="/learn/:courseId" element={
           <ProtectedRoute>
-            <CoursePlayer />
+            <ProtectedCourseRoute>
+              <CoursePlayer />
+            </ProtectedCourseRoute>
           </ProtectedRoute>
         } />
 
