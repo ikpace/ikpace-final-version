@@ -18,14 +18,21 @@ export default function Enrollment() {
 
   const fetchCourseData = async () => {
     try {
-      const { data: courseData } = await supabase
+      console.log('Enrollment page - Fetching course with slug:', slug)
+
+      const { data: courseData, error: courseError } = await supabase
         .from('courses')
         .select('*')
         .eq('slug', slug)
         .eq('is_published', true)
         .maybeSingle()
 
+      if (courseError) {
+        console.error('Enrollment page - Course fetch error:', courseError)
+      }
+
       if (courseData) {
+        console.log('Enrollment page - Course found:', courseData.title, 'ID:', courseData.id)
         setCourse(courseData)
 
         if (user) {
@@ -36,27 +43,42 @@ export default function Enrollment() {
             .eq('course_id', courseData.id)
             .maybeSingle()
 
+          if (enrollment) {
+            console.log('Enrollment page - Existing enrollment found:', enrollment.payment_status)
+          }
           setExistingEnrollment(enrollment)
         }
+      } else {
+        console.warn('Enrollment page - No course found with slug:', slug)
       }
     } catch (error) {
-      console.error('Error fetching course:', error)
+      console.error('Enrollment page - Error fetching course:', error)
     } finally {
       setLoading(false)
     }
   }
 
   const handleEnroll = () => {
+    console.log('Enrollment page - handleEnroll called')
+
     if (!user) {
+      console.log('Enrollment page - No user, redirecting to login')
       navigate('/login', { state: { from: `/enroll/${slug}` } })
       return
     }
 
     if (existingEnrollment?.payment_status === 'completed') {
+      console.log('Enrollment page - User already enrolled, redirecting to dashboard')
       navigate('/dashboard')
       return
     }
 
+    if (!course || !course.id) {
+      console.error('Enrollment page - No course or course ID available')
+      return
+    }
+
+    console.log('Enrollment page - Redirecting to checkout with course ID:', course.id)
     navigate(`/checkout/${course.id}`)
   }
 

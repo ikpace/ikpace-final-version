@@ -6,6 +6,22 @@ import { ChevronLeft, ChevronRight, CheckCircle, Circle, PlayCircle, Award, Book
 import AdvancedVideoPlayer from '../components/AdvancedVideoPlayer'
 import QuizSystem from '../components/QuizSystem'
 
+const extractYouTubeId = (url) => {
+  if (!url) return null
+
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
+    /^([a-zA-Z0-9_-]{11})$/
+  ]
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match && match[1]) return match[1]
+  }
+
+  return null
+}
+
 export default function EnhancedCoursePlayer() {
   const { courseId } = useParams()
   const { user, profile } = useAuth()
@@ -278,16 +294,33 @@ export default function EnhancedCoursePlayer() {
                   {!showQuiz ? (
                     <>
                       {currentLesson.video_url ? (
-                        <AdvancedVideoPlayer
-                          videoUrl={currentLesson.video_url}
-                          videoType={currentLesson.video_type || 'video/mp4'}
-                          title={currentLesson.title}
-                          onComplete={handleVideoComplete}
-                          className="mb-6"
-                        />
+                        (() => {
+                          const youtubeId = extractYouTubeId(currentLesson.video_url)
+
+                          if (youtubeId) {
+                            return (
+                              <AdvancedVideoPlayer
+                                youtubeId={youtubeId}
+                                title={currentLesson.title}
+                                onComplete={handleVideoComplete}
+                                className="mb-6"
+                              />
+                            )
+                          }
+
+                          return (
+                            <AdvancedVideoPlayer
+                              videoUrl={currentLesson.video_url}
+                              videoType={currentLesson.video_type || 'video/mp4'}
+                              title={currentLesson.title}
+                              onComplete={handleVideoComplete}
+                              className="mb-6"
+                            />
+                          )
+                        })()
                       ) : currentLesson.content_url?.includes('youtube') ? (
                         <AdvancedVideoPlayer
-                          youtubeId={currentLesson.content_url.split('/').pop()}
+                          youtubeId={extractYouTubeId(currentLesson.content_url)}
                           title={currentLesson.title}
                           onComplete={handleVideoComplete}
                           className="mb-6"
