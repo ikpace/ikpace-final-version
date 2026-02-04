@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { getAllCourses } from '../data/coursesData'
 import { Clock, BookOpen, TrendingUp } from 'lucide-react'
 
 export default function Courses() {
@@ -21,15 +22,23 @@ export default function Courses() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setCourses(data || [])
+
+      if (data && data.length > 0) {
+        setCourses(data)
+      } else {
+        setCourses(getAllCourses())
+      }
     } catch (error) {
       console.error('Error fetching courses:', error)
+      setCourses(getAllCourses())
     } finally {
       setLoading(false)
     }
   }
 
-  const mockCourses = [
+  const mockCourses = getAllCourses()
+
+  const oldMockCourses = [
     {
       id: '1',
       title: 'Information Technology Fundamentals',

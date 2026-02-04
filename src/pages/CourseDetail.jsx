@@ -109,14 +109,14 @@ export default function CourseDetail() {
           setEnrollment(enrollmentData)
         }
       } else {
-        const mockCourse = mockCourseData[slug]
+        const mockCourse = getCourseBySlug(slug)
         if (mockCourse) {
           setCourse(mockCourse)
         }
       }
     } catch (error) {
       console.error('Error fetching course:', error)
-      const mockCourse = mockCourseData[slug]
+      const mockCourse = getCourseBySlug(slug)
       if (mockCourse) {
         setCourse(mockCourse)
       }

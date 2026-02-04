@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
+import LiveChatSupport from './components/LiveChatSupport'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -98,6 +99,7 @@ function AppContent() {
           </AdminRoute>
         } />
       </Routes>
+      <LiveChatSupport />
     </div>
   )
 }

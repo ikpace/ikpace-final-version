@@ -17,12 +17,16 @@ export default function Navbar() {
     <nav className="bg-primary shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-3 group">
             <img
               src="/whatsapp_image_2026-01-31_at_7.16.31_am.jpeg"
               alt="iKPACE Logo"
-              className="h-12 w-auto"
+              className="h-14 w-auto transition-transform group-hover:scale-105"
             />
+            <div className="hidden sm:block">
+              <div className="text-white font-bold text-lg leading-tight">iKPACE</div>
+              <div className="text-secondary text-xs font-semibold tracking-wide">LEARN SMARTER</div>
+            </div>
           </Link>
 
           <div className="flex items-center space-x-6">
