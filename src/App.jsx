@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import LiveChatSupport from './components/LiveChatSupport'
+import Footer from './components/Footer'
+import PromotionalBanner from './components/PromotionalBanner'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -16,6 +18,8 @@ import Certificates from './pages/Certificates'
 import Enrollment from './pages/Enrollment'
 import Checkout from './pages/Checkout'
 import PaymentSuccess from './pages/PaymentSuccess'
+import Pricing from './pages/Pricing'
+import CareerReady from './pages/CareerReady'
 import ProtectedCourseRoute from './components/ProtectedCourseRoute'
 
 const ProtectedRoute = ({ children }) => {
@@ -59,6 +63,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-neutral-gray">
+      <PromotionalBanner />
       <Navbar />
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
@@ -69,6 +74,8 @@ function AppContent() {
         <Route path="/enroll/:slug" element={<Enrollment />} />
         <Route path="/checkout/:courseId" element={<Checkout />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/career-ready" element={<CareerReady />} />
 
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -108,6 +115,7 @@ function AppContent() {
           </AdminRoute>
         } />
       </Routes>
+      <Footer />
       <LiveChatSupport />
     </div>
   )

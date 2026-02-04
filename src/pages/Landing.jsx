@@ -185,7 +185,10 @@ export default function Landing() {
       <section className="py-20 px-4 bg-neutral-gray">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-primary mb-4">Popular Courses</h2>
+            <div className="inline-block bg-gradient-to-r from-secondary to-accent-yellow text-white px-6 py-2 rounded-full font-bold mb-4">
+              MOST POPULAR PROGRAMS
+            </div>
+            <h2 className="text-4xl font-bold text-primary mb-4">Top-Rated Courses</h2>
             <p className="text-xl text-gray-600">Start with any course - they're all beginner-friendly</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -261,6 +264,37 @@ export default function Landing() {
                 <p className="text-gray-700 italic">&ldquo;{testimonial.quote}&rdquo;</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 px-4 bg-gradient-to-br from-secondary/10 via-primary/5 to-accent-green/10">
+        <div className="max-w-6xl mx-auto">
+          <div className="card bg-gradient-to-r from-primary to-secondary text-white text-center py-16 px-8">
+            <Users className="mx-auto mb-6 animate-pulse" size={80} />
+            <h2 className="text-5xl font-bold mb-6">
+              Join a Community that Has Your Back
+            </h2>
+            <p className="text-2xl mb-8 max-w-4xl mx-auto leading-relaxed">
+              Experience the power of a community that walks with you throughout your career. Our supportive environments are designed for you to connect, collaborate, and build lasting relationships with peers and mentors, fostering collective growth and shared success.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <div className="text-4xl font-bold text-accent-yellow mb-2">5,000+</div>
+                <div className="text-lg">Active Members</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <div className="text-4xl font-bold text-accent-yellow mb-2">24/7</div>
+                <div className="text-lg">Community Support</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <div className="text-4xl font-bold text-accent-yellow mb-2">100+</div>
+                <div className="text-lg">Events Per Month</div>
+              </div>
+            </div>
+            <Link to="/community" className="btn-secondary text-lg px-8 py-4 inline-block">
+              Join Our Community
+            </Link>
           </div>
         </div>
       </section>

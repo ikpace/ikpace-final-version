@@ -34,10 +34,17 @@ export default function Navbar() {
               Courses
             </Link>
 
+            <Link to="/pricing" className="text-white hover:text-secondary transition-colors">
+              Pricing
+            </Link>
+
             {user && (
               <>
                 <Link to="/dashboard" className="text-white hover:text-secondary transition-colors">
                   Dashboard
+                </Link>
+                <Link to="/career-ready" className="text-white hover:text-secondary transition-colors">
+                  Career Ready
                 </Link>
                 <Link to="/community" className="text-white hover:text-secondary transition-colors">
                   Community
