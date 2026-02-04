@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import { X, CreditCard, Smartphone, CheckCircle } from 'lucide-react'
+import { X, CreditCard, Smartphone, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
-export default function PaystackPayment({ email, amount, courseName, onSuccess, onClose }) {
+export default function PaystackPayment({ email, amount, courseName, courseId, onSuccess, onClose }) {
   const [paymentMethod, setPaymentMethod] = useState('card')
   const [scriptLoaded, setScriptLoaded] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -19,20 +22,78 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
     }
   }, [])
 
+  const verifyPayment = async (reference) => {
+    try {
+      setVerifying(true)
+      setError(null)
+
+      console.log('Verifying payment with backend...', { reference, courseId, amount: amount / 100, email })
+
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        throw new Error('Not authenticated')
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': supabaseAnonKey,
+        },
+        body: JSON.stringify({
+          reference,
+          courseId,
+          amount: amount / 100,
+          email,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Payment verification failed')
+      }
+
+      console.log('Payment verified successfully:', result)
+
+      setVerifying(false)
+      onSuccess({
+        reference,
+        transactionId: result.data.transactionId,
+        enrollmentId: result.data.enrollmentId,
+        courseName: result.data.courseName,
+      })
+    } catch (err) {
+      console.error('Payment verification error:', err)
+      setError(err.message)
+      setVerifying(false)
+    }
+  }
+
   const handlePayment = () => {
     const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY
 
     if (!paystackKey || paystackKey === 'your_paystack_public_key' || paystackKey.includes('YOUR')) {
-      console.error('Paystack key not configured!')
-      alert('Payment system not configured. Please add VITE_PAYSTACK_PUBLIC_KEY to your .env file.\n\nGet your key from: https://dashboard.paystack.com/#/settings/developer')
+      setError('Payment system not configured. Please add VITE_PAYSTACK_PUBLIC_KEY to your .env file.')
       return
     }
 
     if (!window.PaystackPop) {
-      alert('Payment system is loading. Please try again in a moment.')
+      setError('Payment system is loading. Please try again in a moment.')
       return
     }
 
+    if (!courseId) {
+      setError('Course ID is missing. Cannot process payment.')
+      return
+    }
+
+    setError(null)
     console.log('Initiating Paystack payment...')
     console.log('Amount:', amount, 'Email:', email, 'Method:', paymentMethod)
 
@@ -53,6 +114,11 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
             value: courseName
           },
           {
+            display_name: 'Course ID',
+            variable_name: 'course_id',
+            value: courseId
+          },
+          {
             display_name: 'Customer Email',
             variable_name: 'email',
             value: email
@@ -60,40 +126,18 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
         ]
       },
       callback: function(response) {
-        console.log('Payment successful:', response)
-        onSuccess({
-          reference: response.reference,
-          status: response.status,
-          trans: response.trans,
-          transaction: response.transaction,
-          trxref: response.trxref
-        })
+        console.log('Paystack payment completed:', response)
+        verifyPayment(response.reference)
       },
       onClose: function() {
         console.log('Payment window closed by user')
+        if (!verifying) {
+          setError('Payment was cancelled')
+        }
       }
     })
 
     handler.openIframe()
-  }
-
-  const handleDemoPayment = () => {
-    console.log('DEMO MODE: Simulating payment...')
-
-    alert('DEMO MODE: Simulating successful payment.\n\nTo enable real payments:\n1. Sign up at https://paystack.com\n2. Get your public key from Settings → API Keys\n3. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file\n4. Restart the development server')
-
-    setTimeout(() => {
-      const demoRef = 'IKPACE_DEMO_' + Date.now()
-      console.log('Demo payment completed with reference:', demoRef)
-      onSuccess({
-        reference: demoRef,
-        status: 'success',
-        trans: demoRef,
-        transaction: demoRef,
-        trxref: demoRef,
-        message: 'Demo payment successful'
-      })
-    }, 1000)
   }
 
   return (
@@ -167,17 +211,50 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
           </div>
         </div>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200 flex items-start">
+            <AlertCircle size={20} className="text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-red-900 font-medium">Payment Error</p>
+              <p className="text-xs text-red-700 mt-1">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {verifying && (
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center justify-center">
+              <Loader2 size={20} className="text-blue-600 animate-spin mr-3" />
+              <div>
+                <p className="text-sm text-blue-900 font-medium">Verifying Payment...</p>
+                <p className="text-xs text-blue-700 mt-1">Please wait while we confirm your payment</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-3 mb-6">
           <button
-            onClick={handleDemoPayment}
-            className="w-full btn-primary flex items-center justify-center shadow-lg hover:shadow-xl"
+            onClick={handlePayment}
+            disabled={verifying}
+            className="w-full btn-primary flex items-center justify-center shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <CheckCircle size={20} className="mr-2" />
-            Pay ${(amount / 100).toFixed(2)} (Demo Mode)
+            {verifying ? (
+              <>
+                <Loader2 size={20} className="mr-2 animate-spin" />
+                Verifying Payment...
+              </>
+            ) : (
+              <>
+                <CreditCard size={20} className="mr-2" />
+                Pay ${(amount / 100).toFixed(2)}
+              </>
+            )}
           </button>
           <button
             onClick={onClose}
-            className="w-full btn-outline"
+            disabled={verifying}
+            className="w-full btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
@@ -205,10 +282,10 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-xs text-blue-900 leading-relaxed">
-            <strong className="block mb-1">💡 Demo Mode Active</strong>
-            Click "Pay" to simulate enrollment. For production use, add your Paystack public key in the PaystackPayment component.
+        <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+          <p className="text-xs text-yellow-900 leading-relaxed">
+            <strong className="block mb-1">💳 Test Mode Active</strong>
+            Use test card: 4084 0840 8408 4081 | CVV: 408 | PIN: 0000 | OTP: 123456
           </p>
         </div>
       </div>

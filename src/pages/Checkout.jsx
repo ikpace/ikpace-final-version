@@ -11,7 +11,6 @@ export default function Checkout() {
   const navigate = useNavigate()
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -69,78 +68,16 @@ export default function Checkout() {
   }
 
   const handlePaymentSuccess = async (paymentResponse) => {
-    setProcessing(true)
-    setError('')
+    console.log('Payment verified and enrollment created:', paymentResponse)
 
-    console.log('Payment response received:', paymentResponse)
-
-    const paymentReference = typeof paymentResponse === 'string'
-      ? paymentResponse
-      : paymentResponse.reference || paymentResponse.trxref
-
-    console.log('Processing payment reference:', paymentReference)
-
-    if (!paymentReference) {
-      console.error('No payment reference found in response:', paymentResponse)
-      setError('Invalid payment response. Please try again.')
-      setProcessing(false)
-      return
-    }
-
-    try {
-      console.log('Creating payment record...')
-      const { data: paymentData, error: paymentError } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          course_id: course.id,
-          amount: course.price,
-          payment_reference: paymentReference,
-          payment_method: 'card',
-          status: 'pending'
-        })
-        .select()
-        .single()
-
-      if (paymentError) {
-        console.error('Payment insert error:', paymentError)
-        throw paymentError
+    navigate('/payment-success', {
+      state: {
+        course: course,
+        reference: paymentResponse.reference,
+        transactionId: paymentResponse.transactionId,
+        enrollmentId: paymentResponse.enrollmentId
       }
-
-      console.log('Payment record created:', paymentData)
-      console.log('Verifying payment with Paystack...')
-
-      const { data: verificationResult, error: verificationError } = await supabase
-        .rpc('verify_payment', {
-          p_payment_reference: paymentReference,
-          p_verification_data: paymentResponse
-        })
-
-      if (verificationError) {
-        console.error('Payment verification error:', verificationError)
-        throw verificationError
-      }
-
-      console.log('Verification result:', verificationResult)
-
-      if (verificationResult.success || verificationResult === true) {
-        console.log('Payment verified successfully! Redirecting...')
-        navigate('/payment-success', {
-          state: {
-            course: course,
-            reference: paymentReference
-          }
-        })
-      } else {
-        console.error('Payment verification failed:', verificationResult)
-        setError('Payment verification failed. Please contact support with reference: ' + paymentReference)
-      }
-    } catch (error) {
-      console.error('Payment processing error:', error)
-      setError('Payment processing failed: ' + error.message + '. Please contact support.')
-    } finally {
-      setProcessing(false)
-    }
+    })
   }
 
   const handlePaymentClose = () => {
@@ -230,9 +167,9 @@ export default function Checkout() {
                 email={profile?.email}
                 amount={course?.price * 100}
                 courseName={course?.title}
+                courseId={course?.id}
                 onSuccess={handlePaymentSuccess}
                 onClose={handlePaymentClose}
-                disabled={processing}
               />
 
               <div className="mt-6 text-center text-sm text-gray-600">
