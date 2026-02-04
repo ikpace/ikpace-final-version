@@ -2,13 +2,13 @@ export const videoConfig = {
   welcome: {
     title: 'Welcome to iKPACE',
     description: 'Watch this video to learn about iKPACE and how to get started with your courses!',
-    youtubeId: 'YOUR_WELCOME_VIDEO_ID',
+    youtubeId: '5qap5aO4i9A',
     fallbackUrl: null
   },
   orientation: {
     title: 'Platform Orientation',
     description: 'This video will guide you through the platform and help you unlock the full potential of your learning experience.',
-    youtubeId: 'YOUR_ORIENTATION_VIDEO_ID',
+    youtubeId: 'QH2-TGUlwu4',
     fallbackUrl: null
   }
 }

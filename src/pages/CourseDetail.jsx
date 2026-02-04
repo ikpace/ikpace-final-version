@@ -79,12 +79,20 @@ export default function CourseDetail() {
 
   const fetchCourseData = async () => {
     try {
-      const { data: courseData, error: courseError } = await supabase
+      const isUUID = slug && slug.length === 36 && slug.includes('-')
+
+      let query = supabase
         .from('courses')
         .select('*')
-        .eq('slug', slug)
         .eq('is_published', true)
-        .maybeSingle()
+
+      if (isUUID) {
+        query = query.eq('id', slug)
+      } else {
+        query = query.eq('slug', slug)
+      }
+
+      const { data: courseData, error: courseError } = await query.maybeSingle()
 
       if (courseError) throw courseError
 
