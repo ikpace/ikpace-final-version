@@ -135,17 +135,29 @@ export default function CourseDetail() {
   }
 
   const handleEnroll = () => {
+    console.log('===== COURSE DETAIL - ENROLL BUTTON CLICKED =====')
+    console.log('User:', user ? 'Logged in' : 'Not logged in')
+    console.log('Course object:', course)
+    console.log('Course slug:', course?.slug)
+    console.log('Course ID:', course?.id)
+    console.log('URL slug param:', slug)
+
     if (!user) {
+      console.log('Redirecting to login...')
       navigate('/login', { state: { from: `/courses/${course?.slug || slug}` } })
       return
     }
 
     if (enrollment?.payment_status === 'completed') {
+      console.log('Already enrolled, going to course...')
       navigate(`/learn/${course.id}`)
       return
     }
 
-    navigate(`/enroll/${course?.slug || course?.id || slug}`)
+    const enrollPath = `/enroll/${course?.slug || course?.id || slug}`
+    console.log('Navigating to enrollment page:', enrollPath)
+    console.log('===== END ENROLL BUTTON CLICK =====')
+    navigate(enrollPath)
   }
 
   const handlePaymentSuccess = async (reference) => {

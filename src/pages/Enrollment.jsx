@@ -18,29 +18,51 @@ export default function Enrollment() {
 
   const fetchCourseData = async () => {
     try {
-      console.log('Enrollment page - Fetching course with slug:', slug)
+      console.log('===== ENROLLMENT PAGE DEBUG =====')
+      console.log('Fetching course with slug/id:', slug)
+      console.log('Slug type:', typeof slug)
+      console.log('Slug length:', slug?.length)
 
       const isUUID = slug && slug.length === 36 && slug.includes('-')
+      console.log('Is UUID?', isUUID)
 
-      let query = supabase
-        .from('courses')
-        .select('*')
-        .eq('is_published', true)
+      let courseData = null
 
       if (isUUID) {
-        query = query.eq('id', slug)
+        console.log('Querying by ID:', slug)
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('id', slug)
+          .eq('is_published', true)
+          .maybeSingle()
+
+        if (error) {
+          console.error('Error querying by ID:', error)
+        } else {
+          console.log('Query by ID result:', data)
+          courseData = data
+        }
       } else {
-        query = query.eq('slug', slug)
-      }
+        console.log('Querying by slug:', slug)
+        const { data, error } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('slug', slug)
+          .eq('is_published', true)
+          .maybeSingle()
 
-      const { data: courseData, error: courseError } = await query.maybeSingle()
-
-      if (courseError) {
-        console.error('Enrollment page - Course fetch error:', courseError)
+        if (error) {
+          console.error('Error querying by slug:', error)
+        } else {
+          console.log('Query by slug result:', data)
+          courseData = data
+        }
       }
 
       if (courseData) {
-        console.log('Enrollment page - Course found:', courseData.title, 'ID:', courseData.id)
+        console.log('SUCCESS - Course found:', courseData.title, 'ID:', courseData.id)
+        console.log('Course details:', JSON.stringify(courseData, null, 2))
         setCourse(courseData)
 
         if (user) {
@@ -52,15 +74,23 @@ export default function Enrollment() {
             .maybeSingle()
 
           if (enrollment) {
-            console.log('Enrollment page - Existing enrollment found:', enrollment.payment_status)
+            console.log('Existing enrollment found:', enrollment.payment_status)
           }
           setExistingEnrollment(enrollment)
         }
       } else {
-        console.warn('Enrollment page - No course found with slug:', slug)
+        console.error('FAILURE - No course found with:', slug)
+        console.log('Attempting to fetch all courses to debug...')
+        const { data: allCourses } = await supabase
+          .from('courses')
+          .select('id, title, slug')
+          .eq('is_published', true)
+          .limit(5)
+        console.log('Available courses in database:', allCourses)
       }
+      console.log('===== END DEBUG =====')
     } catch (error) {
-      console.error('Enrollment page - Error fetching course:', error)
+      console.error('EXCEPTION in fetchCourseData:', error)
     } finally {
       setLoading(false)
     }
