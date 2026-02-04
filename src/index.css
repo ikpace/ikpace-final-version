@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neutral-gray text-neutral-dark;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, #1A3D7C 0%, #0F2654 100%);
+}
+
+.gradient-card {
+  background: linear-gradient(135deg, rgba(26, 61, 124, 0.05) 0%, rgba(255, 122, 0, 0.05) 100%);
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg;
+}
+
+.btn-secondary {
+  @apply bg-secondary hover:bg-secondary-dark text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg;
+}
+
+.btn-outline {
+  @apply border-2 border-primary text-primary hover:bg-primary hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-200;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200;
+}
+
+.input-field {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+}
+
+.progress-bar {
+  @apply bg-gray-200 rounded-full h-2 overflow-hidden;
+}
+
+.progress-fill {
+  @apply bg-secondary h-full rounded-full transition-all duration-500;
+}
