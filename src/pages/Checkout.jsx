@@ -68,47 +68,76 @@ export default function Checkout() {
     }
   }
 
-  const handlePaymentSuccess = async (reference) => {
+  const handlePaymentSuccess = async (paymentResponse) => {
     setProcessing(true)
     setError('')
 
+    console.log('Payment response received:', paymentResponse)
+
+    const paymentReference = typeof paymentResponse === 'string'
+      ? paymentResponse
+      : paymentResponse.reference || paymentResponse.trxref
+
+    console.log('Processing payment reference:', paymentReference)
+
+    if (!paymentReference) {
+      console.error('No payment reference found in response:', paymentResponse)
+      setError('Invalid payment response. Please try again.')
+      setProcessing(false)
+      return
+    }
+
     try {
+      console.log('Creating payment record...')
       const { data: paymentData, error: paymentError } = await supabase
         .from('payments')
         .insert({
           user_id: user.id,
           course_id: course.id,
           amount: course.price,
-          payment_reference: reference.reference,
+          payment_reference: paymentReference,
           payment_method: 'card',
           status: 'pending'
         })
         .select()
         .single()
 
-      if (paymentError) throw paymentError
+      if (paymentError) {
+        console.error('Payment insert error:', paymentError)
+        throw paymentError
+      }
+
+      console.log('Payment record created:', paymentData)
+      console.log('Verifying payment with Paystack...')
 
       const { data: verificationResult, error: verificationError } = await supabase
         .rpc('verify_payment', {
-          p_payment_reference: reference.reference,
-          p_verification_data: reference
+          p_payment_reference: paymentReference,
+          p_verification_data: paymentResponse
         })
 
-      if (verificationError) throw verificationError
+      if (verificationError) {
+        console.error('Payment verification error:', verificationError)
+        throw verificationError
+      }
 
-      if (verificationResult.success) {
+      console.log('Verification result:', verificationResult)
+
+      if (verificationResult.success || verificationResult === true) {
+        console.log('Payment verified successfully! Redirecting...')
         navigate('/payment-success', {
           state: {
             course: course,
-            reference: reference.reference
+            reference: paymentReference
           }
         })
       } else {
-        setError('Payment verification failed. Please contact support.')
+        console.error('Payment verification failed:', verificationResult)
+        setError('Payment verification failed. Please contact support with reference: ' + paymentReference)
       }
     } catch (error) {
-      console.error('Payment error:', error)
-      setError('Payment processing failed. Please try again or contact support.')
+      console.error('Payment processing error:', error)
+      setError('Payment processing failed: ' + error.message + '. Please contact support.')
     } finally {
       setProcessing(false)
     }

@@ -21,6 +21,7 @@ import Checkout from './pages/Checkout'
 import PaymentSuccess from './pages/PaymentSuccess'
 import Pricing from './pages/Pricing'
 import CareerReady from './pages/CareerReady'
+import SystemDiagnostics from './pages/SystemDiagnostics'
 import ProtectedCourseRoute from './components/ProtectedCourseRoute'
 
 const ProtectedRoute = ({ children }) => {
@@ -77,6 +78,7 @@ function AppContent() {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/career-ready" element={<CareerReady />} />
+        <Route path="/diagnostics" element={<SystemDiagnostics />} />
 
         <Route path="/dashboard" element={
           <ProtectedRoute>

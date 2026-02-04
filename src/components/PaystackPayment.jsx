@@ -20,17 +20,30 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
   }, [])
 
   const handlePayment = () => {
+    const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY
+
+    if (!paystackKey || paystackKey === 'your_paystack_public_key' || paystackKey.includes('YOUR')) {
+      console.error('Paystack key not configured!')
+      alert('Payment system not configured. Please add VITE_PAYSTACK_PUBLIC_KEY to your .env file.\n\nGet your key from: https://dashboard.paystack.com/#/settings/developer')
+      return
+    }
+
     if (!window.PaystackPop) {
       alert('Payment system is loading. Please try again in a moment.')
       return
     }
 
+    console.log('Initiating Paystack payment...')
+    console.log('Amount:', amount, 'Email:', email, 'Method:', paymentMethod)
+
+    const reference = 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now()
+
     const handler = window.PaystackPop.setup({
-      key: 'pk_test_YOUR_ACTUAL_PAYSTACK_PUBLIC_KEY_HERE',
+      key: paystackKey,
       email: email,
       amount: amount,
       currency: 'USD',
-      ref: 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now(),
+      ref: reference,
       channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
       metadata: {
         custom_fields: [
@@ -47,10 +60,17 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
         ]
       },
       callback: function(response) {
-        onSuccess(response.reference)
+        console.log('Payment successful:', response)
+        onSuccess({
+          reference: response.reference,
+          status: response.status,
+          trans: response.trans,
+          transaction: response.transaction,
+          trxref: response.trxref
+        })
       },
       onClose: function() {
-        console.log('Payment window closed')
+        console.log('Payment window closed by user')
       }
     })
 
@@ -58,11 +78,21 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
   }
 
   const handleDemoPayment = () => {
-    alert('DEMO MODE: In production, this will process a real payment through Paystack.\n\nTo enable real payments:\n1. Sign up at https://paystack.com\n2. Get your public key from the dashboard\n3. Replace the key in src/components/PaystackPayment.jsx')
+    console.log('DEMO MODE: Simulating payment...')
+
+    alert('DEMO MODE: Simulating successful payment.\n\nTo enable real payments:\n1. Sign up at https://paystack.com\n2. Get your public key from Settings → API Keys\n3. Add VITE_PAYSTACK_PUBLIC_KEY to your .env file\n4. Restart the development server')
 
     setTimeout(() => {
       const demoRef = 'IKPACE_DEMO_' + Date.now()
-      onSuccess(demoRef)
+      console.log('Demo payment completed with reference:', demoRef)
+      onSuccess({
+        reference: demoRef,
+        status: 'success',
+        trans: demoRef,
+        transaction: demoRef,
+        trxref: demoRef,
+        message: 'Demo payment successful'
+      })
     }, 1000)
   }
 
