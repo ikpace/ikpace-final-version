@@ -101,10 +101,29 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-neutral-gray py-8 px-4">
       <div className="max-w-7xl mx-auto">
+        <div className="card mb-8 bg-gradient-to-r from-primary via-primary-dark to-secondary text-white overflow-hidden relative">
+          <div className="absolute top-0 right-0 opacity-10">
+            <Sparkles size={200} />
+          </div>
+          <div className="relative z-10 py-8">
+            <h1 className="text-4xl font-bold mb-3">
+              Welcome, {profile?.full_name}!
+            </h1>
+            <p className="text-xl mb-4 text-white/90">
+              Your learning journey begins today. Let's explore together!
+            </p>
+            {profile?.student_id && (
+              <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <span className="text-sm font-semibold">Student ID: {profile.student_id}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">
+          <h2 className="text-2xl font-bold text-primary mb-2">
             {getGreeting()}, {profile?.full_name?.split(' ')[0]}!
-          </h1>
+          </h2>
           <p className="text-gray-600">Ready to continue your learning journey?</p>
         </div>
 
@@ -143,6 +162,103 @@ export default function Dashboard() {
             </div>
             <h3 className="text-lg font-semibold">Skill Level</h3>
             <p className="text-sm opacity-90">Keep learning!</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="card">
+            <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
+              <BookOpen className="mr-2" size={24} />
+              Welcome Video
+            </h3>
+            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="iKPACE Welcome Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+            <p className="text-sm text-gray-600">
+              Watch this video to learn about iKPACE and how to get started with your courses!
+            </p>
+          </div>
+
+          <div className="card">
+            <h3 className="text-xl font-bold text-primary mb-4 flex items-center">
+              <Target className="mr-2" size={24} />
+              Orientation Video
+            </h3>
+            <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
+              <iframe
+                width="100%"
+                height="100%"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="iKPACE Orientation Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+            <p className="text-sm text-gray-600">
+              This video will guide you through onboarding and help you unlock the full potential of the eHub at ALX. Be sure to refer back to this video to help you along your orientation experience.
+            </p>
+          </div>
+        </div>
+
+        <div className="card mb-8 bg-gradient-to-br from-secondary/10 to-accent-yellow/10 border-secondary">
+          <div className="flex items-start mb-6">
+            <TrendingUp className="text-secondary mr-3 flex-shrink-0" size={32} />
+            <div>
+              <h3 className="text-2xl font-bold text-primary mb-2">Recommended Programs</h3>
+              <p className="text-gray-600">Tailored learning paths based on your interests and goals</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-5 border-2 border-primary/20 hover:border-primary transition-all hover:shadow-lg cursor-pointer">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+                <BookOpen className="text-primary" size={24} />
+              </div>
+              <h4 className="font-bold text-primary mb-2">Tech Fundamentals Track</h4>
+              <p className="text-sm text-gray-600 mb-3">Master IT basics, data analysis, and cybersecurity</p>
+              <div className="flex items-center text-xs text-secondary font-semibold">
+                <span>3 Courses</span>
+                <span className="mx-2">•</span>
+                <span>16 Weeks</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 border-2 border-secondary/20 hover:border-secondary transition-all hover:shadow-lg cursor-pointer">
+              <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mb-3">
+                <Sparkles className="text-secondary" size={24} />
+              </div>
+              <h4 className="font-bold text-primary mb-2">Creative Professional Track</h4>
+              <p className="text-sm text-gray-600 mb-3">Content creation, graphic design, and AI animation</p>
+              <div className="flex items-center text-xs text-secondary font-semibold">
+                <span>3 Courses</span>
+                <span className="mx-2">•</span>
+                <span>14 Weeks</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-5 border-2 border-accent-green/20 hover:border-accent-green transition-all hover:shadow-lg cursor-pointer">
+              <div className="w-12 h-12 bg-accent-green/10 rounded-full flex items-center justify-center mb-3">
+                <Award className="text-accent-green" size={24} />
+              </div>
+              <h4 className="font-bold text-primary mb-2">Entrepreneur Path</h4>
+              <p className="text-sm text-gray-600 mb-3">Freelancing, VA mastery, and digital business</p>
+              <div className="flex items-center text-xs text-secondary font-semibold">
+                <span>3 Courses</span>
+                <span className="mx-2">•</span>
+                <span>12 Weeks</span>
+              </div>
+            </div>
           </div>
         </div>
 

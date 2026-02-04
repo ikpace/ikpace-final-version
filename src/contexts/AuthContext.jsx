@@ -49,10 +49,15 @@ export const AuthProvider = ({ children }) => {
         .eq('id', userId)
         .maybeSingle()
 
-      if (error) throw error
-      setProfile(data)
+      if (error) {
+        console.error('Error fetching profile:', error)
+        setProfile(null)
+      } else {
+        setProfile(data)
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
+      setProfile(null)
     } finally {
       setLoading(false)
     }
@@ -67,12 +72,22 @@ export const AuthProvider = ({ children }) => {
     if (error) throw error
 
     if (data.user) {
-      await supabase.from('user_profiles').insert({
-        id: data.user.id,
-        email: data.user.email,
-        full_name: fullName,
-        role: 'student'
-      })
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          full_name: fullName,
+          role: 'student'
+        })
+        .select()
+        .single()
+
+      if (profileError) {
+        console.error('Error creating profile:', profileError)
+      } else {
+        setProfile(profileData)
+      }
     }
 
     return data

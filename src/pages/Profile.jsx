@@ -54,7 +54,15 @@ export default function Profile() {
                 {profile?.full_name?.charAt(0) || 'U'}
               </div>
               <h2 className="text-2xl font-bold text-primary mb-1">{profile?.full_name}</h2>
-              <p className="text-gray-600 mb-4">{profile?.email}</p>
+              <p className="text-gray-600 mb-2">{profile?.email}</p>
+              {profile?.student_id && (
+                <div className="mb-4">
+                  <div className="inline-block bg-primary/10 px-4 py-2 rounded-lg">
+                    <span className="text-xs text-gray-600 block mb-1">Student ID</span>
+                    <span className="font-mono font-bold text-primary text-lg">{profile.student_id}</span>
+                  </div>
+                </div>
+              )}
               <div className="inline-flex items-center px-4 py-2 bg-secondary/10 rounded-full text-secondary font-semibold text-sm">
                 <Award size={16} className="mr-2" />
                 {profile?.skill_level || 'Beginner'}
