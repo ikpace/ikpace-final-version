@@ -17,14 +17,12 @@ export default function Navbar() {
     <nav className="bg-primary shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="bg-secondary w-10 h-10 rounded-lg flex items-center justify-center">
-              <BookOpen className="text-white" size={24} />
-            </div>
-            <div>
-              <div className="text-white font-bold text-xl">iKpace</div>
-              <div className="text-secondary text-xs font-medium">LEARN SMARTER</div>
-            </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <img
+              src="/whatsapp_image_2026-01-31_at_7.16.31_am.jpeg"
+              alt="iKPACE Logo"
+              className="h-12 w-auto"
+            />
           </Link>
 
           <div className="flex items-center space-x-6">

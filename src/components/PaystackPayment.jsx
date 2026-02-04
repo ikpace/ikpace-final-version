@@ -1,15 +1,21 @@
-import { useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X, CreditCard, Smartphone, CheckCircle } from 'lucide-react'
 
 export default function PaystackPayment({ email, amount, courseName, onSuccess, onClose }) {
+  const [paymentMethod, setPaymentMethod] = useState('card')
+  const [scriptLoaded, setScriptLoaded] = useState(false)
+
   useEffect(() => {
     const script = document.createElement('script')
     script.src = 'https://js.paystack.co/v1/inline.js'
     script.async = true
+    script.onload = () => setScriptLoaded(true)
     document.body.appendChild(script)
 
     return () => {
-      document.body.removeChild(script)
+      if (document.body.contains(script)) {
+        document.body.removeChild(script)
+      }
     }
   }, [])
 
@@ -20,17 +26,23 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
     }
 
     const handler = window.PaystackPop.setup({
-      key: 'pk_test_your_paystack_public_key',
+      key: 'pk_test_YOUR_ACTUAL_PAYSTACK_PUBLIC_KEY_HERE',
       email: email,
       amount: amount,
       currency: 'USD',
-      ref: 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1),
+      ref: 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now(),
+      channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
       metadata: {
         custom_fields: [
           {
             display_name: 'Course Name',
             variable_name: 'course_name',
             value: courseName
+          },
+          {
+            display_name: 'Customer Email',
+            variable_name: 'email',
+            value: email
           }
         ]
       },
@@ -45,45 +57,93 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
     handler.openIframe()
   }
 
+  const handleDemoPayment = () => {
+    alert('DEMO MODE: In production, this will process a real payment through Paystack.\n\nTo enable real payments:\n1. Sign up at https://paystack.com\n2. Get your public key from the dashboard\n3. Replace the key in src/components/PaystackPayment.jsx')
+
+    setTimeout(() => {
+      const demoRef = 'IKPACE_DEMO_' + Date.now()
+      onSuccess(demoRef)
+    }, 1000)
+  }
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-8 relative">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+      <div className="bg-white rounded-2xl max-w-md w-full p-8 relative shadow-2xl animate-slideUp">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all"
         >
-          <X size={24} />
+          <X size={20} />
         </button>
 
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">💳</span>
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-secondary to-accent-yellow rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <CreditCard size={40} className="text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-primary mb-2">Complete Your Enrollment</h2>
-          <p className="text-gray-600">You're one step away from starting your learning journey</p>
+          <h2 className="text-3xl font-bold text-primary mb-2">Complete Enrollment</h2>
+          <p className="text-gray-600">Secure payment via Paystack</p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-600">Course:</span>
-            <span className="font-semibold text-primary">{courseName}</span>
+        <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-6 mb-6 border border-gray-200">
+          <h3 className="font-semibold text-gray-900 mb-4">Order Summary</h3>
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <span className="text-gray-600 text-sm">Course:</span>
+              <span className="font-semibold text-primary text-sm text-right max-w-[200px]">{courseName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-600 text-sm">Email:</span>
+              <span className="font-medium text-gray-900 text-sm">{email}</span>
+            </div>
+            <div className="border-t border-gray-200 pt-3 mt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-900 font-semibold">Total Amount:</span>
+                <span className="text-2xl font-bold text-secondary">${(amount / 100).toFixed(2)}</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-600">Amount:</span>
-            <span className="font-semibold text-primary">${(amount / 100).toFixed(2)}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-600">Duration:</span>
-            <span className="font-semibold text-primary">1 Month Access</span>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Payment Method</label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setPaymentMethod('card')}
+              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                paymentMethod === 'card'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <CreditCard size={24} className={paymentMethod === 'card' ? 'text-primary' : 'text-gray-400'} />
+              <span className={`text-sm mt-2 font-medium ${paymentMethod === 'card' ? 'text-primary' : 'text-gray-600'}`}>
+                Card Payment
+              </span>
+            </button>
+
+            <button
+              onClick={() => setPaymentMethod('mobile_money')}
+              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                paymentMethod === 'mobile_money'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <Smartphone size={24} className={paymentMethod === 'mobile_money' ? 'text-primary' : 'text-gray-400'} />
+              <span className={`text-sm mt-2 font-medium ${paymentMethod === 'mobile_money' ? 'text-primary' : 'text-gray-600'}`}>
+                Mobile Money
+              </span>
+            </button>
           </div>
         </div>
 
         <div className="space-y-3 mb-6">
           <button
-            onClick={handlePayment}
-            className="w-full btn-primary"
+            onClick={handleDemoPayment}
+            className="w-full btn-primary flex items-center justify-center shadow-lg hover:shadow-xl"
           >
-            Pay with Paystack
+            <CheckCircle size={20} className="mr-2" />
+            Pay ${(amount / 100).toFixed(2)} (Demo Mode)
           </button>
           <button
             onClick={onClose}
@@ -93,18 +153,36 @@ export default function PaystackPayment({ email, amount, courseName, onSuccess, 
           </button>
         </div>
 
-        <div className="text-center text-sm text-gray-500">
-          <p>Secure payment powered by Paystack</p>
-          <p>Supports card payments and mobile money</p>
+        <div className="space-y-3">
+          <div className="flex items-center justify-center text-xs text-gray-500">
+            <span className="mr-2">🔒</span>
+            <span>Secure payment powered by Paystack</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center text-xs text-gray-600">
+            <div className="flex flex-col items-center">
+              <CheckCircle size={16} className="text-accent-green mb-1" />
+              <span>SSL Encrypted</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <CheckCircle size={16} className="text-accent-green mb-1" />
+              <span>PCI Compliant</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <CheckCircle size={16} className="text-accent-green mb-1" />
+              <span>Instant Access</span>
+            </div>
+          </div>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Demo Mode:</strong> This is a demo. In production, you'll need to add your Paystack public key
-            to enable real payments.
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p className="text-xs text-blue-900 leading-relaxed">
+            <strong className="block mb-1">💡 Demo Mode Active</strong>
+            Click "Pay" to simulate enrollment. For production use, add your Paystack public key in the PaystackPayment component.
           </p>
         </div>
       </div>
     </div>
   )
 }
+
