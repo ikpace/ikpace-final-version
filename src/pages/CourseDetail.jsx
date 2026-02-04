@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { getCourseBySlug } from '../data/coursesData'
 import { Clock, BookOpen, Users, Award, CheckCircle, Lock } from 'lucide-react'
 import PaystackPayment from '../components/PaystackPayment'
 

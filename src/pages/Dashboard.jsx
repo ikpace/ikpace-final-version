@@ -22,59 +22,45 @@ export default function Dashboard() {
   }, [profile])
 
   const fetchDashboardData = async () => {
-    if (!profile) return
+    if (!profile) {
+      setLoading(false)
+      return
+    }
 
     try {
-      const [enrollmentsRes, notificationsRes, recommendationsRes] = await Promise.all([
-        supabase
-          .from('enrollments')
-          .select(`
-            *,
-            courses (
-              id,
-              title,
-              slug,
-              thumbnail_url,
-              duration_weeks
-            )
-          `)
-          .eq('user_id', profile.id)
-          .order('enrollment_date', { ascending: false }),
+      const { data: enrollmentsData, error: enrollmentsError } = await supabase
+        .from('enrollments')
+        .select(`
+          *,
+          courses (
+            id,
+            title,
+            slug,
+            thumbnail_url,
+            duration_weeks
+          )
+        `)
+        .eq('user_id', profile.id)
+        .order('enrolled_at', { ascending: false })
 
-        supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', profile.id)
-          .eq('is_read', false)
-          .order('created_at', { ascending: false })
-          .limit(5),
+      if (enrollmentsError) {
+        console.error('Error fetching enrollments:', enrollmentsError)
+      }
 
-        supabase
-          .from('learning_recommendations')
-          .select('*')
-          .eq('user_id', profile.id)
-          .eq('is_completed', false)
-          .order('created_at', { ascending: false })
-          .limit(3)
-      ])
-
-      if (enrollmentsRes.data) {
-        setEnrollments(enrollmentsRes.data)
-        const completed = enrollmentsRes.data.filter(e => e.is_completed).length
+      if (enrollmentsData) {
+        setEnrollments(enrollmentsData)
+        const completed = enrollmentsData.filter(e => e.is_completed).length
         setStats(prev => ({
           ...prev,
-          totalCourses: enrollmentsRes.data.length,
+          totalCourses: enrollmentsData.length,
           completedCourses: completed
         }))
       }
 
-      if (notificationsRes.data) setNotifications(notificationsRes.data)
-      if (recommendationsRes.data) setRecommendations(recommendationsRes.data)
-
       setStats(prev => ({
         ...prev,
         learningStreak: profile.learning_streak || 0,
-        totalLearningTime: profile.total_learning_time || 0
+        totalLearningTime: profile.total_hours_learned || 0
       }))
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
