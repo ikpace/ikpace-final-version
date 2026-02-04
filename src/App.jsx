@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import Courses from './pages/Courses'
 import CourseDetail from './pages/CourseDetail'
 import CoursePlayer from './pages/CoursePlayer'
+import EnhancedCoursePlayer from './pages/EnhancedCoursePlayer'
 import Community from './pages/Community'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile from './pages/Profile'
@@ -84,6 +85,14 @@ function AppContent() {
         } />
 
         <Route path="/learn/:courseId" element={
+          <ProtectedRoute>
+            <ProtectedCourseRoute>
+              <EnhancedCoursePlayer />
+            </ProtectedCourseRoute>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/learn-classic/:courseId" element={
           <ProtectedRoute>
             <ProtectedCourseRoute>
               <CoursePlayer />

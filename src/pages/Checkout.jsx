@@ -24,17 +24,28 @@ export default function Checkout() {
 
   const fetchCourseData = async () => {
     try {
-      const { data: courseData } = await supabase
+      console.log('Fetching course with ID:', courseId)
+
+      const { data: courseData, error: courseError } = await supabase
         .from('courses')
         .select('*')
         .eq('id', courseId)
         .eq('is_published', true)
         .maybeSingle()
 
-      if (!courseData) {
-        setError('Course not found')
+      if (courseError) {
+        console.error('Course fetch error:', courseError)
+        setError(`Database error: ${courseError.message}`)
         return
       }
+
+      if (!courseData) {
+        console.warn('No course found with ID:', courseId)
+        setError('Course not found. Please check the course ID or browse our catalog.')
+        return
+      }
+
+      console.log('Course loaded successfully:', courseData.title)
 
       const { data: enrollment } = await supabase
         .from('enrollments')
