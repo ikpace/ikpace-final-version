@@ -20,12 +20,20 @@ export default function Enrollment() {
     try {
       console.log('Enrollment page - Fetching course with slug:', slug)
 
-      const { data: courseData, error: courseError } = await supabase
+      const isUUID = slug && slug.length === 36 && slug.includes('-')
+
+      let query = supabase
         .from('courses')
         .select('*')
-        .eq('slug', slug)
         .eq('is_published', true)
-        .maybeSingle()
+
+      if (isUUID) {
+        query = query.eq('id', slug)
+      } else {
+        query = query.eq('slug', slug)
+      }
+
+      const { data: courseData, error: courseError } = await query.maybeSingle()
 
       if (courseError) {
         console.error('Enrollment page - Course fetch error:', courseError)

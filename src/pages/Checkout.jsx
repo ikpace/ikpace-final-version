@@ -12,6 +12,7 @@ export default function Checkout() {
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -81,7 +82,13 @@ export default function Checkout() {
   }
 
   const handlePaymentClose = () => {
+    setShowPaymentModal(false)
     setError('Payment was cancelled')
+  }
+
+  const handleOpenPaymentModal = () => {
+    setError('')
+    setShowPaymentModal(true)
   }
 
   if (loading) {
@@ -163,18 +170,24 @@ export default function Checkout() {
                 </div>
               </div>
 
-              <PaystackPayment
-                email={profile?.email}
-                amount={course?.price * 100}
-                courseName={course?.title}
-                courseId={course?.id}
-                onSuccess={handlePaymentSuccess}
-                onClose={handlePaymentClose}
-              />
+              <button
+                onClick={handleOpenPaymentModal}
+                className="w-full btn-primary text-lg py-4 shadow-lg hover:shadow-xl transition-all"
+              >
+                <CreditCard className="inline mr-2" size={24} />
+                Proceed to Payment
+              </button>
 
               <div className="mt-6 text-center text-sm text-gray-600">
                 <Shield className="inline mr-2" size={16} />
                 256-bit SSL encryption for your security
+              </div>
+
+              <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <p className="text-xs text-yellow-900 leading-relaxed">
+                  <strong className="block mb-1">💳 Test Mode Active</strong>
+                  Use test card: 4084 0840 8408 4081 | CVV: 408 | PIN: 0000 | OTP: 123456
+                </p>
               </div>
             </div>
           </div>
@@ -225,6 +238,17 @@ export default function Checkout() {
             </div>
           </div>
         </div>
+
+        {showPaymentModal && (
+          <PaystackPayment
+            email={profile?.email}
+            amount={course?.price * 100}
+            courseName={course?.title}
+            courseId={course?.id}
+            onSuccess={handlePaymentSuccess}
+            onClose={handlePaymentClose}
+          />
+        )}
       </div>
     </div>
   )

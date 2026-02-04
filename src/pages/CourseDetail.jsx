@@ -136,7 +136,7 @@ export default function CourseDetail() {
 
   const handleEnroll = () => {
     if (!user) {
-      navigate('/login', { state: { from: `/courses/${slug}` } })
+      navigate('/login', { state: { from: `/courses/${course?.slug || slug}` } })
       return
     }
 
@@ -145,7 +145,7 @@ export default function CourseDetail() {
       return
     }
 
-    navigate(`/enroll/${slug}`)
+    navigate(`/enroll/${course?.slug || course?.id || slug}`)
   }
 
   const handlePaymentSuccess = async (reference) => {
