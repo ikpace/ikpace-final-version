@@ -26,16 +26,28 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
   }
 
   useEffect(() => {
+    if (window.PaystackPop) {
+      console.log('✅ Paystack already loaded')
+      setScriptLoaded(true)
+      return
+    }
+
     const script = document.createElement('script')
     script.src = 'https://js.paystack.co/v1/inline.js'
     script.async = true
     script.onload = () => {
       console.log('✅ Paystack script loaded successfully')
-      setScriptLoaded(true)
+      if (window.PaystackPop) {
+        console.log('✅ PaystackPop object is available:', typeof window.PaystackPop.setup)
+        setScriptLoaded(true)
+      } else {
+        console.error('❌ Paystack script loaded but PaystackPop not found')
+        setError('Payment system failed to initialize. Please refresh the page.')
+      }
     }
-    script.onerror = () => {
-      console.error('❌ Failed to load Paystack script')
-      setError('Failed to load payment system. Please check your internet connection.')
+    script.onerror = (err) => {
+      console.error('❌ Failed to load Paystack script:', err)
+      setError('Failed to load payment system. Please check your internet connection and refresh.')
     }
     document.body.appendChild(script)
 
@@ -188,9 +200,21 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
       })
 
       console.log('🚀 Opening Paystack iframe...')
-      const handler = window.PaystackPop.setup(paystackConfig)
-      handler.openIframe()
-      console.log('✅ Paystack iframe opened')
+
+      try {
+        const handler = window.PaystackPop.setup(paystackConfig)
+
+        if (!handler || typeof handler.openIframe !== 'function') {
+          throw new Error('Paystack handler not initialized properly')
+        }
+
+        handler.openIframe()
+        console.log('✅ Paystack iframe opened successfully')
+      } catch (setupError) {
+        console.error('❌ Paystack setup error:', setupError)
+        setError(`Failed to open payment window: ${setupError.message}. Please try refreshing the page.`)
+        return
+      }
     } catch (err) {
       console.error('❌ Error in handlePayment:', err)
       setError(`Payment error: ${err.message}`)

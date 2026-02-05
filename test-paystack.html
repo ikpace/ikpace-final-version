@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Paystack Test</title>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body>
+  <h1>Paystack Test Page</h1>
+  <button id="testBtn">Test Paystack</button>
+
+  <div id="output"></div>
+
+  <script>
+    const output = document.getElementById('output');
+
+    function log(msg) {
+      output.innerHTML += `<p>${msg}</p>`;
+      console.log(msg);
+    }
+
+    window.addEventListener('load', () => {
+      log('✅ Page loaded');
+      log('PaystackPop available: ' + (!!window.PaystackPop));
+
+      if (window.PaystackPop) {
+        log('PaystackPop.setup type: ' + typeof window.PaystackPop.setup);
+      }
+    });
+
+    document.getElementById('testBtn').addEventListener('click', () => {
+      log('🔘 Button clicked');
+
+      if (!window.PaystackPop) {
+        log('❌ PaystackPop not available!');
+        return;
+      }
+
+      try {
+        const handler = window.PaystackPop.setup({
+          key: 'pk_test_6424c5703c8fd5b50d8e5a93c9f3872e40327052',
+          email: 'test@example.com',
+          amount: 10000,
+          currency: 'NGN',
+          ref: 'TEST_' + Date.now(),
+          callback: function(response) {
+            log('✅ Payment success: ' + response.reference);
+          },
+          onClose: function() {
+            log('❌ Payment closed');
+          }
+        });
+
+        log('✅ Handler created');
+        handler.openIframe();
+        log('✅ Iframe opened');
+      } catch (err) {
+        log('❌ Error: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
