@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 
 export default function PaystackPayment({ email, amount, courseName, courseId, onSuccess, onClose }) {
   const [paymentMethod, setPaymentMethod] = useState('card')
-  const [currency, setCurrency] = useState('NGN')
+  const [currency, setCurrency] = useState('GHS')
   const [scriptLoaded, setScriptLoaded] = useState(true)
   const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState(null)
@@ -19,7 +19,11 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
   }, [])
 
   const getConvertedAmount = () => {
-    if (currency === 'NGN') {
+    if (currency === 'GHS') {
+      // amount is in cents (e.g., 700 for $7)
+      // Convert to GHS: (700 cents / 100) * 12 exchange rate * 100 pesewas = 700 * 12 pesewas
+      return Math.round(amount * 12)
+    } else if (currency === 'NGN') {
       // amount is in cents (e.g., 700 for $7)
       // Convert to NGN: (700 cents / 100) * 800 exchange rate * 100 kobo = 700 * 800 kobo
       return Math.round(amount * 800)
@@ -249,7 +253,9 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
               <div className="flex items-center justify-between">
                 <span className="text-gray-900 font-semibold">Total Amount:</span>
                 <span className="text-2xl font-bold text-secondary">
-                  {currency === 'NGN'
+                  {currency === 'GHS'
+                    ? `₵${(getConvertedAmount() / 100).toFixed(2)}`
+                    : currency === 'NGN'
                     ? `₦${(getConvertedAmount() / 100).toFixed(2)}`
                     : `$${(amount / 100).toFixed(2)}`}
                 </span>
@@ -262,16 +268,16 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
           <label className="block text-sm font-semibold text-gray-700 mb-3">Currency</label>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => setCurrency('NGN')}
+              onClick={() => setCurrency('GHS')}
               className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
-                currency === 'NGN'
+                currency === 'GHS'
                   ? 'border-primary bg-primary/5'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
             >
-              <span className={`text-lg font-bold ${currency === 'NGN' ? 'text-primary' : 'text-gray-400'}`}>₦</span>
-              <span className={`text-xs mt-1 font-medium ${currency === 'NGN' ? 'text-primary' : 'text-gray-600'}`}>
-                Nigerian Naira
+              <span className={`text-lg font-bold ${currency === 'GHS' ? 'text-primary' : 'text-gray-400'}`}>₵</span>
+              <span className={`text-xs mt-1 font-medium ${currency === 'GHS' ? 'text-primary' : 'text-gray-600'}`}>
+                Ghana Cedis
               </span>
             </button>
 
@@ -365,7 +371,9 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
             ) : (
               <>
                 <CreditCard size={20} className="mr-2" />
-                Pay {currency === 'NGN'
+                Pay {currency === 'GHS'
+                  ? `₵${(getConvertedAmount() / 100).toFixed(2)}`
+                  : currency === 'NGN'
                   ? `₦${(getConvertedAmount() / 100).toFixed(2)}`
                   : `$${(amount / 100).toFixed(2)}`}
               </>
@@ -408,9 +416,9 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
             <strong>Test Card Number:</strong> 4084 0840 8408 4081<br />
             <strong>CVV:</strong> 408 | <strong>Expiry:</strong> Any future date<br />
             <strong>PIN:</strong> 0000 | <strong>OTP:</strong> 123456<br />
-            {currency === 'NGN' && (
-              <span className="block mt-2 text-blue-900 bg-blue-100 px-2 py-1 rounded">
-                ℹ️ NGN (Naira) is recommended for testing
+            {currency === 'GHS' && (
+              <span className="block mt-2 text-green-900 bg-green-100 px-2 py-1 rounded">
+                ℹ️ GHS (Ghana Cedis) is the default currency
               </span>
             )}
           </p>

@@ -78,7 +78,7 @@ Deno.serve(async (req: Request) => {
         body: JSON.stringify({
           email,
           amount,
-          currency: currency || "NGN",
+          currency: currency || "GHS",
           reference,
           callback_url: callbackUrl,
           channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
