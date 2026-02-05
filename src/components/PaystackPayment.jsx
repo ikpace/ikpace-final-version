@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 export default function PaystackPayment({ email, amount, courseName, courseId, onSuccess, onClose }) {
   const [paymentMethod, setPaymentMethod] = useState('card')
   const [currency, setCurrency] = useState('NGN')
-  const [scriptLoaded, setScriptLoaded] = useState(false)
+  const [scriptLoaded, setScriptLoaded] = useState(true)
   const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState(null)
 
@@ -25,37 +25,9 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
     return amount
   }
 
+  // No script loading needed for redirect mode
   useEffect(() => {
-    if (window.PaystackPop) {
-      console.log('✅ Paystack already loaded')
-      setScriptLoaded(true)
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = 'https://js.paystack.co/v1/inline.js'
-    script.async = true
-    script.onload = () => {
-      console.log('✅ Paystack script loaded successfully')
-      if (window.PaystackPop) {
-        console.log('✅ PaystackPop object is available:', typeof window.PaystackPop.setup)
-        setScriptLoaded(true)
-      } else {
-        console.error('❌ Paystack script loaded but PaystackPop not found')
-        setError('Payment system failed to initialize. Please refresh the page.')
-      }
-    }
-    script.onerror = (err) => {
-      console.error('❌ Failed to load Paystack script:', err)
-      setError('Failed to load payment system. Please check your internet connection and refresh.')
-    }
-    document.body.appendChild(script)
-
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script)
-      }
-    }
+    console.log('✅ Paystack redirect mode - no script loading required')
   }, [])
 
   const verifyPayment = async (reference) => {
@@ -121,9 +93,7 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
         amount,
         courseId,
         courseName,
-        paymentMethod,
-        scriptLoaded,
-        paystackAvailable: !!window.PaystackPop
+        paymentMethod
       })
 
       if (!email) {
@@ -136,85 +106,68 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
         return
       }
 
-      if (!scriptLoaded || !window.PaystackPop) {
-        setError('Payment system is still loading. Please wait a moment and try again.')
-        setTimeout(() => setError(null), 3000)
-        return
-      }
-
       if (!courseId) {
         setError('Course ID is missing. Cannot process payment.')
         return
       }
 
       setError(null)
-      console.log('✅ All validations passed, opening Paystack...')
+      console.log('✅ All validations passed, redirecting to Paystack...')
 
       const reference = 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now()
-
       const convertedAmount = getConvertedAmount()
-      const paystackConfig = {
+
+      // Store payment info in localStorage for callback
+      localStorage.setItem('paystack_pending_payment', JSON.stringify({
+        reference,
+        courseId,
+        courseName,
+        amount: amount / 100,
+        email,
+        timestamp: Date.now()
+      }))
+
+      // Create form for Paystack redirect
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = 'https://checkout.paystack.com/initialize'
+      form.target = '_blank'
+
+      const fields = {
         key: paystackKey,
         email: email,
         amount: convertedAmount,
         currency: currency,
         ref: reference,
-        channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
-        metadata: {
-          custom_fields: [
-            {
-              display_name: 'Course Name',
-              variable_name: 'course_name',
-              value: courseName
-            },
-            {
-              display_name: 'Course ID',
-              variable_name: 'course_id',
-              value: courseId
-            },
-            {
-              display_name: 'Customer Email',
-              variable_name: 'email',
-              value: email
-            }
-          ]
-        },
-        callback: function(response) {
-          console.log('✅ Paystack payment completed:', response)
-          verifyPayment(response.reference)
-        },
-        onClose: function() {
-          console.log('❌ Payment window closed by user')
-          if (!verifying) {
-            setError('Payment was cancelled')
-          }
-        }
+        channels: paymentMethod === 'card' ? 'card' : 'mobile_money',
+        callback_url: window.location.origin + '/payment-success?reference=' + reference,
+        metadata: JSON.stringify({
+          course_name: courseName,
+          course_id: courseId,
+          customer_email: email
+        })
       }
 
-      console.log('📋 Paystack configuration:', {
-        email,
-        amount: convertedAmount,
-        currency,
-        originalAmount: amount,
-        channels: paystackConfig.channels
+      console.log('📋 Paystack redirect fields:', fields)
+
+      Object.keys(fields).forEach(key => {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = key
+        input.value = fields[key]
+        form.appendChild(input)
       })
 
-      console.log('🚀 Opening Paystack iframe...')
+      document.body.appendChild(form)
+      console.log('🚀 Redirecting to Paystack...')
+      form.submit()
+      document.body.removeChild(form)
 
-      try {
-        const handler = window.PaystackPop.setup(paystackConfig)
-
-        if (!handler || typeof handler.openIframe !== 'function') {
-          throw new Error('Paystack handler not initialized properly')
-        }
-
-        handler.openIframe()
-        console.log('✅ Paystack iframe opened successfully')
-      } catch (setupError) {
-        console.error('❌ Paystack setup error:', setupError)
-        setError(`Failed to open payment window: ${setupError.message}. Please try refreshing the page.`)
-        return
-      }
+      // Show waiting message
+      setError('Redirecting to payment page...')
+      setTimeout(() => {
+        onClose()
+      }, 1500)
     } catch (err) {
       console.error('❌ Error in handlePayment:', err)
       setError(`Payment error: ${err.message}`)

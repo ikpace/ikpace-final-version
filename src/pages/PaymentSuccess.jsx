@@ -1,19 +1,133 @@
-import { useEffect } from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { CheckCircle, Award, BookOpen, ArrowRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { CheckCircle, Award, BookOpen, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 export default function PaymentSuccess() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { course, reference } = location.state || {}
+  const [searchParams] = useSearchParams()
+  const [verifying, setVerifying] = useState(false)
+  const [error, setError] = useState(null)
+  const [paymentData, setPaymentData] = useState(null)
+
+  const referenceFromUrl = searchParams.get('reference')
+  const stateData = location.state
 
   useEffect(() => {
-    if (!course || !reference) {
-      navigate('/dashboard')
-    }
-  }, [course, reference, navigate])
+    const handlePaymentVerification = async () => {
+      try {
+        let reference = null
+        let paymentInfo = null
 
-  if (!course) {
+        if (referenceFromUrl) {
+          console.log('🔍 Payment callback from Paystack redirect:', referenceFromUrl)
+
+          const stored = localStorage.getItem('paystack_pending_payment')
+          if (stored) {
+            paymentInfo = JSON.parse(stored)
+            reference = referenceFromUrl
+            localStorage.removeItem('paystack_pending_payment')
+          }
+        } else if (stateData?.reference) {
+          console.log('🔍 Payment callback from popup:', stateData.reference)
+          reference = stateData.reference
+          paymentInfo = {
+            courseId: stateData.course?.id,
+            courseName: stateData.course?.title,
+            amount: stateData.course?.price,
+            email: stateData.course?.email
+          }
+        }
+
+        if (!reference || !paymentInfo) {
+          console.warn('No payment data found, redirecting to dashboard')
+          setTimeout(() => navigate('/dashboard'), 2000)
+          return
+        }
+
+        setVerifying(true)
+
+        console.log('Verifying payment:', { reference, paymentInfo })
+
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session) {
+          throw new Error('Not authenticated')
+        }
+
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+        const response = await fetch(`${supabaseUrl}/functions/v1/verify-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': supabaseAnonKey,
+          },
+          body: JSON.stringify({
+            reference,
+            courseId: paymentInfo.courseId,
+            amount: paymentInfo.amount,
+            email: paymentInfo.email,
+          }),
+        })
+
+        const result = await response.json()
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Payment verification failed')
+        }
+
+        console.log('✅ Payment verified successfully:', result)
+
+        setPaymentData({
+          reference,
+          courseName: paymentInfo.courseName,
+          courseId: paymentInfo.courseId,
+          ...result.data
+        })
+
+        setVerifying(false)
+      } catch (err) {
+        console.error('Payment verification error:', err)
+        setError(err.message)
+        setVerifying(false)
+      }
+    }
+
+    handlePaymentVerification()
+  }, [referenceFromUrl, stateData, navigate])
+
+  if (verifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+        <div className="card max-w-md text-center py-12">
+          <Loader2 className="text-primary mx-auto mb-6 animate-spin" size={64} />
+          <h2 className="text-2xl font-bold text-primary mb-4">Verifying Payment...</h2>
+          <p className="text-gray-600">Please wait while we confirm your transaction</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
+        <div className="card max-w-md text-center py-12">
+          <AlertCircle className="text-red-600 mx-auto mb-6" size={64} />
+          <h2 className="text-2xl font-bold text-red-800 mb-4">Payment Verification Failed</h2>
+          <p className="text-red-600 mb-8">{error}</p>
+          <Link to="/dashboard" className="btn-primary">
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!paymentData) {
     return null
   }
 
@@ -29,13 +143,13 @@ export default function PaymentSuccess() {
             Payment Successful!
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Welcome to {course.title}! You now have full access to the course.
+            Welcome to {paymentData.courseName}! You now have full access to the course.
           </p>
 
           <div className="max-w-md mx-auto mb-8 p-6 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg border-2 border-primary/20">
             <div className="text-sm text-gray-600 mb-2">Transaction Reference</div>
             <div className="font-mono text-sm text-primary font-semibold break-all">
-              {reference}
+              {paymentData.reference}
             </div>
           </div>
 
@@ -58,7 +172,7 @@ export default function PaymentSuccess() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={`/learn/${course.id}`} className="btn-primary text-lg">
+            <Link to={`/learn/${paymentData.courseId}`} className="btn-primary text-lg">
               Start Learning Now
               <ArrowRight className="ml-2 inline" size={20} />
             </Link>
