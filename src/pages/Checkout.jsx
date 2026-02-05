@@ -87,6 +87,13 @@ export default function Checkout() {
   }
 
   const handleOpenPaymentModal = () => {
+    console.log('🔓 Opening payment modal with:', {
+      userEmail: user?.email,
+      profileEmail: profile?.email,
+      courseId: course?.id,
+      courseTitle: course?.title,
+      price: course?.price
+    })
     setError('')
     setShowPaymentModal(true)
   }
@@ -241,7 +248,7 @@ export default function Checkout() {
 
         {showPaymentModal && (
           <PaystackPayment
-            email={user?.email}
+            email={user?.email || profile?.email}
             amount={course?.price * 100}
             courseName={course?.title}
             courseId={course?.id}

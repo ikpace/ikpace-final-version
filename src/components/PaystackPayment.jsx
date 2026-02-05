@@ -9,10 +9,26 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    console.log('💳 PaystackPayment component mounted with props:', {
+      email,
+      amount,
+      courseName,
+      courseId
+    })
+  }, [])
+
+  useEffect(() => {
     const script = document.createElement('script')
     script.src = 'https://js.paystack.co/v1/inline.js'
     script.async = true
-    script.onload = () => setScriptLoaded(true)
+    script.onload = () => {
+      console.log('✅ Paystack script loaded successfully')
+      setScriptLoaded(true)
+    }
+    script.onerror = () => {
+      console.error('❌ Failed to load Paystack script')
+      setError('Failed to load payment system. Please check your internet connection.')
+    }
     document.body.appendChild(script)
 
     return () => {
@@ -76,68 +92,91 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
   }
 
   const handlePayment = () => {
-    const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY
+    try {
+      const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY
 
-    if (!paystackKey || paystackKey === 'your_paystack_public_key' || paystackKey.includes('YOUR')) {
-      setError('Payment system not configured. Please add VITE_PAYSTACK_PUBLIC_KEY to your .env file.')
-      return
-    }
+      console.log('🔍 Payment initiated with:', {
+        paystackKey: paystackKey ? `${paystackKey.substring(0, 10)}...` : 'MISSING',
+        email,
+        amount,
+        courseId,
+        courseName,
+        paymentMethod,
+        scriptLoaded,
+        paystackAvailable: !!window.PaystackPop
+      })
 
-    if (!window.PaystackPop) {
-      setError('Payment system is loading. Please try again in a moment.')
-      return
-    }
-
-    if (!courseId) {
-      setError('Course ID is missing. Cannot process payment.')
-      return
-    }
-
-    setError(null)
-    console.log('Initiating Paystack payment...')
-    console.log('Amount:', amount, 'Email:', email, 'Method:', paymentMethod)
-
-    const reference = 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now()
-
-    const handler = window.PaystackPop.setup({
-      key: paystackKey,
-      email: email,
-      amount: amount,
-      currency: 'USD',
-      ref: reference,
-      channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
-      metadata: {
-        custom_fields: [
-          {
-            display_name: 'Course Name',
-            variable_name: 'course_name',
-            value: courseName
-          },
-          {
-            display_name: 'Course ID',
-            variable_name: 'course_id',
-            value: courseId
-          },
-          {
-            display_name: 'Customer Email',
-            variable_name: 'email',
-            value: email
-          }
-        ]
-      },
-      callback: function(response) {
-        console.log('Paystack payment completed:', response)
-        verifyPayment(response.reference)
-      },
-      onClose: function() {
-        console.log('Payment window closed by user')
-        if (!verifying) {
-          setError('Payment was cancelled')
-        }
+      if (!email) {
+        setError('Email address is missing. Please refresh and try again.')
+        return
       }
-    })
 
-    handler.openIframe()
+      if (!paystackKey || paystackKey === 'your_paystack_public_key' || paystackKey.includes('YOUR')) {
+        setError('Payment system not configured. Please add VITE_PAYSTACK_PUBLIC_KEY to your .env file.')
+        return
+      }
+
+      if (!scriptLoaded || !window.PaystackPop) {
+        setError('Payment system is still loading. Please wait a moment and try again.')
+        setTimeout(() => setError(null), 3000)
+        return
+      }
+
+      if (!courseId) {
+        setError('Course ID is missing. Cannot process payment.')
+        return
+      }
+
+      setError(null)
+      console.log('✅ All validations passed, opening Paystack...')
+
+      const reference = 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now()
+
+      const handler = window.PaystackPop.setup({
+        key: paystackKey,
+        email: email,
+        amount: amount,
+        currency: 'USD',
+        ref: reference,
+        channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
+        metadata: {
+          custom_fields: [
+            {
+              display_name: 'Course Name',
+              variable_name: 'course_name',
+              value: courseName
+            },
+            {
+              display_name: 'Course ID',
+              variable_name: 'course_id',
+              value: courseId
+            },
+            {
+              display_name: 'Customer Email',
+              variable_name: 'email',
+              value: email
+            }
+          ]
+        },
+        callback: function(response) {
+          console.log('✅ Paystack payment completed:', response)
+          verifyPayment(response.reference)
+        },
+        onClose: function() {
+          console.log('❌ Payment window closed by user')
+          if (!verifying) {
+            setError('Payment was cancelled')
+          }
+        }
+      })
+
+      console.log('🚀 Opening Paystack iframe...')
+      handler.openIframe()
+      console.log('✅ Paystack iframe opened')
+    } catch (err) {
+      console.error('❌ Error in handlePayment:', err)
+      setError(`Payment error: ${err.message}`)
+    }
   }
 
   return (
@@ -236,10 +275,15 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
         <div className="space-y-3 mb-6">
           <button
             onClick={handlePayment}
-            disabled={verifying}
+            disabled={verifying || !scriptLoaded}
             className="w-full btn-primary flex items-center justify-center shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {verifying ? (
+            {!scriptLoaded ? (
+              <>
+                <Loader2 size={20} className="mr-2 animate-spin" />
+                Loading Payment System...
+              </>
+            ) : verifying ? (
               <>
                 <Loader2 size={20} className="mr-2 animate-spin" />
                 Verifying Payment...
