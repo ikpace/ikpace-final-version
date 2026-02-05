@@ -112,13 +112,22 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
       const { data: { session } } = await supabase.auth.getSession()
 
       if (!session) {
-        throw new Error('Not authenticated')
+        throw new Error('Not authenticated. Please log in and try again.')
       }
+
+      console.log('🔑 Session found:', { userId: session.user.id, email: session.user.email })
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase configuration missing')
+      }
+
       const convertedAmount = getConvertedAmount()
+
+      console.log('📤 Calling edge function:', `${supabaseUrl}/functions/v1/initialize-payment`)
+      console.log('📦 Payment data:', { email, amount: convertedAmount, currency, courseId })
 
       const response = await fetch(`${supabaseUrl}/functions/v1/initialize-payment`, {
         method: 'POST',
@@ -138,10 +147,30 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
         }),
       })
 
-      const result = await response.json()
+      let result
+      try {
+        result = await response.json()
+      } catch (parseError) {
+        console.error('❌ Failed to parse response:', parseError)
+        const text = await response.text()
+        console.error('Raw response:', text)
+        throw new Error('Invalid response from payment server')
+      }
+
+      console.log('📡 API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        result
+      })
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to initialize payment')
+        console.error('❌ Payment initialization failed:', {
+          status: response.status,
+          error: result.error,
+          fullResult: result
+        })
+        throw new Error(result.error || `Payment server error (${response.status})`)
       }
 
       console.log('✅ Payment initialized:', result)
@@ -165,8 +194,22 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
         onClose()
       }, 2000)
     } catch (err) {
-      console.error('❌ Error in handlePayment:', err)
-      setError(`Payment error: ${err.message}`)
+      console.error('❌ Error in handlePayment:', {
+        message: err.message,
+        stack: err.stack,
+        error: err
+      })
+
+      let errorMessage = err.message
+
+      // Provide more helpful error messages
+      if (err.message.includes('fetch')) {
+        errorMessage = 'Cannot connect to payment server. Please check your internet connection.'
+      } else if (err.message.includes('Not authenticated')) {
+        errorMessage = 'Please log in to make a payment.'
+      }
+
+      setError(`Payment error: ${errorMessage}`)
       setVerifying(false)
     }
   }

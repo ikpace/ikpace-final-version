@@ -28,8 +28,11 @@ Deno.serve(async (req: Request) => {
   try {
     const paystackSecretKey = Deno.env.get("PAYSTACK_SECRET_KEY");
     if (!paystackSecretKey) {
-      throw new Error("PAYSTACK_SECRET_KEY not configured");
+      console.error('❌ PAYSTACK_SECRET_KEY environment variable is not set');
+      throw new Error("Payment system not configured. Please contact administrator.");
     }
+
+    console.log('✅ Paystack secret key found:', paystackSecretKey.substring(0, 15) + '...');
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
