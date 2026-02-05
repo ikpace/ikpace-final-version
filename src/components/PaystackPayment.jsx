@@ -20,7 +20,9 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
 
   const getConvertedAmount = () => {
     if (currency === 'NGN') {
-      return Math.round(amount * 8)
+      // amount is in cents (e.g., 700 for $7)
+      // Convert to NGN: (700 cents / 100) * 800 exchange rate * 100 kobo = 700 * 800 kobo
+      return Math.round(amount * 800)
     }
     return amount
   }
