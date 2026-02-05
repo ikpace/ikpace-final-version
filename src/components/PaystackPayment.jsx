@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 
 export default function PaystackPayment({ email, amount, courseName, courseId, onSuccess, onClose }) {
   const [paymentMethod, setPaymentMethod] = useState('card')
+  const [currency, setCurrency] = useState('NGN')
   const [scriptLoaded, setScriptLoaded] = useState(false)
   const [verifying, setVerifying] = useState(false)
   const [error, setError] = useState(null)
@@ -16,6 +17,13 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
       courseId
     })
   }, [])
+
+  const getConvertedAmount = () => {
+    if (currency === 'NGN') {
+      return Math.round(amount * 8)
+    }
+    return amount
+  }
 
   useEffect(() => {
     const script = document.createElement('script')
@@ -132,11 +140,12 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
 
       const reference = 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now()
 
-      const handler = window.PaystackPop.setup({
+      const convertedAmount = getConvertedAmount()
+      const paystackConfig = {
         key: paystackKey,
         email: email,
-        amount: amount,
-        currency: 'USD',
+        amount: convertedAmount,
+        currency: currency,
         ref: reference,
         channels: paymentMethod === 'card' ? ['card'] : ['mobile_money'],
         metadata: {
@@ -168,9 +177,18 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
             setError('Payment was cancelled')
           }
         }
+      }
+
+      console.log('📋 Paystack configuration:', {
+        email,
+        amount: convertedAmount,
+        currency,
+        originalAmount: amount,
+        channels: paystackConfig.channels
       })
 
       console.log('🚀 Opening Paystack iframe...')
+      const handler = window.PaystackPop.setup(paystackConfig)
       handler.openIframe()
       console.log('✅ Paystack iframe opened')
     } catch (err) {
@@ -211,9 +229,46 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-900 font-semibold">Total Amount:</span>
-                <span className="text-2xl font-bold text-secondary">${(amount / 100).toFixed(2)}</span>
+                <span className="text-2xl font-bold text-secondary">
+                  {currency === 'NGN'
+                    ? `₦${(getConvertedAmount() / 100).toFixed(2)}`
+                    : `$${(amount / 100).toFixed(2)}`}
+                </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Currency</label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setCurrency('NGN')}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                currency === 'NGN'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <span className={`text-lg font-bold ${currency === 'NGN' ? 'text-primary' : 'text-gray-400'}`}>₦</span>
+              <span className={`text-xs mt-1 font-medium ${currency === 'NGN' ? 'text-primary' : 'text-gray-600'}`}>
+                Nigerian Naira
+              </span>
+            </button>
+
+            <button
+              onClick={() => setCurrency('USD')}
+              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
+                currency === 'USD'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <span className={`text-lg font-bold ${currency === 'USD' ? 'text-primary' : 'text-gray-400'}`}>$</span>
+              <span className={`text-xs mt-1 font-medium ${currency === 'USD' ? 'text-primary' : 'text-gray-600'}`}>
+                US Dollar
+              </span>
+            </button>
           </div>
         </div>
 
@@ -291,7 +346,9 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
             ) : (
               <>
                 <CreditCard size={20} className="mr-2" />
-                Pay ${(amount / 100).toFixed(2)}
+                Pay {currency === 'NGN'
+                  ? `₦${(getConvertedAmount() / 100).toFixed(2)}`
+                  : `$${(amount / 100).toFixed(2)}`}
               </>
             )}
           </button>
@@ -328,8 +385,15 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
 
         <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
           <p className="text-xs text-yellow-900 leading-relaxed">
-            <strong className="block mb-1">💳 Test Mode Active</strong>
-            Use test card: 4084 0840 8408 4081 | CVV: 408 | PIN: 0000 | OTP: 123456
+            <strong className="block mb-2">💳 Test Mode Active</strong>
+            <strong>Test Card Number:</strong> 4084 0840 8408 4081<br />
+            <strong>CVV:</strong> 408 | <strong>Expiry:</strong> Any future date<br />
+            <strong>PIN:</strong> 0000 | <strong>OTP:</strong> 123456<br />
+            {currency === 'NGN' && (
+              <span className="block mt-2 text-blue-900 bg-blue-100 px-2 py-1 rounded">
+                ℹ️ NGN (Naira) is recommended for testing
+              </span>
+            )}
           </p>
         </div>
       </div>
