@@ -83,26 +83,19 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
     }
   }
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     try {
-      const paystackKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY
-
       console.log('🔍 Payment initiated with:', {
-        paystackKey: paystackKey ? `${paystackKey.substring(0, 10)}...` : 'MISSING',
         email,
         amount,
         courseId,
         courseName,
-        paymentMethod
+        paymentMethod,
+        currency
       })
 
       if (!email) {
         setError('Email address is missing. Please refresh and try again.')
-        return
-      }
-
-      if (!paystackKey || paystackKey === 'your_paystack_public_key' || paystackKey.includes('YOUR')) {
-        setError('Payment system not configured. Please add VITE_PAYSTACK_PUBLIC_KEY to your .env file.')
         return
       }
 
@@ -112,14 +105,49 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
       }
 
       setError(null)
-      console.log('✅ All validations passed, redirecting to Paystack...')
+      setVerifying(true)
 
-      const reference = 'IKPACE_' + Math.floor((Math.random() * 1000000000) + 1) + '_' + Date.now()
+      console.log('✅ All validations passed, initializing payment...')
+
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        throw new Error('Not authenticated')
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
       const convertedAmount = getConvertedAmount()
 
-      // Store payment info in localStorage for callback
+      const response = await fetch(`${supabaseUrl}/functions/v1/initialize-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': supabaseAnonKey,
+          'origin': window.location.origin,
+        },
+        body: JSON.stringify({
+          email,
+          amount: convertedAmount,
+          currency,
+          courseId,
+          courseName,
+          paymentMethod,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to initialize payment')
+      }
+
+      console.log('✅ Payment initialized:', result)
+
       localStorage.setItem('paystack_pending_payment', JSON.stringify({
-        reference,
+        reference: result.data.reference,
         courseId,
         courseName,
         amount: amount / 100,
@@ -127,50 +155,19 @@ export default function PaystackPayment({ email, amount, courseName, courseId, o
         timestamp: Date.now()
       }))
 
-      // Create form for Paystack redirect
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = 'https://checkout.paystack.com/initialize'
-      form.target = '_blank'
+      console.log('🚀 Redirecting to Paystack payment page...')
+      window.open(result.data.authorization_url, '_blank')
 
-      const fields = {
-        key: paystackKey,
-        email: email,
-        amount: convertedAmount,
-        currency: currency,
-        ref: reference,
-        channels: paymentMethod === 'card' ? 'card' : 'mobile_money',
-        callback_url: window.location.origin + '/payment-success?reference=' + reference,
-        metadata: JSON.stringify({
-          course_name: courseName,
-          course_id: courseId,
-          customer_email: email
-        })
-      }
+      setVerifying(false)
+      setError('Payment page opened in new tab. Please complete your payment there.')
 
-      console.log('📋 Paystack redirect fields:', fields)
-
-      Object.keys(fields).forEach(key => {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = key
-        input.value = fields[key]
-        form.appendChild(input)
-      })
-
-      document.body.appendChild(form)
-      console.log('🚀 Redirecting to Paystack...')
-      form.submit()
-      document.body.removeChild(form)
-
-      // Show waiting message
-      setError('Redirecting to payment page...')
       setTimeout(() => {
         onClose()
-      }, 1500)
+      }, 2000)
     } catch (err) {
       console.error('❌ Error in handlePayment:', err)
       setError(`Payment error: ${err.message}`)
+      setVerifying(false)
     }
   }
 
