@@ -241,7 +241,7 @@ export default function Checkout() {
 
         {showPaymentModal && (
           <PaystackPayment
-            email={profile?.email}
+            email={user?.email}
             amount={course?.price * 100}
             courseName={course?.title}
             courseId={course?.id}
