@@ -1,270 +1,207 @@
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { getAllCourses } from '../data/coursesData'
-import { Clock, BookOpen, TrendingUp } from 'lucide-react'
 
 export default function Courses() {
   const [courses, setCourses] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
 
-  useEffect(() => {
-    fetchCourses()
-  }, [])
-
-  const fetchCourses = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      if (data && data.length > 0) {
-        setCourses(data)
-      } else {
-        setCourses(getAllCourses())
-      }
-    } catch (error) {
-      console.error('Error fetching courses:', error)
-      setCourses(getAllCourses())
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const mockCourses = getAllCourses()
-
-  const oldMockCourses = [
+  // YOUR ACTUAL COURSES FROM BACKUP - SIMPLE VERSION
+  const allCourses = [
     {
-      id: '1',
-      title: 'Information Technology Fundamentals',
-      slug: 'it-fundamentals',
-      description: 'Master the basics of IT including hardware, software, networking, and troubleshooting. Perfect for beginners looking to start a career in technology.',
-      price: 7.00,
-      duration_weeks: 4,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 1247
+      id: 'tiktok-mastery',
+      title: 'TikTok Monetization Mastery',
+      description: 'Master TikTok algorithm, viral content creation, brand partnerships.',
+      price: 7,
+      originalPrice: 49,
+      duration: '6 Weeks',
+      students: 2847,
+      rating: 4.9,
+      category: 'social',
+      image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800',
+      badge: '?? #1 SELLER'
     },
     {
-      id: '2',
-      title: 'Data Analysis with Excel & Python',
-      slug: 'data-analysis',
-      description: 'Learn data analysis from scratch with Excel, Power BI intro, and Python basics. Transform raw data into actionable insights.',
-      price: 7.00,
-      duration_weeks: 6,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 2134
+      id: 'instagram-reels',
+      title: 'Instagram Reels & Growth Hacks',
+      description: 'Master Instagram Reels algorithm, content strategy, engagement hacks.',
+      price: 7,
+      originalPrice: 39,
+      duration: '4 Weeks',
+      students: 1893,
+      rating: 4.8,
+      category: 'social',
+      image: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800',
+      badge: '?? TRENDING'
     },
     {
-      id: '3',
-      title: 'Cybersecurity Fundamentals',
-      slug: 'cybersecurity',
-      description: 'Understand cyber threats, security principles, and how to protect systems. Start your journey in the high-demand cybersecurity field.',
-      price: 7.00,
-      duration_weeks: 6,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 986
+      id: 'youtube-automation',
+      title: 'YouTube Automation Mastery',
+      description: 'Create automated YouTube channels without showing your face.',
+      price: 7,
+      originalPrice: 69,
+      duration: '8 Weeks',
+      students: 1567,
+      rating: 4.7,
+      category: 'social',
+      image: 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800',
+      badge: '?? PASSIVE INCOME'
     },
     {
-      id: '4',
-      title: 'Virtual Assistant Mastery',
-      slug: 'virtual-assistant',
-      description: 'Learn administrative skills, time management, and tools to become a successful virtual assistant. Work from anywhere!',
-      price: 7.00,
-      duration_weeks: 4,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 1532
+      id: 'content-to-cash',
+      title: 'Content to Cash System',
+      description: 'Learn how to monetize content across platforms.',
+      price: 7,
+      originalPrice: 49,
+      duration: '5 Weeks',
+      students: 2341,
+      rating: 4.8,
+      category: 'social',
+      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+      badge: '?? MULTIPLE STREAMS'
     },
     {
-      id: '5',
-      title: 'Content Creation & Marketing',
-      slug: 'content-creation',
-      description: 'Master content creation for social media, blogs, and digital platforms. Build your personal brand and grow your audience.',
-      price: 7.00,
-      duration_weeks: 4,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/3153204/pexels-photo-3153204.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 1876
+      id: 'influencer-playbook',
+      title: 'Influencer Brand Deal Playbook',
+      description: 'Complete guide to landing brand deals, negotiating contracts.',
+      price: 7,
+      originalPrice: 35,
+      duration: '4 Weeks',
+      students: 987,
+      rating: 4.9,
+      category: 'social',
+      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800',
+      badge: '?? BRAND DEALS'
     },
     {
-      id: '6',
-      title: 'Graphic Design Essentials',
-      slug: 'graphic-design',
-      description: 'Learn design principles, tools like Canva and Photoshop basics, and create stunning visuals for any project.',
-      price: 7.00,
-      duration_weeks: 6,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 2341
+      id: 'ai-prompt-engineering',
+      title: 'AI Prompt Engineering Pro',
+      description: 'Become an AI prompt expert for content creation and automation.',
+      price: 7,
+      originalPrice: 79,
+      duration: '6 Weeks',
+      students: 3456,
+      rating: 4.9,
+      category: 'ai',
+      image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800',
+      badge: '?? VERY HOT'
     },
     {
-      id: '7',
-      title: 'AI Animation & Video Creation',
-      slug: 'ai-animation',
-      description: 'Create animations and videos using AI tools. Perfect for content creators and marketers looking to level up.',
-      price: 7.00,
-      duration_weeks: 4,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/8438922/pexels-photo-8438922.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 1654
+      id: 'ai-business-automation',
+      title: 'AI Tools for Business Automation',
+      description: 'Learn to use AI for customer service, content creation, and data analysis.',
+      price: 7,
+      originalPrice: 59,
+      duration: '5 Weeks',
+      students: 2789,
+      rating: 4.8,
+      category: 'ai',
+      image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?w=800',
+      badge: '? TIME SAVER'
     },
     {
-      id: '8',
-      title: 'Freelancing Success Blueprint',
-      slug: 'freelancing',
-      description: 'Learn how to find clients on Upwork, Fiverr, and succeed as a freelancer. Build a thriving remote career.',
-      price: 7.00,
-      duration_weeks: 4,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/4065876/pexels-photo-4065876.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 1923
+      id: 'ai-agents',
+      title: 'Build AI Agents Without Coding',
+      description: 'Learn to build AI agents that can research, write, analyze data.',
+      price: 7,
+      originalPrice: 69,
+      duration: '6 Weeks',
+      students: 1567,
+      rating: 4.7,
+      category: 'ai',
+      image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800',
+      badge: '?? NO-CODE AI'
     },
     {
-      id: '9',
-      title: 'Digital Entrepreneurship',
-      slug: 'digital-entrepreneurship',
-      description: 'Start and grow your online business. Learn digital marketing, e-commerce, and strategies for success.',
-      price: 7.00,
-      duration_weeks: 4,
-      level: 'beginner',
-      thumbnail_url: 'https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=800',
-      enrollment_count: 1445
+      id: 'ai-freelancers',
+      title: 'AI for Freelancers & Side Hustles',
+      description: 'Learn how freelancers can use AI to deliver better work faster.',
+      price: 7,
+      originalPrice: 39,
+      duration: '4 Weeks',
+      students: 4321,
+      rating: 4.9,
+      category: 'ai',
+      image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
+      badge: '?? FREELANCE BOOST'
+    },
+    {
+      id: 'ai-content-creation',
+      title: 'AI Content Creation Pro',
+      description: 'Master AI tools for creating engaging content across all platforms.',
+      price: 7,
+      originalPrice: 55,
+      duration: '5 Weeks',
+      students: 1890,
+      rating: 4.8,
+      category: 'ai',
+      image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800',
+      badge: '?? CONTENT CREATION'
+    },
+    {
+      id: 'nocode-websites',
+      title: 'No-Code Website Builder Pro',
+      description: 'Master Webflow, Framer, and Bubble to create stunning websites.',
+      price: 7,
+      originalPrice: 49,
+      duration: '6 Weeks',
+      students: 1890,
+      rating: 4.8,
+      category: 'nocode',
+      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800',
+      badge: '?? NO-CODE'
     }
   ]
 
-  const displayCourses = courses.length > 0 ? courses : mockCourses
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    setCourses(allCourses)
+    setLoading(false)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-neutral-gray py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-primary mb-4">Explore Our Courses</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            All courses are beginner-friendly and designed for practical, real-world skills.
-            Start learning for just $7 per course per month.
-          </p>
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="bg-gradient-to-r from-[#7329ce] to-[#4610db] text-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">All Courses</h1>
+            <p className="text-xl mb-8">{courses.length} Premium Courses • All for $7</p>
+          </div>
         </div>
+      </div>
 
-        <div className="flex flex-wrap gap-4 justify-center mb-12">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${
-              filter === 'all'
-                ? 'bg-primary text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            All Courses
-          </button>
-          <button
-            onClick={() => setFilter('tech')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${
-              filter === 'tech'
-                ? 'bg-primary text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Technology
-          </button>
-          <button
-            onClick={() => setFilter('business')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${
-              filter === 'business'
-                ? 'bg-primary text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Business
-          </button>
-          <button
-            onClick={() => setFilter('creative')}
-            className={`px-6 py-2 rounded-full font-medium transition-all ${
-              filter === 'creative'
-                ? 'bg-primary text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            Creative
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayCourses.map((course) => (
-            <Link
-              key={course.id}
-              to={`/courses/${course.slug}`}
-              className="card p-0 overflow-hidden hover:scale-105 transition-transform"
-            >
-              <div className="relative">
-                <img
-                  src={course.thumbnail_url}
-                  alt={course.title}
-                  className="w-full h-56 object-cover"
-                />
-                <div className="absolute top-4 right-4 bg-secondary text-white px-3 py-1 rounded-full font-bold text-sm">
-                  ${course.price}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        {loading ? (
+          <div className="text-center">Loading...</div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {courses.map(course => (
+              <div key={course.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="h-48 bg-gray-200">
+                  <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-gray-900">{course.title}</h3>
+                    <span className="text-xs bg-yellow-100 px-2 py-1 rounded">{course.badge}</span>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-xl font-bold text-gray-900">${course.price}</span>
+                      <span className="text-sm text-gray-500 line-through ml-2">${course.originalPrice}</span>
+                    </div>
+                    <Link 
+                      to={`/course/${course.id}`}
+                      className="px-4 py-2 bg-[#7329ce] text-white rounded-lg text-sm"
+                    >
+                      View Details
+                    </Link>
+                  </div>
                 </div>
               </div>
-
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-primary mb-3 min-h-[56px]">
-                  {course.title}
-                </h3>
-
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {course.description}
-                </p>
-
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <div className="flex items-center">
-                    <Clock size={16} className="mr-1" />
-                    <span>{course.duration_weeks} weeks</span>
-                  </div>
-                  <div className="flex items-center">
-                    <BookOpen size={16} className="mr-1" />
-                    <span className="capitalize">{course.level}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <TrendingUp size={16} className="mr-1 text-accent-green" />
-                    <span>{course.enrollment_count} enrolled</span>
-                  </div>
-                  <button className="text-secondary font-semibold hover:underline">
-                    Learn More â†’
-                  </button>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-16 gradient-hero rounded-2xl p-12 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Ready to Transform Your Career?</h2>
-          <p className="text-xl text-gray-200 mb-6">
-            Enroll in multiple courses and build a complete skillset
-          </p>
-          <Link to="/register" className="btn-secondary text-lg px-8 py-4 inline-block">
-            Get Started for Free
-          </Link>
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

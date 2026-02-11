@@ -1,192 +1,125 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { CheckCircle, Award, BookOpen, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import React, { useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { CheckCircle, Home, BookOpen, Download } from "lucide-react";
 
 export default function PaymentSuccess() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const [verifying, setVerifying] = useState(false)
-  const [error, setError] = useState(null)
-  const [paymentData, setPaymentData] = useState(null)
-
-  const referenceFromUrl = searchParams.get('reference')
-  const stateData = location.state
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const { course, userDetails, amount, enrollmentId } = location.state || {};
 
   useEffect(() => {
-    const handlePaymentVerification = async () => {
-      try {
-        let reference = null
-        let paymentInfo = null
-
-        if (referenceFromUrl) {
-          console.log('🔍 Payment callback from Paystack redirect:', referenceFromUrl)
-
-          const stored = localStorage.getItem('paystack_pending_payment')
-          if (stored) {
-            paymentInfo = JSON.parse(stored)
-            reference = referenceFromUrl
-            localStorage.removeItem('paystack_pending_payment')
-          }
-        } else if (stateData?.reference) {
-          console.log('🔍 Payment callback from popup:', stateData.reference)
-          reference = stateData.reference
-          paymentInfo = {
-            courseId: stateData.course?.id,
-            courseName: stateData.course?.title,
-            amount: stateData.course?.price,
-            email: stateData.course?.email
-          }
-        }
-
-        if (!reference || !paymentInfo) {
-          console.warn('No payment data found, redirecting to dashboard')
-          setTimeout(() => navigate('/dashboard'), 2000)
-          return
-        }
-
-        setVerifying(true)
-
-        console.log('Verifying payment:', { reference, paymentInfo })
-
-        const { data: { session } } = await supabase.auth.getSession()
-
-        if (!session) {
-          throw new Error('Not authenticated')
-        }
-
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-        const response = await fetch(`${supabaseUrl}/functions/v1/verify-payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-            'apikey': supabaseAnonKey,
-          },
-          body: JSON.stringify({
-            reference,
-            courseId: paymentInfo.courseId,
-            amount: paymentInfo.amount,
-            email: paymentInfo.email,
-          }),
-        })
-
-        const result = await response.json()
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Payment verification failed')
-        }
-
-        console.log('✅ Payment verified successfully:', result)
-
-        setPaymentData({
-          reference,
-          courseName: paymentInfo.courseName,
-          courseId: paymentInfo.courseId,
-          ...result.data
-        })
-
-        setVerifying(false)
-      } catch (err) {
-        console.error('Payment verification error:', err)
-        setError(err.message)
-        setVerifying(false)
-      }
+    // Redirect if no state
+    if (!location.state) {
+      navigate("/courses");
     }
-
-    handlePaymentVerification()
-  }, [referenceFromUrl, stateData, navigate])
-
-  if (verifying) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-        <div className="card max-w-md text-center py-12">
-          <Loader2 className="text-primary mx-auto mb-6 animate-spin" size={64} />
-          <h2 className="text-2xl font-bold text-primary mb-4">Verifying Payment...</h2>
-          <p className="text-gray-600">Please wait while we confirm your transaction</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-red-100">
-        <div className="card max-w-md text-center py-12">
-          <AlertCircle className="text-red-600 mx-auto mb-6" size={64} />
-          <h2 className="text-2xl font-bold text-red-800 mb-4">Payment Verification Failed</h2>
-          <p className="text-red-600 mb-8">{error}</p>
-          <Link to="/dashboard" className="btn-primary">
-            Go to Dashboard
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  if (!paymentData) {
-    return null
-  }
+  }, [location.state, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent-green/10 to-primary/10 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="card text-center py-12">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-accent-green rounded-full mb-6">
-            <CheckCircle className="text-white" size={64} />
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 pt-16">
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="bg-white rounded-3xl shadow-xl p-8 md:p-12 text-center">
+          {/* Success Icon */}
+          <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-8">
+            <CheckCircle className="w-16 h-16 text-green-600" />
           </div>
-
-          <h1 className="text-4xl font-bold text-primary mb-4">
-            Payment Successful!
+          
+          {/* Success Message */}
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            ?? Enrollment Successful!
           </h1>
+          
           <p className="text-xl text-gray-600 mb-8">
-            Welcome to {paymentData.courseName}! You now have full access to the course.
+            Welcome to {course?.title || "the course"}! Your learning journey begins now.
           </p>
-
-          <div className="max-w-md mx-auto mb-8 p-6 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg border-2 border-primary/20">
-            <div className="text-sm text-gray-600 mb-2">Transaction Reference</div>
-            <div className="font-mono text-sm text-primary font-semibold break-all">
-              {paymentData.reference}
+          
+          {/* Enrollment Details */}
+          <div className="bg-gray-50 rounded-2xl p-6 mb-8 text-left">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Enrollment Details</h2>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-gray-600">Course</p>
+                <p className="font-bold text-lg">{course?.title || "Digital Course"}</p>
+              </div>
+              
+              <div>
+                <p className="text-gray-600">Amount Paid</p>
+                <p className="font-bold text-lg">${amount?.toFixed(2) || "7.00"}</p>
+              </div>
+              
+              <div>
+                <p className="text-gray-600">Student Name</p>
+                <p className="font-bold text-lg">{userDetails?.fullName || "Student"}</p>
+              </div>
+              
+              <div>
+                <p className="text-gray-600">Enrollment ID</p>
+                <p className="font-mono text-sm">{enrollmentId?.slice(0, 8) || "NEW-ENROLL"}</p>
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-8">
-            <div className="p-4 bg-white rounded-lg border-2 border-gray-200">
-              <BookOpen className="text-primary mx-auto mb-2" size={32} />
-              <div className="font-bold text-primary">Start Learning</div>
-              <div className="text-sm text-gray-600">Access your course now</div>
-            </div>
-            <div className="p-4 bg-white rounded-lg border-2 border-gray-200">
-              <Award className="text-secondary mx-auto mb-2" size={32} />
-              <div className="font-bold text-primary">Earn Certificate</div>
-              <div className="text-sm text-gray-600">Complete to get certified</div>
-            </div>
-            <div className="p-4 bg-white rounded-lg border-2 border-gray-200">
-              <CheckCircle className="text-accent-green mx-auto mb-2" size={32} />
-              <div className="font-bold text-primary">Lifetime Access</div>
-              <div className="text-sm text-gray-600">Learn at your own pace</div>
+          
+          {/* What's Next */}
+          <div className="mb-10">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">What's Next?</h3>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-blue-50 p-6 rounded-xl">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <BookOpen className="w-6 h-6 text-blue-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-2">Access Course</h4>
+                <p className="text-gray-600 text-sm">
+                  Go to your dashboard to start learning immediately
+                </p>
+              </div>
+              
+              <div className="bg-green-50 p-6 rounded-xl">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Download className="w-6 h-6 text-green-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-2">Download Materials</h4>
+                <p className="text-gray-600 text-sm">
+                  Get all course resources from the learning portal
+                </p>
+              </div>
+              
+              <div className="bg-purple-50 p-6 rounded-xl">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Home className="w-6 h-6 text-purple-600" />
+                </div>
+                <h4 className="font-bold text-gray-900 mb-2">Join Community</h4>
+                <p className="text-gray-600 text-sm">
+                  Connect with other students in our learning community
+                </p>
+              </div>
             </div>
           </div>
-
+          
+          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to={`/learn/${paymentData.courseId}`} className="btn-primary text-lg">
-              Start Learning Now
-              <ArrowRight className="ml-2 inline" size={20} />
-            </Link>
-            <Link to="/dashboard" className="btn-secondary text-lg">
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-xl hover:shadow-lg transition-all"
+            >
               Go to Dashboard
-            </Link>
+            </button>
+            
+            <button
+              onClick={() => navigate("/courses")}
+              className="px-8 py-4 bg-white border-2 border-primary text-primary font-bold rounded-xl hover:bg-gray-50 transition-all"
+            >
+              Browse More Courses
+            </button>
           </div>
-
-          <div className="mt-8 text-sm text-gray-600">
-            <p className="mb-2">A confirmation email has been sent to your email address.</p>
-            <p>Need help? Contact us at <a href="mailto:support@ikpace.com" className="text-secondary hover:underline">support@ikpace.com</a></p>
-          </div>
+          
+          {/* Receipt Note */}
+          <p className="text-gray-500 text-sm mt-8">
+            A receipt has been sent to {userDetails?.email || "your email"}
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }

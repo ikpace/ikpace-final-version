@@ -4,12 +4,12 @@ import { BookOpen, User, LogOut, LayoutDashboard, Users, Award } from 'lucide-re
 import { useState } from 'react'
 
 export default function Navbar() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, logout } = useAuth()
   const navigate = useNavigate()
   const [showDropdown, setShowDropdown] = useState(false)
 
-  const handleSignOut = async () => {
-    await signOut()
+  const handleSignOut = () => {
+    logout()
     navigate('/login')
   }
 

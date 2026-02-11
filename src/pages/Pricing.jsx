@@ -1,277 +1,272 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { CheckCircle, Sparkles, Tag, TrendingUp, Users, Award, Zap } from 'lucide-react'
+﻿import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Check, Star, Zap, Shield, Users, Target } from "lucide-react";
 
-export default function Pricing() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [selectedMonths, setSelectedMonths] = useState(1)
-  const [couponCode, setCouponCode] = useState('')
-  const [appliedCoupon, setAppliedCoupon] = useState(false)
+const Pricing = () => {
+  const navigate = useNavigate();
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
+  const [months, setMonths] = useState(1);
+  const [coupon, setCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(false);
 
-  const monthlyPrice = 5
-  const yearlyPrice = 45
-  const yearlySavings = 11
+  const courseId = "301c3b0d-5a28-4994-8907-ba6a50e5cb4f";
 
-  const calculateTotal = () => {
-    return monthlyPrice * selectedMonths
-  }
-
-  const handleSelectPlan = (planType) => {
-    if (!user) {
-      navigate('/register', { state: { plan: planType } })
-      return
-    }
-    navigate('/checkout-subscription', { state: { plan: planType, months: selectedMonths } })
-  }
+  const handleGetStarted = (planType) => {
+    navigate(`/checkout/${courseId}`, {
+      state: {
+        plan: planType,
+        months: months,
+        coupon: appliedCoupon ? coupon : "",
+        price: calculatePrice(planType, months, appliedCoupon),
+      },
+    });
+  };
 
   const applyCoupon = () => {
-    if (couponCode.toUpperCase() === 'SAVE11') {
-      setAppliedCoupon(true)
+    if (coupon.toLowerCase() === "ikpace20") {
+      setAppliedCoupon(true);
+      alert("🎉 Coupon applied! You get 20% off!");
+    } else {
+      setAppliedCoupon(false);
+      alert("Invalid coupon code. Try 'IKPACE20' for 20% off!");
     }
-  }
+  };
+
+  const calculatePrice = (plan, monthsCount, hasCoupon) => {
+    let price = plan === "monthly" ? 5 : 45;
+    price *= monthsCount;
+    if (hasCoupon) price *= 0.8;
+    return price.toFixed(2);
+  };
 
   const features = [
-    {
-      icon: <CheckCircle className="text-accent-green" size={24} />,
-      text: 'Unlimited registration into tech training programmes'
-    },
-    {
-      icon: <CheckCircle className="text-accent-green" size={24} />,
-      text: 'Unlimited access to Tech Hubs/community/events'
-    },
-    {
-      icon: <CheckCircle className="text-accent-green" size={24} />,
-      text: 'Online and in-person infrastructure access'
-    },
-    {
-      icon: <CheckCircle className="text-accent-green" size={24} />,
-      text: 'Access to vast university partner network'
-    },
-    {
-      icon: <CheckCircle className="text-accent-green" size={24} />,
-      text: 'Priority support and mentorship'
-    },
-    {
-      icon: <CheckCircle className="text-accent-green" size={24} />,
-      text: 'Certificate of completion for all courses'
-    }
-  ]
+    { icon: <Zap className="w-5 h-5" />, text: "30+ Interactive Lessons" },
+    { icon: <Target className="w-5 h-5" />, text: "Real-world Projects" },
+    { icon: <Users className="w-5 h-5" />, text: "Community Access" },
+    { icon: <Shield className="w-5 h-5" />, text: "Certificate of Completion" },
+    { icon: <Star className="w-5 h-5" />, text: "Lifetime Content Updates" },
+    { icon: <Check className="w-5 h-5" />, text: "1-on-1 Mentorship Sessions" },
+  ];
 
   return (
-    <div className="min-h-screen bg-neutral-gray py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto text-center mb-16">
+        <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-6">
+          <Star className="w-4 h-4 mr-2" /> LIMITED TIME OFFER
+        </div>
+        <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          Start Your Tech Journey Today
+        </h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
+          Join <span className="font-bold text-blue-600">5,000+ students</span> who transformed their careers with our project-based learning approach. No experience required.
+        </p>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-12">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+            <div className="text-4xl font-bold text-blue-600 mb-2">98%</div>
+            <div className="text-gray-600">Satisfaction Rate</div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+            <div className="text-4xl font-bold text-blue-600 mb-2">4.9/5</div>
+            <div className="text-gray-600">Average Rating</div>
+          </div>
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+            <div className="text-4xl font-bold text-blue-600 mb-2">30 Days</div>
+            <div className="text-gray-600">Money-back Guarantee</div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-primary mb-4">
-            Choose Your Learning Path
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Unlock unlimited access to world-class tech training programs and join a thriving community of learners
-          </p>
+        {/* Pricing Toggle */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-gray-100 p-1 rounded-2xl inline-flex">
+            <button
+              className={`px-8 py-3 rounded-xl font-semibold transition-all ${selectedPlan === "monthly" ? "bg-white shadow-lg text-blue-600" : "text-gray-600"}`}
+              onClick={() => setSelectedPlan("monthly")}
+            >
+              Monthly
+            </button>
+            <button
+              className={`px-8 py-3 rounded-xl font-semibold transition-all ${selectedPlan === "yearly" ? "bg-white shadow-lg text-blue-600" : "text-gray-600"}`}
+              onClick={() => setSelectedPlan("yearly")}
+            >
+              Yearly <span className="text-sm text-green-600 ml-2">Save 25%</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
-          <div className="card relative hover:shadow-2xl transition-all duration-300 border-2 border-gray-200 hover:border-primary">
-            <div className="absolute top-0 right-0 bg-primary text-white px-4 py-2 rounded-bl-lg font-semibold">
-              Popular
-            </div>
-            <div className="pt-8">
-              <h2 className="text-3xl font-bold text-primary mb-2">All Access</h2>
-              <p className="text-gray-600 mb-6">Perfect for getting started</p>
-
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="text-5xl font-bold text-primary">${monthlyPrice}</span>
-                  <span className="text-gray-600">/month</span>
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-primary mb-2">
-                    Select Duration
-                  </label>
-                  <select
-                    value={selectedMonths}
-                    onChange={(e) => setSelectedMonths(Number(e.target.value))}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(month => (
-                      <option key={month} value={month}>
-                        {month} {month === 1 ? 'Month' : 'Months'}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-4 rounded-lg mb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-primary">Total Amount:</span>
-                    <span className="text-3xl font-bold text-primary">${calculateTotal()}</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    For {selectedMonths} {selectedMonths === 1 ? 'month' : 'months'} of access
-                  </p>
-                </div>
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          {/* Monthly Plan */}
+          <div className={`bg-white rounded-3xl shadow-2xl p-8 border-2 ${selectedPlan === "monthly" ? "border-blue-500" : "border-gray-100"}`}>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">Monthly Access</h3>
+                <p className="text-gray-600 mt-2">Perfect for getting started</p>
               </div>
-
-              <button
-                onClick={() => handleSelectPlan('all-access')}
-                className="btn-primary w-full text-lg mb-6"
-              >
-                SAVE & CONTINUE
-              </button>
-
-              <div className="space-y-3">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    {feature.icon}
-                    <span className="text-gray-700">{feature.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="card relative hover:shadow-2xl transition-all duration-300 border-4 border-secondary bg-gradient-to-br from-white to-secondary/5">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-accent-yellow to-secondary text-white px-6 py-2 rounded-full font-bold shadow-lg flex items-center gap-2">
-              <Sparkles size={20} />
-              BEST VALUE - SAVE ${yearlySavings}
-            </div>
-            <div className="pt-12">
-              <h2 className="text-3xl font-bold text-primary mb-2">All Access Plus</h2>
-              <p className="text-gray-600 mb-6">12 months for the price of 5!</p>
-
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-5xl font-bold text-secondary">${yearlyPrice}</span>
-                  <span className="text-gray-600">/year</span>
+              {selectedPlan === "monthly" && (
+                <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-bold">
+                  POPULAR
                 </div>
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="text-lg text-gray-500 line-through">${monthlyPrice * 12}</span>
-                  <span className="bg-accent-green text-white px-3 py-1 rounded-full text-sm font-bold">
-                    Save ${yearlySavings}
+              )}
+            </div>
+
+            <div className="mb-8">
+              <div className="flex items-baseline">
+                <span className="text-5xl font-bold text-gray-900">${calculatePrice("monthly", months, appliedCoupon)}</span>
+                <span className="text-gray-500 ml-2">/month</span>
+              </div>
+              {appliedCoupon && (
+                <div className="flex items-center mt-2">
+                  <span className="text-gray-400 line-through mr-2">${(5 * months).toFixed(2)}</span>
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">
+                    🎉 20% OFF APPLIED
                   </span>
                 </div>
+              )}
+            </div>
 
-                <div className="bg-gradient-to-r from-secondary/10 to-accent-yellow/10 border-2 border-secondary/20 p-4 rounded-lg mb-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tag className="text-secondary" size={20} />
-                    <span className="font-semibold text-primary">Have a coupon code?</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Enter code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-secondary focus:outline-none"
-                    />
-                    <button
-                      onClick={applyCoupon}
-                      className="bg-secondary text-white px-6 py-2 rounded-lg font-semibold hover:bg-secondary-dark transition-colors"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  {appliedCoupon && (
-                    <p className="text-accent-green text-sm mt-2 flex items-center gap-1">
-                      <CheckCircle size={16} />
-                      Coupon applied successfully!
-                    </p>
-                  )}
-                </div>
-
-                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-4 rounded-lg mb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-primary">Total Amount:</span>
-                    <span className="text-3xl font-bold text-secondary">
-                      ${appliedCoupon ? yearlyPrice - 11 : yearlyPrice}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    12 months of unlimited access
-                  </p>
-                </div>
+            {/* Month Selector */}
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Select duration: <span className="font-bold">{months} month{months > 1 ? 's' : ''}</span>
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="12"
+                value={months}
+                onChange={(e) => setMonths(parseInt(e.target.value))}
+                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>1 month</span>
+                <span>6 months</span>
+                <span>12 months</span>
               </div>
+            </div>
 
-              <button
-                onClick={() => handleSelectPlan('all-access-plus')}
-                className="bg-gradient-to-r from-secondary to-accent-yellow text-white w-full py-4 rounded-lg font-bold text-lg hover:shadow-xl transition-all transform hover:scale-105 mb-6"
-              >
-                GET ALL ACCESS PLUS
-              </button>
+            <button
+              onClick={() => handleGetStarted("monthly")}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl mb-6"
+            >
+              Start Learning Now →
+            </button>
 
-              <div className="space-y-3">
-                {features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-3">
+            <ul className="space-y-4">
+              {features.slice(0, 4).map((feature, index) => (
+                <li key={index} className="flex items-center">
+                  <div className="bg-blue-100 p-1 rounded-lg mr-3">
                     {feature.icon}
-                    <span className="text-gray-700 font-semibold">{feature.text}</span>
                   </div>
-                ))}
-                <div className="flex items-start gap-3 mt-4 pt-4 border-t-2 border-secondary/20">
-                  <Sparkles className="text-secondary" size={24} />
-                  <span className="text-gray-700 font-bold">PLUS: Priority access to new courses</span>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Award className="text-secondary" size={24} />
-                  <span className="text-gray-700 font-bold">PLUS: Exclusive community events</span>
-                </div>
+                  <span className="text-gray-700">{feature.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Yearly Plan */}
+          <div className={`bg-gradient-to-br from-gray-900 to-black rounded-3xl shadow-2xl p-8 border-2 border-gray-800 ${selectedPlan === "yearly" ? "border-yellow-400" : ""}`}>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-2xl font-bold text-white">Annual Mastery</h3>
+                <p className="text-gray-300 mt-2">Best value - commit to mastery</p>
+              </div>
+              <div className="bg-yellow-500 text-gray-900 px-4 py-2 rounded-full font-bold">
+                BEST VALUE
               </div>
             </div>
+
+            <div className="mb-8">
+              <div className="flex items-baseline">
+                <span className="text-5xl font-bold text-white">${calculatePrice("yearly", months, appliedCoupon)}</span>
+                <span className="text-gray-300 ml-2">/year</span>
+              </div>
+              <div className="text-gray-300 mt-2">
+                <span className="line-through mr-2">$60</span>
+                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">Save 25%</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleGetStarted("yearly")}
+              className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 font-bold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl mb-6"
+            >
+              Get Annual Access →
+            </button>
+
+            <ul className="space-y-4">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-center">
+                  <div className="bg-yellow-500/20 p-1 rounded-lg mr-3">
+                    {React.cloneElement(feature.icon, { className: "w-5 h-5 text-yellow-400" })}
+                  </div>
+                  <span className="text-gray-300">{feature.text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto card bg-gradient-to-br from-primary/5 to-secondary/5 border-2 border-primary/20 mb-12">
-          <h3 className="text-2xl font-bold text-primary mb-4 text-center">
-            What's Included in All Access Plans
+        {/* Coupon Section */}
+        <div className="max-w-md mx-auto mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 shadow-lg">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+            🎁 Special Student Discount
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-3">
-                <TrendingUp className="text-primary" size={32} />
-              </div>
-              <h4 className="font-bold text-primary mb-2">Career Growth</h4>
-              <p className="text-sm text-gray-600">Build job-ready skills for remote work and freelancing</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary/10 rounded-full mb-3">
-                <Users className="text-secondary" size={32} />
-              </div>
-              <h4 className="font-bold text-primary mb-2">Community</h4>
-              <p className="text-sm text-gray-600">Connect with peers and mentors worldwide</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-green/10 rounded-full mb-3">
-                <Award className="text-accent-green" size={32} />
-              </div>
-              <h4 className="font-bold text-primary mb-2">Certificates</h4>
-              <p className="text-sm text-gray-600">Earn verified certificates for your resume</p>
-            </div>
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-yellow/10 rounded-full mb-3">
-                <Zap className="text-accent-yellow" size={32} />
-              </div>
-              <h4 className="font-bold text-primary mb-2">Flexibility</h4>
-              <p className="text-sm text-gray-600">Learn at your own pace, anytime, anywhere</p>
-            </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Enter coupon code: IKPACE20"
+              value={coupon}
+              onChange={(e) => setCoupon(e.target.value)}
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button
+              onClick={applyCoupon}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-6 py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all"
+            >
+              Apply
+            </button>
+          </div>
+          <p className="text-gray-600 text-sm mt-4 text-center">
+            Use code <span className="font-bold text-blue-600">IKPACE20</span> for 20% off any plan
+          </p>
+        </div>
+
+        {/* Trust Badges */}
+        <div className="mt-16 text-center">
+          <p className="text-gray-500 mb-8">Trusted by students from</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
+            <div className="text-xl font-bold text-gray-400">Google</div>
+            <div className="text-xl font-bold text-gray-400">Microsoft</div>
+            <div className="text-xl font-bold text-gray-400">Amazon</div>
+            <div className="text-xl font-bold text-gray-400">Andela</div>
+            <div className="text-xl font-bold text-gray-400">MEST</div>
           </div>
         </div>
 
-        <div className="text-center max-w-3xl mx-auto">
-          <p className="text-gray-600 mb-6">
-            Not sure which plan is right for you? Start with the monthly plan and upgrade anytime.
-            All plans include a 30-day money-back guarantee.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/courses" className="btn-secondary">
-              Browse All Courses
-            </Link>
-            <Link to="/contact" className="btn-outline">
-              Contact Support
-            </Link>
+        {/* FAQ Preview */}
+        <div className="mt-16 max-w-3xl mx-auto">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+            Frequently Asked Questions
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <h4 className="font-bold text-gray-900 mb-2">Can I cancel anytime?</h4>
+              <p className="text-gray-600">Yes! Cancel your subscription anytime. No questions asked.</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <h4 className="font-bold text-gray-900 mb-2">Do I get a certificate?</h4>
+              <p className="text-gray-600">Yes, all paid plans include a verifiable certificate upon completion.</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+export default Pricing;

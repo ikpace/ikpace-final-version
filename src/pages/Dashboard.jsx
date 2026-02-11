@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -6,6 +6,7 @@ import { BookOpen, TrendingUp, Award, Clock, Flame, Target, Sparkles, Bell } fro
 import VideoPlayer from '../components/VideoPlayer'
 import { videoConfig } from '../config/videos'
 
+import WhatsAppCommunity from '../components/WhatsAppCommunity'
 export default function Dashboard() {
   const { profile } = useAuth()
   const [enrollments, setEnrollments] = useState([])
@@ -203,7 +204,7 @@ export default function Dashboard() {
               <p className="text-sm text-gray-600 mb-3">Master IT basics, data analysis, and cybersecurity</p>
               <div className="flex items-center text-xs text-secondary font-semibold">
                 <span>3 Courses</span>
-                <span className="mx-2">•</span>
+                <span className="mx-2">â€¢</span>
                 <span>16 Weeks</span>
               </div>
             </div>
@@ -216,7 +217,7 @@ export default function Dashboard() {
               <p className="text-sm text-gray-600 mb-3">Content creation, graphic design, and AI animation</p>
               <div className="flex items-center text-xs text-secondary font-semibold">
                 <span>3 Courses</span>
-                <span className="mx-2">•</span>
+                <span className="mx-2">â€¢</span>
                 <span>14 Weeks</span>
               </div>
             </div>
@@ -229,7 +230,7 @@ export default function Dashboard() {
               <p className="text-sm text-gray-600 mb-3">Freelancing, VA mastery, and digital business</p>
               <div className="flex items-center text-xs text-secondary font-semibold">
                 <span>3 Courses</span>
-                <span className="mx-2">•</span>
+                <span className="mx-2">â€¢</span>
                 <span>12 Weeks</span>
               </div>
             </div>
@@ -248,7 +249,11 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
-            </div>
+                  {/* WhatsApp Community Section */}
+      <div className='mt-12'>
+        <WhatsAppCommunity />
+      </div>
+</div>
           </div>
         )}
 
@@ -385,7 +390,13 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+            {/* WhatsApp Community Section */}
+      <div className='mt-12'>
+        <WhatsAppCommunity />
       </div>
+</div>
     </div>
   )
 }
+
+

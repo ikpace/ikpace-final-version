@@ -1,430 +1,166 @@
-import { useEffect, useState } from 'react'
-import { X, CreditCard, Smartphone, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+﻿import React from 'react';
+import { PaystackButton } from 'react-paystack';
 
-export default function PaystackPayment({ email, amount, courseName, courseId, onSuccess, onClose }) {
-  const [paymentMethod, setPaymentMethod] = useState('card')
-  const [currency, setCurrency] = useState('GHS')
-  const [scriptLoaded, setScriptLoaded] = useState(true)
-  const [verifying, setVerifying] = useState(false)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    console.log('💳 PaystackPayment component mounted with props:', {
-      email,
-      amount,
-      courseName,
-      courseId
-    })
-  }, [])
-
-  const getConvertedAmount = () => {
-    if (currency === 'GHS') {
-      // amount is in cents (e.g., 700 for $7)
-      // Convert to GHS: (700 cents / 100) * 12 exchange rate * 100 pesewas = 700 * 12 pesewas
-      return Math.round(amount * 12)
-    } else if (currency === 'NGN') {
-      // amount is in cents (e.g., 700 for $7)
-      // Convert to NGN: (700 cents / 100) * 800 exchange rate * 100 kobo = 700 * 800 kobo
-      return Math.round(amount * 800)
+const PaystackPayment = ({ amount, email, courseName, onSuccess, onClose }) => {
+  // Your Paystack public test key (replace with your actual key)
+  const publicKey = "pk_test_d42afb4dd7431f9a9ee9a0ac0a9eb0e0a1877d7a";
+  
+  // Convert amount from dollars to pesewas (Paystack expects amount in smallest currency unit)
+  // amount is in dollars, we need to convert to GHS then to pesewas
+  const exchangeRate = 11.8;
+  const amountInGHS = amount / 100 * exchangeRate; // amount is in cents, convert to dollars first
+  const amountInPesewas = Math.round(amountInGHS * 100);
+  
+  const componentProps = {
+    email: email || "customer@example.com",
+    amount: amountInPesewas,
+    publicKey: publicKey,
+    text: "Pay Now",
+    onSuccess: (reference) => {
+      console.log("Payment successful!", reference);
+      if (onSuccess) {
+        onSuccess({
+          reference: reference.reference,
+          transactionId: reference.transaction,
+          amount: amountInGHS,
+          currency: "GHS",
+          method: "Card Payment"
+        });
+      }
+    },
+    onClose: onClose || (() => {
+      console.log("Payment modal closed");
+      alert("Payment was cancelled. You can try again.");
+    }),
+    metadata: {
+      custom_fields: [
+        {
+          display_name: "Course Name",
+          variable_name: "course_name",
+          value: courseName || "Digital Entrepreneurship Course"
+        }
+      ]
     }
-    return amount
-  }
-
-  // No script loading needed for redirect mode
-  useEffect(() => {
-    console.log('✅ Paystack redirect mode - no script loading required')
-  }, [])
-
-  const verifyPayment = async (reference) => {
-    try {
-      setVerifying(true)
-      setError(null)
-
-      console.log('Verifying payment with backend...', { reference, courseId, amount: amount / 100, email })
-
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session) {
-        throw new Error('Not authenticated')
-      }
-
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/verify-payment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': supabaseAnonKey,
-        },
-        body: JSON.stringify({
-          reference,
-          courseId,
-          amount: amount / 100,
-          email,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Payment verification failed')
-      }
-
-      console.log('Payment verified successfully:', result)
-
-      setVerifying(false)
-      onSuccess({
-        reference,
-        transactionId: result.data.transactionId,
-        enrollmentId: result.data.enrollmentId,
-        courseName: result.data.courseName,
-      })
-    } catch (err) {
-      console.error('Payment verification error:', err)
-      setError(err.message)
-      setVerifying(false)
-    }
-  }
-
-  const handlePayment = async () => {
-    try {
-      console.log('🔍 Payment initiated with:', {
-        email,
-        amount,
-        courseId,
-        courseName,
-        paymentMethod,
-        currency
-      })
-
-      if (!email) {
-        setError('Email address is missing. Please refresh and try again.')
-        return
-      }
-
-      if (!courseId) {
-        setError('Course ID is missing. Cannot process payment.')
-        return
-      }
-
-      setError(null)
-      setVerifying(true)
-
-      console.log('✅ All validations passed, initializing payment...')
-
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session) {
-        throw new Error('Not authenticated. Please log in and try again.')
-      }
-
-      console.log('🔑 Session found:', { userId: session.user.id, email: session.user.email })
-
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-      if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error('Supabase configuration missing')
-      }
-
-      const convertedAmount = getConvertedAmount()
-
-      console.log('📤 Calling edge function:', `${supabaseUrl}/functions/v1/initialize-payment`)
-      console.log('📦 Payment data:', { email, amount: convertedAmount, currency, courseId })
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/initialize-payment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': supabaseAnonKey,
-          'origin': window.location.origin,
-        },
-        body: JSON.stringify({
-          email,
-          amount: convertedAmount,
-          currency,
-          courseId,
-          courseName,
-          paymentMethod,
-        }),
-      })
-
-      let result
-      try {
-        result = await response.json()
-      } catch (parseError) {
-        console.error('❌ Failed to parse response:', parseError)
-        const text = await response.text()
-        console.error('Raw response:', text)
-        throw new Error('Invalid response from payment server')
-      }
-
-      console.log('📡 API Response:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        result
-      })
-
-      if (!response.ok || !result.success) {
-        console.error('❌ Payment initialization failed:', {
-          status: response.status,
-          error: result.error,
-          fullResult: result
-        })
-        throw new Error(result.error || `Payment server error (${response.status})`)
-      }
-
-      console.log('✅ Payment initialized:', result)
-
-      localStorage.setItem('paystack_pending_payment', JSON.stringify({
-        reference: result.data.reference,
-        courseId,
-        courseName,
-        amount: amount / 100,
-        email,
-        timestamp: Date.now()
-      }))
-
-      console.log('🚀 Redirecting to Paystack payment page...')
-      window.open(result.data.authorization_url, '_blank')
-
-      setVerifying(false)
-      setError('Payment page opened in new tab. Please complete your payment there.')
-
-      setTimeout(() => {
-        onClose()
-      }, 2000)
-    } catch (err) {
-      console.error('❌ Error in handlePayment:', {
-        message: err.message,
-        stack: err.stack,
-        error: err
-      })
-
-      let errorMessage = err.message
-
-      // Provide more helpful error messages
-      if (err.message.includes('fetch')) {
-        errorMessage = 'Cannot connect to payment server. Please check your internet connection.'
-      } else if (err.message.includes('Not authenticated')) {
-        errorMessage = 'Please log in to make a payment.'
-      }
-
-      setError(`Payment error: ${errorMessage}`)
-      setVerifying(false)
-    }
-  }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl max-w-md w-full p-8 relative shadow-2xl animate-slideUp">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-secondary to-accent-yellow rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <CreditCard size={40} className="text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-primary mb-2">Complete Enrollment</h2>
-          <p className="text-gray-600">Secure payment via Paystack</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-6 mb-6 border border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-4">Order Summary</h3>
-          <div className="space-y-3">
-            <div className="flex items-start justify-between">
-              <span className="text-gray-600 text-sm">Course:</span>
-              <span className="font-semibold text-primary text-sm text-right max-w-[200px]">{courseName}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600 text-sm">Email:</span>
-              <span className="font-medium text-gray-900 text-sm">{email}</span>
-            </div>
-            <div className="border-t border-gray-200 pt-3 mt-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-900 font-semibold">Total Amount:</span>
-                <span className="text-2xl font-bold text-secondary">
-                  {currency === 'GHS'
-                    ? `₵${(getConvertedAmount() / 100).toFixed(2)}`
-                    : currency === 'NGN'
-                    ? `₦${(getConvertedAmount() / 100).toFixed(2)}`
-                    : `$${(amount / 100).toFixed(2)}`}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Currency</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setCurrency('GHS')}
-              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
-                currency === 'GHS'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <span className={`text-lg font-bold ${currency === 'GHS' ? 'text-primary' : 'text-gray-400'}`}>₵</span>
-              <span className={`text-xs mt-1 font-medium ${currency === 'GHS' ? 'text-primary' : 'text-gray-600'}`}>
-                Ghana Cedis
-              </span>
-            </button>
-
-            <button
-              onClick={() => setCurrency('USD')}
-              className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all ${
-                currency === 'USD'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <span className={`text-lg font-bold ${currency === 'USD' ? 'text-primary' : 'text-gray-400'}`}>$</span>
-              <span className={`text-xs mt-1 font-medium ${currency === 'USD' ? 'text-primary' : 'text-gray-600'}`}>
-                US Dollar
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Payment Method</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setPaymentMethod('card')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
-                paymentMethod === 'card'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <CreditCard size={24} className={paymentMethod === 'card' ? 'text-primary' : 'text-gray-400'} />
-              <span className={`text-sm mt-2 font-medium ${paymentMethod === 'card' ? 'text-primary' : 'text-gray-600'}`}>
-                Card Payment
-              </span>
-            </button>
-
-            <button
-              onClick={() => setPaymentMethod('mobile_money')}
-              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
-                paymentMethod === 'mobile_money'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <Smartphone size={24} className={paymentMethod === 'mobile_money' ? 'text-primary' : 'text-gray-400'} />
-              <span className={`text-sm mt-2 font-medium ${paymentMethod === 'mobile_money' ? 'text-primary' : 'text-gray-600'}`}>
-                Mobile Money
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200 flex items-start">
-            <AlertCircle size={20} className="text-red-600 mr-3 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm text-red-900 font-medium">Payment Error</p>
-              <p className="text-xs text-red-700 mt-1">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {verifying && (
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-center">
-              <Loader2 size={20} className="text-blue-600 animate-spin mr-3" />
-              <div>
-                <p className="text-sm text-blue-900 font-medium">Verifying Payment...</p>
-                <p className="text-xs text-blue-700 mt-1">Please wait while we confirm your payment</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-3 mb-6">
-          <button
-            onClick={handlePayment}
-            disabled={verifying || !scriptLoaded}
-            className="w-full btn-primary flex items-center justify-center shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {!scriptLoaded ? (
-              <>
-                <Loader2 size={20} className="mr-2 animate-spin" />
-                Loading Payment System...
-              </>
-            ) : verifying ? (
-              <>
-                <Loader2 size={20} className="mr-2 animate-spin" />
-                Verifying Payment...
-              </>
-            ) : (
-              <>
-                <CreditCard size={20} className="mr-2" />
-                Pay {currency === 'GHS'
-                  ? `₵${(getConvertedAmount() / 100).toFixed(2)}`
-                  : currency === 'NGN'
-                  ? `₦${(getConvertedAmount() / 100).toFixed(2)}`
-                  : `$${(amount / 100).toFixed(2)}`}
-              </>
-            )}
-          </button>
-          <button
+    <div className="paystack-payment-modal" style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+      padding: "20px"
+    }}>
+      <div style={{
+        backgroundColor: "white",
+        borderRadius: "12px",
+        padding: "30px",
+        maxWidth: "500px",
+        width: "100%",
+        boxShadow: "0 10px 40px rgba(0,0,0,0.2)"
+      }}>
+        <div style={{ marginBottom: "20px" }}>
+          <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#065f46", marginBottom: "5px" }}>
+            Complete Payment
+          </h2>
+          <p style={{ color: "#6b7280", fontSize: "14px" }}>
+            {courseName || "Digital Entrepreneurship Course"}
+          </p>
+          <button 
             onClick={onClose}
-            disabled={verifying}
-            className="w-full btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              position: "absolute",
+              top: "15px",
+              right: "15px",
+              background: "none",
+              border: "none",
+              fontSize: "24px",
+              cursor: "pointer",
+              color: "#6b7280"
+            }}
           >
-            Cancel
+            ×
           </button>
         </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-center text-xs text-gray-500">
-            <span className="mr-2">🔒</span>
-            <span>Secure payment powered by Paystack</span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 text-center text-xs text-gray-600">
-            <div className="flex flex-col items-center">
-              <CheckCircle size={16} className="text-accent-green mb-1" />
-              <span>SSL Encrypted</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <CheckCircle size={16} className="text-accent-green mb-1" />
-              <span>PCI Compliant</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <CheckCircle size={16} className="text-accent-green mb-1" />
-              <span>Instant Access</span>
-            </div>
+        
+        <div style={{
+          backgroundColor: "#f0fdf4",
+          padding: "15px",
+          borderRadius: "8px",
+          marginBottom: "20px",
+          textAlign: "center"
+        }}>
+          <p style={{ fontSize: "14px", color: "#065f46", marginBottom: "5px" }}>
+            Amount to Pay
+          </p>
+          <p style={{ fontSize: "32px", fontWeight: "bold", color: "#065f46", margin: "0" }}>
+            ₵{amountInGHS.toFixed(2)}
+          </p>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginTop: "5px" }}>
+            ≈ ${(amount / 100).toFixed(2)} USD • Exchange Rate: 1 USD = {exchangeRate} GHS
+          </p>
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ fontSize: "18px", color: "#374151", marginBottom: "10px" }}>
+            💳 Pay with Card
+          </h3>
+          <p style={{ color: "#6b7280", fontSize: "14px", marginBottom: "15px" }}>
+            You will be redirected to Paystack's secure payment page to enter your card details.
+            We accept Visa, Mastercard, and Verve cards.
+          </p>
+          
+          <div style={{ 
+            backgroundColor: "#f3f4f6", 
+            padding: "15px", 
+            borderRadius: "8px",
+            marginBottom: "15px"
+          }}>
+            <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: "5px" }}>
+              💡 <strong>Test Card for Demo:</strong>
+            </p>
+            <p style={{ fontSize: "13px", color: "#1f2937", margin: "0", fontFamily: "monospace" }}>
+              Card: 4084 0840 8408 4081 • CVV: 408 • PIN: 0000 • OTP: 123456
+            </p>
           </div>
         </div>
-
-        <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-xs text-yellow-900 leading-relaxed">
-            <strong className="block mb-2">💳 Test Mode Active</strong>
-            <strong>Test Card Number:</strong> 4084 0840 8408 4081<br />
-            <strong>CVV:</strong> 408 | <strong>Expiry:</strong> Any future date<br />
-            <strong>PIN:</strong> 0000 | <strong>OTP:</strong> 123456<br />
-            {currency === 'GHS' && (
-              <span className="block mt-2 text-green-900 bg-green-100 px-2 py-1 rounded">
-                ℹ️ GHS (Ghana Cedis) is the default currency
-              </span>
-            )}
+        
+        <div>
+          <PaystackButton 
+            {...componentProps}
+            style={{
+              width: "100%",
+              backgroundColor: "#059669",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              padding: "16px",
+              fontSize: "18px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "background-color 0.2s"
+            }}
+          />
+          
+          <p style={{
+            fontSize: "11px",
+            color: "#9ca3af",
+            textAlign: "center",
+            marginTop: "15px",
+            lineHeight: "1.4"
+          }}>
+            🔒 Secure 256-bit SSL encryption • Your card details are never stored on our servers
           </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
+export default PaystackPayment;

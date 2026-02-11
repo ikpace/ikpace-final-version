@@ -1,28 +1,33 @@
+﻿// YouTube Video Configuration for iKPace Platform
+// Using valid YouTube video IDs for testing
+
 export const videoConfig = {
   welcome: {
     title: 'Welcome to iKPACE',
     description: 'Watch this video to learn about iKPACE and how to get started with your courses!',
-    youtubeId: '5qap5aO4i9A',
+    youtubeId: 'dQw4w9WgXcQ', // Popular test video
     fallbackUrl: null
   },
   orientation: {
     title: 'Platform Orientation',
     description: 'This video will guide you through the platform and help you unlock the full potential of your learning experience.',
-    youtubeId: 'QH2-TGUlwu4',
+    youtubeId: 'jNQXAC9IVRw', // First YouTube video
     fallbackUrl: null
   }
-}
+};
 
 export const getYouTubeEmbedUrl = (videoId) => {
-  if (!videoId || videoId === 'YOUR_WELCOME_VIDEO_ID' || videoId === 'YOUR_ORIENTATION_VIDEO_ID') {
+  if (!videoId) {
     return null
   }
-  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`
+  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=0&controls=1`
 }
 
 export const getYouTubeThumbnail = (videoId) => {
-  if (!videoId || videoId === 'YOUR_WELCOME_VIDEO_ID' || videoId === 'YOUR_ORIENTATION_VIDEO_ID') {
-    return 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=800'
+  if (!videoId) {
+    return 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
   }
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
 }
+
+export default videoConfig;
