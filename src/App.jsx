@@ -12,14 +12,21 @@ import CareerReady from "./pages/CareerReady";
 import Community from "./pages/Community";
 import AdminDashboard from "./pages/AdminDashboard";
 import Checkout from "./pages/Checkout";
-import Payment from "./pages/Payment";
-import PaymentTest from "./pages/PaymentTest";
-import SimplePaymentSuccess from "./pages/SimplePaymentSuccess";
-import EnrollmentSuccess from "./pages/EnrollmentSuccess";
-import ConfirmEnrollment from "./pages/ConfirmEnrollment";
-import AdminRoute from "./components/AdminRoute";
+// import Payment from "./pages/Payment";
+// // import PaymentTest from "./pages/PaymentTest";
+// import SimplePaymentSuccess from "./pages/SimplePaymentSuccess";
+// import EnrollmentSuccess from "./pages/EnrollmentSuccess";
+// import ConfirmEnrollment from "./pages/ConfirmEnrollment";
+// import AdminRoute from "./components/AdminRoute";
 import Navbar from "./components/Navbar";
 import PromotionalBanner from "./components/PromotionalBanner";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import CourseCurriculum from "./pages/CourseCurriculum";
+import ProtectedRoute from "./components/ProtectedRoute"
+
+console.log("SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL)
+console.log("SUPABASE KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY)
+
 
 function Layout({ children, showNavbar = true }) {
   return (
@@ -66,11 +73,13 @@ function App() {
               <Pricing />
             </Layout>
           } />
-          
+
           {/* User Routes (may require login) */}
           <Route path="/dashboard" element={
             <Layout>
-              <Dashboard />
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
             </Layout>
           } />
           <Route path="/career-ready" element={
@@ -84,20 +93,13 @@ function App() {
             </Layout>
           } />
 
-          
-                    {/* Enrollment Confirmation */}
 
-                    <Route path="/confirm-enrollment/:id" element={
+          {/* Enrollment Confirmation */}
+          {/* 
+                    <Route path="/confirm-enrollment/:id" element={<Layout><ConfirmEnrollment /></Layout>
+                    } /> */}
 
-                      <Layout>
 
-                        <ConfirmEnrollment />
-
-                      </Layout>
-
-                    } />
-
-          
 
           {/* Checkout & Payment */}
           <Route path="/checkout/:courseId" element={
@@ -105,25 +107,36 @@ function App() {
               <Checkout />
             </Layout>
           } />
-          <Route path="/payment-success" element={
+          <Route
+            path="/payment-success"
+            element={
+              <Layout>
+                <PaymentSuccess />
+              </Layout>
+            }
+          />
+
+          {/* Course Curriculum Pages */}
+          <Route path="/course-curriculum/:slug" element={
             <Layout>
-              <SimplePaymentSuccess />
-            </Layout>
-          } />
-          <Route path="/enrollment-success" element={
-            <Layout>
-              <EnrollmentSuccess />
+              <CourseCurriculum />
             </Layout>
           } />
 
+          {/* <Route path="/enrollment-success" element={
+            <Layout>
+              <EnrollmentSuccess />
+            </Layout>
+          } /> */}
+
           {/* Admin Route - No Navbar */}
-          <Route path="/admin" element={
+          {/* <Route path="/admin" element={
             <Layout showNavbar={false}>
               <AdminRoute>
                 <AdminDashboard />
               </AdminRoute>
             </Layout>
-          } />
+          } /> */}
 
           {/* Homepage */}
           <Route path="/" element={
@@ -141,9 +154,3 @@ function App() {
 }
 
 export default App;
-
-
-
-
-
-

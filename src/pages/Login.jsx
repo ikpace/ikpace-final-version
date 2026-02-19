@@ -15,26 +15,25 @@ export default function Login() {
   // Get where user was trying to go
   const from = location.state?.from?.pathname || '/'
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+  setLoading(true)
 
-    try {
-      const result = await signIn(email, password)
-      
-      if (result?.success) {
-        // Go back to where user was trying to go, or home
-        navigate(from, { replace: true })
-      } else {
-        setError(result?.error?.message || 'Login failed')
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to sign in.')
-    } finally {
-      setLoading(false)
-    }
+  try {
+    await signIn(email.trim(), password.trim())
+
+    // If no error thrown, login succeeded
+    navigate(from, { replace: true })
+
+  } catch (err) {
+    console.error("LOGIN ERROR:", err)
+    setError(err.message || 'Failed to sign in.')
+  } finally {
+    setLoading(false)
   }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-primary/5 to-secondary/5">
@@ -81,7 +80,7 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input-field pl-10"
-                  placeholder="••••••••"
+                  placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                   required
                 />
               </div>

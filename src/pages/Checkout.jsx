@@ -25,7 +25,7 @@ export default function Checkout() {
     const loadCourse = async () => {
       try {
         setLoading(true);
-        
+
         if (courseId) {
           // Try to fetch from Supabase first
           const { data, error } = await supabase
@@ -104,6 +104,51 @@ export default function Checkout() {
         description: 'Buy, build & rent websites for passive income',
         image: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800',
         instructor: 'Robert Chen - Digital Real Estate Investor'
+      },
+      'virtual-assistant-pro': {
+        id: 'virtual-assistant-pro',
+        title: 'Virtual Assistant Professional',
+        price: 7,
+        duration: '6 weeks',
+        description: 'Master administrative skills and become a successful virtual assistant',
+        image: 'https://images.unsplash.com/photo-4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=800',
+        instructor: 'Amara Osei - VA Business Coach'
+      },
+      'social-media-marketing': {
+        id: 'social-media-marketing',
+        title: 'Social Media Marketing',
+        price: 7,
+        duration: '6 weeks',
+        description: 'Master social media strategy, ads & analytics',
+        image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
+        instructor: 'Kofi Asante - Digital Marketing Expert'
+      },
+      'canva-graphic-design': {
+        id: 'canva-graphic-design',
+        title: 'Canva & Graphic Design',
+        price: 7,
+        duration: '4 weeks',
+        description: 'Create stunning visuals & build your design portfolio',
+        image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800',
+        instructor: 'Esi Darkwah - Graphic Designer'
+      },
+      'smart-kids-coding': {
+        id: 'smart-kids-coding',
+        title: 'Smart Kids Coding',
+        price: 7,
+        duration: '4 weeks',
+        description: 'Fun coding adventures for ages 6-12 using Scratch',
+        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
+        instructor: 'Ms. Akosua - Kids Coding Instructor'
+      },
+      'freelancing-online-income': {
+        id: 'freelancing-online-income',
+        title: 'Freelancing & Online Income',
+        price: 7,
+        duration: '4 weeks',
+        description: 'Start earning online with freelancing skills',
+        image: 'https://images.unsplash.com/photo-4065876/pexels-photo-4065876.jpeg?auto=compress&cs=tinysrgb&w=800',
+        instructor: 'Samuel Ofori - Freelance Business Coach'
       }
     };
     return sampleCourses[id] || sampleCourses['tiktok-mastery'];
@@ -123,21 +168,65 @@ export default function Checkout() {
 
   const handleContinueToPayment = () => {
     if (!formData.fullName || !formData.email || !formData.phone) {
-      alert('Please fill in all required fields');
+      alert("Please fill in all required fields");
       return;
     }
 
-    // Save user details to localStorage or context
-    localStorage.setItem('checkoutDetails', JSON.stringify({
-      ...formData,
-      courseId,
-      courseTitle: course?.title,
-      coursePrice: course?.price
-    }));
+    if (!window.PaystackPop) {
+      alert("Payment system not loaded. Please refresh.");
+      return;
+    }
 
-    // Navigate to payment page
-    navigate(`/payment?courseId=${courseId}`);
+    const handler = window.PaystackPop.setup({
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      email: formData.email,
+      amount: course.price * 100, // IMPORTANT
+      currency: "GHS",
+
+      callback: function (response) {
+        savePayment(response);
+      },
+
+      onClose: function () {
+        console.log("Payment popup closed");
+      },
+    });
+
+    handler.openIframe();
   };
+
+  const savePayment = async (response) => {
+    console.log("Payment success:", response.reference);
+
+    const { error } = await supabase.from("payments").insert([
+      {
+        user_email: formData.email,
+        full_name: formData.fullName,
+        phone: formData.phone,
+        course_id: course.id,
+        course_title: course.title,
+        amount: course.price,
+        reference: response.reference,
+        status: "success",
+      },
+    ]);
+
+    if (error) {
+      console.error("Error saving payment:", error);
+      alert("Payment succeeded but saving failed.");
+      return;
+    }
+
+    navigate("/payment-success", {
+      state: {
+        course: course,
+        userDetails: formData,
+        amount: course.price,
+        enrollmentId: response.reference,
+      },
+    });
+  };
+
 
   if (loading) {
     return (
@@ -219,7 +308,7 @@ export default function Checkout() {
             {/* Student Information Form */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Student Information</h2>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -480,7 +569,7 @@ export default function Checkout() {
         {/* Footer Note */}
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>By continuing, you agree to our <a href="/terms" className="text-[#7329ce] hover:underline">Terms of Service</a> and <a href="/privacy" className="text-[#7329ce] hover:underline">Privacy Policy</a>.</p>
-          <p className="mt-1">© {new Date().getFullYear()} IKPACE Learning Platform. All rights reserved.</p>
+          <p className="mt-1">ï¿½ {new Date().getFullYear()} IKPACE Learning Platform. All rights reserved.</p>
         </div>
       </div>
     </div>

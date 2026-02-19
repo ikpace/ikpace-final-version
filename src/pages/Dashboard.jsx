@@ -6,7 +6,7 @@ import { BookOpen, TrendingUp, Award, Clock, Flame, Target, Sparkles, Bell } fro
 import VideoPlayer from '../components/VideoPlayer'
 import { videoConfig } from '../config/videos'
 
-import WhatsAppCommunity from '../components/WhatsAppCommunity'
+// import WhatsAppCommunity from '../components/WhatsAppCommunity'
 export default function Dashboard() {
   const { profile } = useAuth()
   const [enrollments, setEnrollments] = useState([])
@@ -250,9 +250,9 @@ export default function Dashboard() {
                 </div>
               </div>
                   {/* WhatsApp Community Section */}
-      <div className='mt-12'>
+      {/* <div className='mt-12'>
         <WhatsAppCommunity />
-      </div>
+      </div> */}
 </div>
           </div>
         )}
@@ -391,9 +391,9 @@ export default function Dashboard() {
           </div>
         </div>
             {/* WhatsApp Community Section */}
-      <div className='mt-12'>
+      {/* <div className='mt-12'>
         <WhatsAppCommunity />
-      </div>
+      </div> */}
 </div>
     </div>
   )

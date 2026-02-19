@@ -858,8 +858,266 @@ export default function CourseDetail() {
       weeklyHours: '3-4 hours'
     },
 
+    // ==================== NEW CURRICULUM COURSES ====================
+    'virtual-assistant-pro': {
+      id: 'virtual-assistant-pro',
+      title: 'Virtual Assistant Professional',
+      subtitle: 'Launch your remote VA career in 6 weeks',
+      description: 'Master administrative skills, communication, social media assistance, and client acquisition to become a successful virtual assistant.',
+      fullDescription: 'This comprehensive 6-week program covers everything you need to become a professional virtual assistant. From communication mastery to client acquisition strategies, you will learn to manage emails, calendars, documents, and social media for clients worldwide. Graduate with a professional portfolio and certification.',
+      price: 7,
+      originalPrice: 49,
+      duration: '6 Weeks (2–3 classes/week)',
+      students: 1845,
+      rating: 4.8,
+      category: 'business',
+      level: 'beginner',
+      instructor: 'Amara Osei - VA Business Coach',
+      instructorTitle: 'Virtual Assistant Expert',
+      instructorImage: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
+      image: 'https://images.unsplash.com/photo-4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=800',
+      featured: true,
+      badge: '💼 VA PRO',
+      badgeColor: 'bg-gradient-to-r from-[#7C4DFF] to-[#448AFF]',
+      tags: ['Virtual Assistant', 'Remote Work', 'Admin Skills', 'Freelancing'],
+      features: ['Professional certificate', 'Portfolio creation', 'Client acquisition guide', 'Lifetime access'],
+      discount: 85,
+      color: 'from-[#7C4DFF] to-[#448AFF]',
+      learningOutcomes: [
+        'Understand VA services and work ethics',
+        'Master professional email & calendar management',
+        'Use Google Workspace and file management systems',
+        'Manage social media scheduling and engagement',
+        'Build a CV, portfolio, and acquire clients',
+        'Complete a final VA portfolio and mock client task'
+      ],
+      requirements: ['Computer with internet', 'Basic computer literacy', 'Professional attitude', 'Time management skills'],
+      toolsNeeded: ['Google Workspace', 'Google Calendar', 'Scheduling tools', 'Email client'],
+      timeCommitment: '2-3 classes per week for 6 weeks',
+      modules: [
+        { title: 'Week 1: Introduction to Virtual Assistance', duration: '3 hours', lessons: 3, topics: ['What is a Virtual Assistant?', 'Types of VA services', 'Work ethics & professionalism'] },
+        { title: 'Week 2: Communication & Email Management', duration: '3 hours', lessons: 3, topics: ['Professional email writing', 'Calendar management', 'Scheduling tools (Google Calendar)'] },
+        { title: 'Week 3: Administrative Tools', duration: '3 hours', lessons: 3, topics: ['Google Workspace', 'Document organization', 'File management systems'] },
+        { title: 'Week 4: Social Media Assistance', duration: '3 hours', lessons: 3, topics: ['Content scheduling', 'Basic engagement management', 'Using scheduling tools'] },
+        { title: 'Week 5: Client Acquisition', duration: '3 hours', lessons: 3, topics: ['Creating a CV & portfolio', 'Freelance platforms overview', 'Pricing your services'] },
+        { title: 'Week 6: Final Project', duration: '4 hours', lessons: 3, topics: ['Create VA portfolio', 'Mock client task', 'Certification'] }
+      ],
+      testimonials: [
+        { name: 'Fatima Abdi', role: 'Freelance VA', rating: 5, text: 'Landed 3 clients within my first month after completing this course!' },
+        { name: 'Grace Mensah', role: 'Remote Worker', rating: 5, text: 'The portfolio project was incredibly helpful for showcasing my skills.' }
+      ],
+      lessons: 18,
+      projects: 3,
+      monthsToComplete: '1.5 months',
+      weeklyHours: '4-6 hours'
+    },
+
+    'social-media-marketing': {
+      id: 'social-media-marketing',
+      title: 'Social Media Marketing',
+      subtitle: 'Master social media strategy, ads & analytics',
+      description: 'Learn content creation, branding, paid ads, analytics, and campaign planning to become a social media marketing expert.',
+      fullDescription: 'This 6-week social media marketing course takes you from understanding platforms to creating full campaign strategies. Learn content planning, branding, paid promotions, analytics tracking, and present your own marketing campaign as a final project.',
+      price: 7,
+      originalPrice: 49,
+      duration: '6 Weeks',
+      students: 2156,
+      rating: 4.9,
+      category: 'social',
+      level: 'beginner',
+      instructor: 'Kofi Asante - Digital Marketing Expert',
+      instructorTitle: 'Social Media Strategist',
+      instructorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
+      featured: true,
+      badge: '📱 SMM PRO',
+      badgeColor: 'bg-gradient-to-r from-[#E040FB] to-[#FF4081]',
+      tags: ['Social Media', 'Marketing', 'Content Strategy', 'Paid Ads'],
+      features: ['Campaign templates', 'Analytics guide', 'Certificate', 'Community access'],
+      discount: 85,
+      color: 'from-[#E040FB] to-[#FF4081]',
+      learningOutcomes: [
+        'Understand all major social media platforms',
+        'Create effective content & caption strategies',
+        'Build a personal brand with visual consistency',
+        'Run paid ads and boost posts effectively',
+        'Track analytics and improve performance',
+        'Create and present a full campaign plan'
+      ],
+      requirements: ['Social media accounts', 'Smartphone or computer', 'Basic writing skills', 'Creative thinking'],
+      toolsNeeded: ['Social media accounts', 'Canva', 'Meta Ads Manager', 'Analytics tools'],
+      timeCommitment: '4-6 hours per week for 6 weeks',
+      modules: [
+        { title: 'Week 1: Social Media Basics', duration: '3 hours', lessons: 2, topics: ['Platforms overview', 'Understanding target audience'] },
+        { title: 'Week 2: Content Creation Strategy', duration: '4 hours', lessons: 3, topics: ['Content planning', 'Writing captions', 'Hashtags & trends'] },
+        { title: 'Week 3: Branding & Positioning', duration: '3 hours', lessons: 2, topics: ['Personal brand building', 'Visual consistency'] },
+        { title: 'Week 4: Ads & Promotions', duration: '3 hours', lessons: 2, topics: ['Introduction to paid ads', 'Boosting posts'] },
+        { title: 'Week 5: Analytics & Growth', duration: '3 hours', lessons: 2, topics: ['Insights & engagement tracking', 'Improving performance'] },
+        { title: 'Week 6: Campaign Project', duration: '4 hours', lessons: 2, topics: ['Create full campaign plan', 'Present strategy'] }
+      ],
+      testimonials: [
+        { name: 'Nana Ama', role: 'Brand Manager', rating: 5, text: 'This course gave me the confidence to run ads for my business!' },
+        { name: 'Yaw Boateng', role: 'Entrepreneur', rating: 5, text: 'Doubled my engagement in just 3 weeks applying these strategies.' }
+      ],
+      lessons: 13,
+      projects: 2,
+      monthsToComplete: '1.5 months',
+      weeklyHours: '4-6 hours'
+    },
+
+    'canva-graphic-design': {
+      id: 'canva-graphic-design',
+      title: 'Canva & Graphic Design',
+      subtitle: 'Create stunning visuals & build your design portfolio',
+      description: 'Learn design fundamentals, Canva mastery, branding design, and build a professional graphic design portfolio in 4 weeks.',
+      fullDescription: 'This 4-week course teaches you everything from color theory and typography to creating logos, flyers, posters, and complete social media branding kits using Canva. Graduate with a professional portfolio showcasing your design skills.',
+      price: 7,
+      originalPrice: 39,
+      duration: '4 Weeks',
+      students: 2890,
+      rating: 4.8,
+      category: 'design',
+      level: 'beginner',
+      instructor: 'Esi Darkwah - Graphic Designer',
+      instructorTitle: 'Canva & Design Expert',
+      instructorImage: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400',
+      image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800',
+      featured: true,
+      badge: '🎨 DESIGN',
+      badgeColor: 'bg-gradient-to-r from-[#00BFA5] to-[#64FFDA]',
+      tags: ['Graphic Design', 'Canva', 'Branding', 'Visual Design'],
+      features: ['Design templates', 'Portfolio project', 'Certificate', 'Lifetime access'],
+      discount: 82,
+      color: 'from-[#00BFA5] to-[#64FFDA]',
+      learningOutcomes: [
+        'Understand color theory, fonts & layout principles',
+        'Master Canva templates, custom designs & background removal',
+        'Design logos, flyers & posters',
+        'Create a complete social media branding kit',
+        'Build a professional design portfolio'
+      ],
+      requirements: ['Computer or tablet', 'Free Canva account', 'Creative interest', 'No prior design experience needed'],
+      toolsNeeded: ['Canva (free or Pro)', 'Computer or tablet', 'Internet connection'],
+      timeCommitment: '4-6 hours per week for 4 weeks',
+      modules: [
+        { title: 'Week 1: Design Fundamentals', duration: '4 hours', lessons: 2, topics: ['Color theory', 'Fonts & layout'] },
+        { title: 'Week 2: Canva Mastery', duration: '4 hours', lessons: 3, topics: ['Templates', 'Custom designs', 'Background removal'] },
+        { title: 'Week 3: Branding Design', duration: '4 hours', lessons: 2, topics: ['Logo basics', 'Flyer & poster design'] },
+        { title: 'Week 4: Final Portfolio', duration: '4 hours', lessons: 2, topics: ['Design social media kit', 'Branding project'] }
+      ],
+      testimonials: [
+        { name: 'Abena Serwaa', role: 'Social Media Manager', rating: 5, text: 'Now I design all my own graphics — clients love them!' },
+        { name: 'Kwame Adjei', role: 'Entrepreneur', rating: 5, text: 'The branding project alone was worth the entire course fee.' }
+      ],
+      lessons: 9,
+      projects: 3,
+      monthsToComplete: '1 month',
+      weeklyHours: '4-6 hours'
+    },
+
+    'smart-kids-coding': {
+      id: 'smart-kids-coding',
+      title: 'Smart Kids Coding',
+      subtitle: 'Fun coding adventures for ages 6–12',
+      description: 'Introduce kids to coding through Scratch! Build animations, stories, and games in a fun, interactive 4-week program.',
+      fullDescription: 'This exciting 4-week coding program is designed for children ages 6–12. Using Scratch, kids learn coding fundamentals through fun projects — building animations, stories, and their very own games. The course culminates in a final game project with a presentation and certificate ceremony.',
+      price: 7,
+      originalPrice: 35,
+      duration: '4 Weeks (Ages 6–12)',
+      students: 1567,
+      rating: 4.9,
+      category: 'kids',
+      level: 'beginner',
+      instructor: 'Ms. Akosua - Kids Coding Instructor',
+      instructorTitle: 'Children\'s Coding Educator',
+      instructorImage: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400',
+      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
+      featured: true,
+      badge: '👧 KIDS',
+      badgeColor: 'bg-gradient-to-r from-[#FF6D00] to-[#FFD600]',
+      tags: ['Kids Coding', 'Scratch', 'Game Development', 'STEM'],
+      features: ['Fun projects', 'Certificate', 'Game creation', 'Parent updates'],
+      discount: 80,
+      color: 'from-[#FF6D00] to-[#FFD600]',
+      learningOutcomes: [
+        'Understand what coding is and why it matters',
+        'Learn Scratch basics and interface',
+        'Create animations and interactive stories',
+        'Build games with characters and scoring',
+        'Present a personal game project',
+        'Receive a certificate of completion'
+      ],
+      requirements: ['Ages 6–12 years', 'Computer or tablet', 'Parent/guardian supervision', 'Enthusiasm to learn!'],
+      toolsNeeded: ['Computer or tablet', 'Scratch (free - scratch.mit.edu)', 'Internet connection'],
+      timeCommitment: '2-3 hours per week for 4 weeks',
+      modules: [
+        { title: 'Week 1: Introduction to Coding', duration: '2 hours', lessons: 3, topics: ['What is coding?', 'Scratch basics', 'First project'] },
+        { title: 'Week 2: Animations & Stories', duration: '3 hours', lessons: 3, topics: ['Loops & events', 'Build simple animation', 'Interactive stories'] },
+        { title: 'Week 3: Game Creation', duration: '3 hours', lessons: 3, topics: ['Adding characters', 'Simple scoring system', 'Game mechanics'] },
+        { title: 'Week 4: Final Game Project', duration: '3 hours', lessons: 3, topics: ['Build personal game', 'Presentation & certificate', 'Showcase'] }
+      ],
+      testimonials: [
+        { name: 'Parent - Mrs. Owusu', role: 'Mother of 2', rating: 5, text: 'My kids absolutely loved this course! They built their own games and can\'t stop coding.' },
+        { name: 'Parent - Mr. Mensah', role: 'Father', rating: 5, text: 'Amazing program for kids. Very well structured and engaging.' }
+      ],
+      lessons: 12,
+      projects: 4,
+      monthsToComplete: '1 month',
+      weeklyHours: '2-3 hours'
+    },
+
+    'freelancing-online-income': {
+      id: 'freelancing-online-income',
+      title: 'Freelancing & Online Income',
+      subtitle: 'Start earning online in 4 weeks',
+      description: 'Learn freelancing fundamentals, profile setup, client acquisition, pricing strategy, and build a sustainable online income.',
+      fullDescription: 'This practical 4-week course teaches you how to launch your freelancing career from scratch. Learn to create winning profiles, write compelling proposals, find and retain clients, set up payment methods, and build a long-term sustainable freelance business.',
+      price: 7,
+      originalPrice: 39,
+      duration: '4 Weeks',
+      students: 3210,
+      rating: 4.8,
+      category: 'business',
+      level: 'beginner',
+      instructor: 'Samuel Ofori - Freelance Business Coach',
+      instructorTitle: 'Freelancing & Online Income Expert',
+      instructorImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400',
+      image: 'https://images.unsplash.com/photo-4065876/pexels-photo-4065876.jpeg?auto=compress&cs=tinysrgb&w=800',
+      featured: true,
+      badge: '💰 FREELANCE',
+      badgeColor: 'bg-gradient-to-r from-[#00C853] to-[#B2FF59]',
+      tags: ['Freelancing', 'Online Income', 'Remote Work', 'Business'],
+      features: ['Profile templates', 'Proposal guide', 'Pricing calculator', 'Certificate'],
+      discount: 82,
+      color: 'from-[#00C853] to-[#B2FF59]',
+      learningOutcomes: [
+        'Understand the freelancing landscape & popular skills',
+        'Create a winning portfolio and online profile',
+        'Write proposals that get responses',
+        'Find jobs and communicate with clients effectively',
+        'Set up payment methods for international clients',
+        'Build long-term client relationships'
+      ],
+      requirements: ['Computer with internet', 'Marketable skill (or willingness to learn)', 'Professional attitude', 'Communication skills'],
+      toolsNeeded: ['Freelance platforms (Upwork, Fiverr)', 'Portfolio tool', 'Payment setup', 'Communication tools'],
+      timeCommitment: '4-6 hours per week for 4 weeks',
+      modules: [
+        { title: 'Week 1: Introduction to Freelancing', duration: '3 hours', lessons: 2, topics: ['What is freelancing?', 'Popular skills'] },
+        { title: 'Week 2: Setting Up Online Profile', duration: '4 hours', lessons: 2, topics: ['Creating portfolio', 'Writing proposals'] },
+        { title: 'Week 3: Getting Clients', duration: '4 hours', lessons: 3, topics: ['Finding jobs', 'Pricing strategy', 'Client communication'] },
+        { title: 'Week 4: Freelance Business Setup', duration: '4 hours', lessons: 3, topics: ['Payment methods', 'Building long-term clients', 'Final profile review'] }
+      ],
+      testimonials: [
+        { name: 'Daniel Tetteh', role: 'Freelance Writer', rating: 5, text: 'Started earning on Upwork within 2 weeks of completing this course!' },
+        { name: 'Ama Darko', role: 'Virtual Assistant', rating: 5, text: 'The proposal writing section was a game-changer for landing clients.' }
+      ],
+      lessons: 10,
+      projects: 2,
+      monthsToComplete: '1 month',
+      weeklyHours: '4-6 hours'
+    },
+
     // Add more courses following the same pattern...
-    // I'll add more in the next response if needed
   }
 
   useEffect(() => {
@@ -1015,7 +1273,7 @@ export default function CourseDetail() {
 
     const handleEnrollNow = () => {
     if (course) {
-      navigate(`/confirm-enrollment/${course.id}`)
+      navigate(`/checkout/${course.id}`)
     }
   }
 
@@ -1088,7 +1346,7 @@ export default function CourseDetail() {
                   {course.badge}
                 </span>
                 <span className="text-white/80 text-sm">{course.category?.toUpperCase() || 'COURSE'}</span>
-                <span className="text-white/80 text-sm">�</span>
+                <span className="text-white/80 text-sm">�</span>
                 <span className="text-white/80 text-sm">{course.level || 'beginner'}</span>
               </div>
 
@@ -1160,7 +1418,7 @@ export default function CourseDetail() {
                       {course.discount}% OFF
                     </div>
                   )}
-                  <div className="text-sm text-white/80">One-time payment � Lifetime access</div>
+                  <div className="text-sm text-white/80">One-time payment � Lifetime access</div>
                 </div>
 
                 <button
@@ -1305,7 +1563,7 @@ export default function CourseDetail() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-2xl font-bold text-gray-900">Course Curriculum</h3>
                   <div className="text-gray-600">
-                    {course.lessons || 30} lessons � {course.projects || 5} projects
+                    {course.lessons || 30} lessons � {course.projects || 5} projects
                   </div>
                 </div>
                 {course.modules?.map((module, moduleIndex) => (
@@ -1315,7 +1573,7 @@ export default function CourseDetail() {
                         <h4 className="font-bold text-gray-900 text-lg">{module.title}</h4>
                         <div className="flex items-center mt-2 text-gray-600 text-sm">
                           <Clock size={16} className="mr-2" />
-                          {module.duration} � {module.lessons} lessons
+                          {module.duration} � {module.lessons} lessons
                         </div>
                       </div>
                       <div className="text-[#7329ce] font-bold">
@@ -1522,7 +1780,7 @@ export default function CourseDetail() {
                 {course.originalPrice > course.price && (
                   <div className="text-white/80 line-through mb-1">${course.originalPrice?.toFixed(2)}</div>
                 )}
-                <div className="text-white/80 mb-6">One-time payment � Lifetime access</div>
+                <div className="text-white/80 mb-6">One-time payment � Lifetime access</div>
                 <button
                   onClick={handleEnrollNow}
                   className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-6 rounded-xl text-lg mb-4 transition-colors"

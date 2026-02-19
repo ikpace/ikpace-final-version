@@ -4,34 +4,54 @@ import { ArrowRight, BookOpen, Users, Award, Star, CheckCircle, TrendingUp, Cloc
 export default function Landing() {
   const popularCourses = [
     {
-      id: "1",
-      title: "Digital Marketing Mastery",
-      description: "Complete strategy for online marketing success",
+      id: "virtual-assistant-pro",
+      title: "Virtual Assistant Professional",
+      description: "Master admin skills, communication & client acquisition",
       price: 7.00,
-      students: "1,247+",
-      rating: 4.9,
-      duration: "8 weeks",
-      badge: "BESTSELLER"
-    },
-    {
-      id: "2",
-      title: "AI Content Creation Pro", 
-      description: "Master AI tools for automated content creation",
-      price: 7.00,
-      students: "892+",
+      students: "1,845+",
       rating: 4.8,
       duration: "6 weeks",
-      badge: "TRENDING"
+      badge: "VA PRO"
     },
     {
-      id: "3",
-      title: "Social Media Ads Expert",
-      description: "Advanced advertising across all platforms",
-      price: 9.00,
-      students: "567+",
-      rating: 4.7,
+      id: "social-media-marketing",
+      title: "Social Media Marketing",
+      description: "Content strategy, branding, paid ads & analytics",
+      price: 7.00,
+      students: "2,156+",
+      rating: 4.9,
+      duration: "6 weeks",
+      badge: "SMM PRO"
+    },
+    {
+      id: "canva-graphic-design",
+      title: "Canva & Graphic Design",
+      description: "Design fundamentals, Canva mastery & portfolio building",
+      price: 7.00,
+      students: "2,890+",
+      rating: 4.8,
       duration: "4 weeks",
-      badge: "POPULAR"
+      badge: "DESIGN"
+    },
+    {
+      id: "smart-kids-coding",
+      title: "Smart Kids Coding",
+      description: "Fun coding for ages 6-12 with Scratch & game creation",
+      price: 7.00,
+      students: "1,567+",
+      rating: 4.9,
+      duration: "4 weeks",
+      badge: "KIDS"
+    },
+    {
+      id: "freelancing-online-income",
+      title: "Freelancing & Online Income",
+      description: "Profile setup, client acquisition & pricing strategy",
+      price: 7.00,
+      students: "3,210+",
+      rating: 4.8,
+      duration: "4 weeks",
+      badge: "FREELANCE"
     }
   ];
 
@@ -85,7 +105,7 @@ export default function Landing() {
       <div className="bg-gradient-to-r from-accent-yellow via-secondary to-primary text-white">
         <div className="max-w-7xl mx-auto px-4 py-3 text-center">
           <p className="font-bold text-lg">
-            ?? LIMITED TIME: Get 3 courses for $18 (Save $3!) •{" "}
+            ?? LIMITED TIME: Get 3 courses for $18 (Save $3!) ï¿½{" "}
             <Link to="/pricing" className="underline font-extrabold">
               Claim Offer Now ?
             </Link>
@@ -108,7 +128,7 @@ export default function Landing() {
               <span className="text-accent-yellow">Transform Your Career</span>
             </h1>
             <p className="text-2xl mb-12 max-w-3xl mx-auto opacity-90">
-              Join thousands building practical digital skills with AI-powered learning, 
+              Join thousands building practical digital skills with AI-powered learning,
               expert instruction, and a supportive global community.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -116,7 +136,7 @@ export default function Landing() {
                 to="/courses"
                 className="group bg-white text-primary hover:bg-gray-100 font-bold text-xl px-12 py-5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl flex items-center gap-3"
               >
-                Start Learning Now • $7/course
+                Start Learning Now ï¿½ $7/course
                 <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
               </Link>
               <Link
@@ -194,7 +214,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {popularCourses.map((course) => (
               <div key={course.id} className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200">
                 <div className="h-48 relative overflow-hidden">
