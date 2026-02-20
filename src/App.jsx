@@ -1,6 +1,9 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import LiveChatSupport from './components/LiveChatSupport';
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -12,144 +15,42 @@ import CareerReady from "./pages/CareerReady";
 import Community from "./pages/Community";
 import AdminDashboard from "./pages/AdminDashboard";
 import Checkout from "./pages/Checkout";
-// import Payment from "./pages/Payment";
-// // import PaymentTest from "./pages/PaymentTest";
-// import SimplePaymentSuccess from "./pages/SimplePaymentSuccess";
-// import EnrollmentSuccess from "./pages/EnrollmentSuccess";
-// import ConfirmEnrollment from "./pages/ConfirmEnrollment";
-// import AdminRoute from "./components/AdminRoute";
-import Navbar from "./components/Navbar";
-import PromotionalBanner from "./components/PromotionalBanner";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import CourseCurriculum from "./pages/CourseCurriculum";
-import ProtectedRoute from "./components/ProtectedRoute"
+import Profile from './pages/Profile';
 
-console.log("SUPABASE URL:", import.meta.env.VITE_SUPABASE_URL)
-console.log("SUPABASE KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY)
-
-
-function Layout({ children, showNavbar = true }) {
+// Layout component to wrap all pages with Navbar and Footer
+function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {showNavbar && <PromotionalBanner />}
-      {showNavbar && <Navbar />}
-      <main className={showNavbar ? "pt-16" : ""}>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
         {children}
       </main>
+      <Footer />
+      <LiveChatSupport />
     </div>
   );
 }
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
+    <AuthProvider>
+      <Router>
         <Routes>
-          {/* Auth Routes - No Navbar */}
-          <Route path="/login" element={
-            <Layout showNavbar={false}>
-              <Login />
-            </Layout>
-          } />
-          <Route path="/register" element={
-            <Layout showNavbar={false}>
-              <Register />
-            </Layout>
-          } />
-
-          {/* Public Routes with Navbar */}
-          <Route path="/course/:id" element={
-            <Layout>
-              <CourseDetail />
-            </Layout>
-          } />
-          <Route path="/courses" element={
-            <Layout>
-              <Courses />
-            </Layout>
-          } />
-          <Route path="/pricing" element={
-            <Layout>
-              <Pricing />
-            </Layout>
-          } />
-
-          {/* User Routes (may require login) */}
-          <Route path="/dashboard" element={
-            <Layout>
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            </Layout>
-          } />
-          <Route path="/career-ready" element={
-            <Layout>
-              <CareerReady />
-            </Layout>
-          } />
-          <Route path="/community" element={
-            <Layout>
-              <Community />
-            </Layout>
-          } />
-
-
-          {/* Enrollment Confirmation */}
-          {/* 
-                    <Route path="/confirm-enrollment/:id" element={<Layout><ConfirmEnrollment /></Layout>
-                    } /> */}
-
-
-
-          {/* Checkout & Payment */}
-          <Route path="/checkout/:courseId" element={
-            <Layout>
-              <Checkout />
-            </Layout>
-          } />
-          <Route
-            path="/payment-success"
-            element={
-              <Layout>
-                <PaymentSuccess />
-              </Layout>
-            }
-          />
-
-          {/* Course Curriculum Pages */}
-          <Route path="/course-curriculum/:slug" element={
-            <Layout>
-              <CourseCurriculum />
-            </Layout>
-          } />
-
-          {/* <Route path="/enrollment-success" element={
-            <Layout>
-              <EnrollmentSuccess />
-            </Layout>
-          } /> */}
-
-          {/* Admin Route - No Navbar */}
-          {/* <Route path="/admin" element={
-            <Layout showNavbar={false}>
-              <AdminRoute>
-                <AdminDashboard />
-              </AdminRoute>
-            </Layout>
-          } /> */}
-
-          {/* Homepage */}
-          <Route path="/" element={
-            <Layout>
-              <Landing />
-            </Layout>
-          } />
-
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/" element={<Layout><Landing /></Layout>} />
+          <Route path="/login" element={<Layout><Login /></Layout>} />
+          <Route path="/register" element={<Layout><Register /></Layout>} />
+          <Route path="/courses" element={<Layout><Courses /></Layout>} />
+          <Route path="/course/:id" element={<Layout><CourseDetail /></Layout>} />
+          <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
+          <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/profile" element={<Layout><Profile /></Layout>} />
+          <Route path="/career-ready" element={<Layout><CareerReady /></Layout>} />
+          <Route path="/community" element={<Layout><Community /></Layout>} />
+          <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
+          <Route path="/checkout/:courseId" element={<Layout><Checkout /></Layout>} />
         </Routes>
-      </AuthProvider>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 

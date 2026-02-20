@@ -87,6 +87,24 @@ export default function Checkout() {
         image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800',
         instructor: 'Alex Chen - TikTok Expert'
       },
+      'smm': {
+        id: 'smm',
+        title: 'Social Media Marketing Mastery',
+        price: 249,
+        duration: '8 weeks',
+        description: 'Complete social media marketing strategy for all platforms',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800',
+        instructor: 'Sarah Johnson - SMM Expert'
+      },
+      'canva-design': {
+        id: 'canva-design',
+        title: 'Canva & Graphic Design Pro',
+        price: 199,
+        duration: '4 weeks',
+        description: 'Master Canva and create stunning designs',
+        image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800',
+        instructor: 'Emma Davis - Design Expert'
+      },
       'ai-prompt-engineering': {
         id: 'ai-prompt-engineering',
         title: 'AI Prompt Engineering Pro',
@@ -111,7 +129,7 @@ export default function Checkout() {
         price: 7,
         duration: '6 weeks',
         description: 'Master administrative skills and become a successful virtual assistant',
-        image: 'https://images.unsplash.com/photo-4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=800',
+        image: 'https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=800',
         instructor: 'Amara Osei - VA Business Coach'
       },
       'social-media-marketing': {
@@ -147,7 +165,7 @@ export default function Checkout() {
         price: 7,
         duration: '4 weeks',
         description: 'Start earning online with freelancing skills',
-        image: 'https://images.unsplash.com/photo-4065876/pexels-photo-4065876.jpeg?auto=compress&cs=tinysrgb&w=800',
+        image: 'https://images.pexels.com/photos/4065876/pexels-photo-4065876.jpeg?auto=compress&cs=tinysrgb&w=800',
         instructor: 'Samuel Ofori - Freelance Business Coach'
       }
     };
@@ -180,13 +198,11 @@ export default function Checkout() {
     const handler = window.PaystackPop.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       email: formData.email,
-      amount: course.price * 100, // IMPORTANT
+      amount: course.price * 100,
       currency: "GHS",
-
       callback: function (response) {
         savePayment(response);
       },
-
       onClose: function () {
         console.log("Payment popup closed");
       },
@@ -226,7 +242,6 @@ export default function Checkout() {
       },
     });
   };
-
 
   if (loading) {
     return (
@@ -435,7 +450,7 @@ export default function Checkout() {
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
                   <div className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">
-                    ?
+                    1
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">Step 1: Confirm Details</h4>
@@ -569,7 +584,7 @@ export default function Checkout() {
         {/* Footer Note */}
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>By continuing, you agree to our <a href="/terms" className="text-[#7329ce] hover:underline">Terms of Service</a> and <a href="/privacy" className="text-[#7329ce] hover:underline">Privacy Policy</a>.</p>
-          <p className="mt-1">� {new Date().getFullYear()} IKPACE Learning Platform. All rights reserved.</p>
+          <p className="mt-1">© {new Date().getFullYear()} IKPACE Learning Platform. All rights reserved.</p>
         </div>
       </div>
     </div>

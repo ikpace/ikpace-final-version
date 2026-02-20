@@ -27,19 +27,17 @@ export default function Navbar() {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const dropdownRef = useRef(null)
 
-const colors = {
-  primary: "#1A3D7C",    // Ikpace Deep Blue (main buttons, headings)
-  secondary: "#FF7A00",  // Ikpace Vibrant Orange (CTA, highlights)
-  accent: "#2F5EA8",     // Stronger blue accent (better contrast than before)
-
-  dark: "#1F2937",       // Dark readable text (better than #333 on white)
-
-  success: "#008F4C",    // Darker brand green (visible on white)
-  warning: "#E6B800",    // Deeper brand yellow (no fade)
-
-  green: "#008F4C",      // Brand green (consistent)
-  yellow: "#E6B800",     // Brand yellow (consistent)
-};
+  const colors = {
+    primary: "#1A3D7C",
+    secondary: "#FF7A00",
+    accent: "#4A90E2",
+    purple: "#9013FE",
+    dark: "#111827",
+    success: "#10B981",
+    warning: "#F59E0B",
+    pink: "#E83E8C",
+    teal: "#20C997"
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -63,7 +61,7 @@ const colors = {
     navigate('/login')
   }
 
-  // Menu items with dropdowns - FIXED with correct course links
+  // Menu items with dropdowns - exactly as requested
   const menuItems = [
     {
       id: 'programs',
@@ -71,45 +69,11 @@ const colors = {
       icon: <ProgramIcon size={18} />,
       color: colors.primary,
       items: [
-        { 
-          name: "Virtual Assistant Professional", 
-          href: "/course/virtual-assistant-pro", 
-          icon: <Briefcase size={16} />, 
-          duration: "6 Weeks", 
-          price: "$7.00", 
-          badge: "Popular" 
-        },
-        { 
-          name: "Social Media Marketing", 
-          href: "/course/social-media-marketing", 
-          icon: <Megaphone size={16} />, 
-          duration: "6 Weeks", 
-          price: "$7.00", 
-          badge: "Trending" 
-        },
-        { 
-          name: "Canva & Graphic Design", 
-          href: "/course/canva-graphic-design", 
-          icon: <Palette size={16} />, 
-          duration: "4 Weeks", 
-          price: "$7.00" 
-        },
-        { 
-          name: "Smart Kids Coding", 
-          href: "/course/smart-kids-coding", 
-          icon: <Code size={16} />, 
-          duration: "4 Weeks", 
-          price: "$7.00", 
-          badge: "Ages 6-12" 
-        },
-        { 
-          name: "Freelancing & Online Income", 
-          href: "/course/freelancing-online-income", 
-          icon: <Rocket size={16} />, 
-          duration: "4 Weeks", 
-          price: "$7.00", 
-          badge: "New" 
-        }
+        { name: "Virtual Assistant Professional", href: "/programs/va-professional", icon: <Briefcase size={16} />, duration: "6 Weeks", price: "$7.00", badge: "Popular" },
+        { name: "Social Media Marketing", href: "/programs/smm", icon: <Megaphone size={16} />, duration: "6 Weeks", price: "$7.00", badge: "Trending" },
+        { name: "Canva & Graphic Design", href: "/programs/canva-design", icon: <Palette size={16} />, duration: "4 Weeks", price: "$7.00" },
+        { name: "Smart Kids Coding", href: "/programs/kids-coding", icon: <Code size={16} />, duration: "4 Weeks", price: "$7.00", badge: "Ages 6-12" },
+        { name: "Freelancing & Online Income", href: "/programs/freelancing", icon: <Rocket size={16} />, duration: "4 Weeks", price: "$7.00", badge: "New" }
       ]
     },
     {
@@ -118,41 +82,11 @@ const colors = {
       icon: <HeartIcon size={18} />,
       color: colors.pink,
       items: [
-        { 
-          name: "Women in Tech Scholarship", 
-          href: "/course/women-tech-scholarship", 
-          icon: <Medal size={16} />, 
-          badge: "Apply Now", 
-          description: "50% tuition support for women" 
-        },
-        { 
-          name: "Return to Work Program", 
-          href: "/course/return-to-work", 
-          icon: <Rocket size={16} />, 
-          badge: "Flexible", 
-          description: "For career breaks" 
-        },
-        { 
-          name: "Tech Leadership for Women", 
-          href: "/course/tech-leadership", 
-          icon: <Crown size={16} />, 
-          badge: "Mentorship", 
-          description: "Executive skills" 
-        },
-        { 
-          name: "Coding for Beginners", 
-          href: "/course/coding-beginners", 
-          icon: <Code size={16} />, 
-          badge: "Free", 
-          description: "Start your journey" 
-        },
-        { 
-          name: "Women Entrepreneurs", 
-          href: "/course/tech-entrepreneurship", 
-          icon: <Briefcase size={16} />, 
-          badge: "Workshop", 
-          description: "Build your startup" 
-        }
+        { name: "Women in Tech Scholarship", href: "/women-tech/scholarship", icon: <Medal size={16} />, badge: "Apply Now", description: "50% tuition support for women" },
+        { name: "Return to Work Program", href: "/women-tech/return-to-work", icon: <Rocket size={16} />, badge: "Flexible", description: "For career breaks" },
+        { name: "Tech Leadership for Women", href: "/women-tech/leadership", icon: <Crown size={16} />, badge: "Mentorship", description: "Executive skills" },
+        { name: "Coding for Beginners", href: "/women-tech/coding", icon: <Code size={16} />, badge: "Free", description: "Start your journey" },
+        { name: "Women Entrepreneurs", href: "/women-tech/entrepreneurs", icon: <Briefcase size={16} />, badge: "Workshop", description: "Build your startup" }
       ]
     },
     {
@@ -161,41 +95,11 @@ const colors = {
       icon: <UsersIcon size={18} />,
       color: colors.success,
       items: [
-        { 
-          name: "Student Forums", 
-          href: "/community/forums", 
-          icon: <MessageCircle size={16} />, 
-          badge: "20k+ members", 
-          description: "Ask questions, share ideas" 
-        },
-        { 
-          name: "Study Groups", 
-          href: "/community/study-groups", 
-          icon: <Users size={16} />, 
-          badge: "Join now", 
-          description: "Learn together" 
-        },
-        { 
-          name: "Events & Workshops", 
-          href: "/community/events", 
-          icon: <CalendarDays size={16} />, 
-          badge: "Weekly", 
-          description: "Live sessions" 
-        },
-        { 
-          name: "Alumni Network", 
-          href: "/community/alumni", 
-          icon: <Award size={16} />, 
-          badge: "10k+ graduates", 
-          description: "Connect with graduates" 
-        },
-        { 
-          name: "Become an Ambassador", 
-          href: "/community/ambassador", 
-          icon: <Crown size={16} />, 
-          badge: "Apply", 
-          description: "Lead and earn rewards" 
-        }
+        { name: "Student Forums", href: "/community/forums", icon: <MessageCircle size={16} />, badge: "20k+ members", description: "Ask questions, share ideas" },
+        { name: "Study Groups", href: "/community/study-groups", icon: <Users size={16} />, badge: "Join now", description: "Learn together" },
+        { name: "Events & Workshops", href: "/community/events", icon: <CalendarDays size={16} />, badge: "Weekly", description: "Live sessions" },
+        { name: "Alumni Network", href: "/community/alumni", icon: <Award size={16} />, badge: "10k+ graduates", description: "Connect with graduates" },
+        { name: "Become an Ambassador", href: "/community/ambassador", icon: <Crown size={16} />, badge: "Apply", description: "Lead and earn rewards" }
       ]
     },
     {
@@ -204,38 +108,11 @@ const colors = {
       icon: <Info size={18} />,
       color: colors.accent,
       items: [
-        { 
-          name: "Our Mission", 
-          href: "/about/mission", 
-          icon: <TargetIcon size={16} />, 
-          description: "Why we exist" 
-        },
-        { 
-          name: "Our Team", 
-          href: "/about/team", 
-          icon: <Users size={16} />, 
-          description: "Meet the experts" 
-        },
-        { 
-          name: "Success Stories", 
-          href: "/about/success-stories", 
-          icon: <Star size={16} />, 
-          badge: "1000+ stories", 
-          description: "Real achievements" 
-        },
-        { 
-          name: "Careers", 
-          href: "/about/careers", 
-          icon: <Briefcase size={16} />, 
-          badge: "We're hiring", 
-          description: "Join our team" 
-        },
-        { 
-          name: "Contact Us", 
-          href: "/contact", 
-          icon: <Mail size={16} />, 
-          description: "Get in touch" 
-        }
+        { name: "Our Mission", href: "/about/mission", icon: <TargetIcon size={16} />, description: "Why we exist" },
+        { name: "Our Team", href: "/about/team", icon: <Users size={16} />, description: "Meet the experts" },
+        { name: "Success Stories", href: "/about/success-stories", icon: <Star size={16} />, badge: "1000+ stories", description: "Real achievements" },
+        { name: "Careers", href: "/about/careers", icon: <Briefcase size={16} />, badge: "We're hiring", description: "Join our team" },
+        { name: "Contact Us", href: "/contact", icon: <Mail size={16} />, description: "Get in touch" }
       ]
     }
   ]
@@ -488,7 +365,7 @@ const colors = {
       </div>
 
       {/* Add animation styles */}
-      <style>{`
+      <style jsx>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -506,3 +383,4 @@ const colors = {
     </nav>
   )
 }
+
