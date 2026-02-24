@@ -1,19 +1,128 @@
-﻿@tailwind base;
+﻿
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================= */
+/* Lovable CSS Variables        */
+/* ============================= */
+
 @layer base {
-  body {
-    @apply bg-neutral-gray text-neutral-dark;
-    font-family: 'Inter', sans-serif;
+  :root {
+    --background: 0 0% 96%;
+    --foreground: 0 0% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+
+    --primary: 214 65% 29%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 27 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 94%;
+    --muted-foreground: 0 0% 33%;
+
+    --accent: 145 100% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 45 100% 50%;
+    --warning-foreground: 0 0% 20%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 214 65% 29%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 214 65% 24%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 27 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 60% 32%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 214 50% 35%;
+    --sidebar-ring: 27 100% 50%;
+    --sidebar-muted: 214 40% 40%;
+  }
+
+  .dark {
+    --background: 220 15% 10%;
+    --foreground: 210 20% 90%;
+    --card: 220 15% 14%;
+    --card-foreground: 210 20% 90%;
+    --popover: 220 15% 14%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 214 65% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 27 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 145 100% 39%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 214 65% 45%;
+    --sidebar-background: 220 15% 8%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 27 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 14%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 15% 18%;
+    --sidebar-ring: 27 100% 50%;
   }
 }
+
+/* ============================= */
+/* Your Original Base Styles    */
+/* ============================= */
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    @apply bg-neutral-gray text-neutral-dark;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* ============================= */
+/* Your Utilities               */
+/* ============================= */
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full bg-secondary transition-all duration-500;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  }
 }
+
+/* ============================= */
+/* Your Custom Components       */
+/* ============================= */
 
 .gradient-hero {
   background: linear-gradient(135deg, #1A3D7C 0%, #0F2654 100%);
@@ -51,13 +160,13 @@
   @apply bg-secondary h-full rounded-full transition-all duration-500;
 }
 
+/* ============================= */
+/* Animations                   */
+/* ============================= */
+
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideUp {

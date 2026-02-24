@@ -41,8 +41,17 @@ import ReturnToWork from './pages/ReturnToWork';
 import TechLeadership from './pages/TechLeadership';
 import CodingBeginners from './pages/CodingBeginners';
 import WomenEntrepreneurs from './pages/WomenEntrepreneurs';
+import PaymentSuccess from "./pages/PaymentSuccess";
+import CourseCurriculum from "./pages/CourseCurriculum";
+import CourseD from "./pages/CourseD";
+import StudentDashboard from "./pages/StudentDashboard"
+import NotFound from "./pages/NotFound";
+
+
 
 // Layout component to wrap all pages with Navbar and Footer
+
+
 function Layout({ children }) {
   return (
     <div className="flex flex-col min-h-screen">
@@ -77,6 +86,27 @@ function App() {
           <Route path="/community" element={<Layout><Community /></Layout>} />
           <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
           <Route path="/checkout/:courseId" element={<Layout><Checkout /></Layout>} />
+          <Route
+            path="/payment-success"
+            element={
+              <Layout>
+                <PaymentSuccess />
+              </Layout>
+            }
+          />
+
+           {/* Course Curriculum Pages
+           <Route path="/course-curriculum/:slug" element={
+            <Layout>
+              <CourseCurriculum />
+            </Layout>
+          } /> */}
+
+
+<Route path="/student-dashboard" element={<StudentDashboard />} />
+       
+       <Route path="/courses/:courseId" element={<CourseD />} />
+       <Route path="*" element={<NotFound />} />
 
           {/* ========== COMMUNITY DROPDOWN ROUTES ========== */}
           <Route path="/community/forums" element={<Layout><CommunityForums /></Layout>} />

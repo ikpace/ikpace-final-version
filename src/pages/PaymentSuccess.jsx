@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { CheckCircle, Home, BookOpen, Download } from "lucide-react";
+import { addEnrollment } from "@/data/curriculumData";
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function PaymentSuccess() {
     // Redirect if no state
     if (!location.state) {
       navigate("/courses");
-    }
+    } 
   }, [location.state, navigate]);
 
   return (
@@ -100,23 +101,28 @@ export default function PaymentSuccess() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => navigate(`/course-curriculum/${course?.id || 'virtual-assistant-pro'}`, {
-                state: {
-                  enrollmentId: enrollmentId,
-                  courseName: course?.title,
-                  userDetails: userDetails
-                }
-              })}
+              onClick={() => {
+                const courseId = course?.id || 'virtual-assistant-pro';
+                addEnrollment({
+                  courseId,
+                  enrollmentId,
+                  course: { ...course, id: courseId },
+                  userDetails
+                });
+                navigate("/student-dashboard", {
+                  state: { course: { ...course, id: courseId }, enrollmentId, userDetails }
+                });
+              }}
               className="px-8 py-4 bg-gradient-to-r from-[#7329ce] to-[#4610db] text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
               🚀 Start Learning Now
             </button>
 
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/student-dashboard")}
               className="px-8 py-4 bg-white border-2 border-[#7329ce] text-[#7329ce] font-bold rounded-xl hover:bg-gray-50 transition-all"
             >
-              Go to Dashboard
+              Go to Student Dashboard
             </button>
 
             <button
