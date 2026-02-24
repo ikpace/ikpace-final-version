@@ -106,7 +106,7 @@ export const curriculumData = {
     color: 'from-[#00C853] to-[#B2FF59]',
     accentColor: '#00C853',
     icon: '💰',
-    image: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dmlydHVhbCUyMGFzc2lzdGFudHxlbnwwfHwwfHx8MA%3D%3D',
+    image: 'https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dmlydHVhbCUyMGFzc2lzdGFudHxlbnwwfHwwfHx8MA%3D%3D ',
     description: 'Learn to launch your freelancing career from scratch — create winning profiles, find clients, set pricing, and build a sustainable business.',
     instructor: 'Samuel Ofori - Freelance Business Coach',
     category: 'Business',

@@ -1,14 +1,25 @@
-import { BookOpen, LayoutDashboard, FileText, Bell, Award, MessageSquare, Settings, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  BookOpen,
+  LayoutDashboard,
+  FileText,
+  Bell,
+  Award,
+  MessageSquare,
+  Settings,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useState } from "react";
 
 const navItems = [
   { title: "Dashboard", url: "/student-dashboard", icon: LayoutDashboard },
-  { title: "My Courses", url: "/student-dashboard", icon: BookOpen },
-  { title: "Assignments", url: "/student-dashboard", icon: FileText },
-  { title: "Notifications", url: "/student-dashboard", icon: Bell },
-  { title: "Certificates", url: "/student-dashboard", icon: Award },
-  { title: "Discussions", url: "/student-dashboard", icon: MessageSquare },
+  { title: "My Courses", url: "/student-dashboard#courses", icon: BookOpen },
+  { title: "Assignments", url: "/student-dashboard#assignments", icon: FileText },
+  { title: "Notifications", url: "/student-dashboard#notifications", icon: Bell },
+  { title: "Certificates", url: "/student-dashboard#certificates", icon: Award },
+  { title: "Discussions", url: "/student-dashboard#discussions", icon: MessageSquare },
   { title: "Settings", url: "/student-dashboard", icon: Settings },
 ];
 

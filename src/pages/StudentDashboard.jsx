@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatsOverview } from "@/components/StatsOverview";
@@ -6,10 +6,13 @@ import { CourseCard } from "@/components/CourseCard";
 import { AssignmentsList } from "@/components/AssignmentsList";
 import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { CertificatesSection } from "@/components/CertificatesSection";
-import { curriculumData, getEnrollments, getProgress } from "@/data/curriculumData";
+import { curriculumData, getEnrollments, getProgress, saveProgress } from "@/data/curriculumData";
 
 const Index = () => {
   const location = useLocation();
+  const coursesRef = useRef(null);
+  const assignmentsRef = useRef(null);
+  const certificatesRef = useRef(null);
 
   const enrolledCourses = useMemo(() => {
     const enrollments = getEnrollments();
@@ -24,10 +27,20 @@ const Index = () => {
       .map((courseId) => {
         const c = curriculumData[courseId];
         if (!c) return null;
+
         const totalLessons = c.weeks.reduce((sum, w) => sum + w.topics.length, 0);
-        const progress = getProgress(courseId);
+        const progress = getProgress(courseId) || {};
         const completedLessons = (progress.completedLessonIds || []).length;
         const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+        // When a course is fully completed for the first time, persist a completion timestamp.
+        if (totalLessons > 0 && completedLessons === totalLessons && !progress.completedAt) {
+          saveProgress(courseId, {
+            ...progress,
+            completedLessonIds: progress.completedLessonIds || [],
+            completedAt: new Date().toISOString(),
+          });
+        }
 
         return {
           id: courseId,
@@ -38,10 +51,34 @@ const Index = () => {
           completedLessons,
           thumbnail: c.image,
           category: c.category || "Professional",
+          completedAt: progress.completedAt || null,
         };
       })
       .filter(Boolean);
   }, [location.state?.course?.id]);
+
+  const completedCourses = useMemo(
+    () => enrolledCourses.filter((course) => course.progress === 100),
+    [enrolledCourses]
+  );
+
+  useEffect(() => {
+    const hash = location.hash?.replace("#", "");
+    if (!hash) return;
+
+    const sectionMap = {
+      courses: coursesRef,
+      assignments: assignmentsRef,
+      notifications: assignmentsRef,
+      discussions: assignmentsRef,
+      certificates: certificatesRef,
+    };
+
+    const targetRef = sectionMap[hash];
+    if (targetRef?.current) {
+      targetRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
 
   return (
     <DashboardLayout>
@@ -51,7 +88,7 @@ const Index = () => {
           <p className="text-gray-600 mt-1">Continue where you left off.</p>
         </div>
         <StatsOverview enrolledCourses={enrolledCourses} />
-        <section>
+        <section ref={coursesRef}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">My Courses</h2>
             <Link to="/courses" className="text-sm font-medium text-orange-600 hover:underline">
@@ -76,11 +113,13 @@ const Index = () => {
             </div>
           )}
         </section>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div ref={assignmentsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AssignmentsList />
           <NotificationsPanel />
         </div>
-        <CertificatesSection />
+        <div ref={certificatesRef}>
+          <CertificatesSection completedCourses={completedCourses} />
+        </div>
       </div>
     </DashboardLayout>
   );
