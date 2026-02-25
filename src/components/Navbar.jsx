@@ -69,14 +69,14 @@ const colors = {
   // Menu items with dropdowns - FIXED with correct course links
   const menuItems = [
     {
-      id: 'programs',
+      id: 'courses',
       title: 'Programs',
       icon: <ProgramIcon size={18} />,
       color: colors.primary,
       items: [
         { 
           name: "Virtual Assistant Professional", 
-          href: "/course/virtual-assistant-pro", 
+          href: "/course/virtual-assistant-pro/view-more", 
           icon: <Briefcase size={16} />, 
           duration: "6 Weeks", 
           price: "$7.00", 
@@ -85,7 +85,7 @@ const colors = {
         },
         { 
           name: "Social Media Marketing", 
-          href: "/course/social-media-marketing", 
+          href: "/course/social-media-marketing/view-more", 
           icon: <Megaphone size={16} />, 
           duration: "6 Weeks", 
           price: "$7.00", 
@@ -94,7 +94,7 @@ const colors = {
         },
         { 
           name: "Canva & Graphic Design", 
-          href: "/course/canva-graphic-design", 
+          href: "/course/canva-graphic-design/view-more", 
           icon: <Palette size={16} />, 
           duration: "4 Weeks", 
           price: "$7.00",
@@ -102,7 +102,7 @@ const colors = {
         },
         { 
           name: "Smart Kids Coding", 
-          href: "/course/smart-kids-coding", 
+          href: "/course/smart-kids-coding/view-more", 
           icon: <Code size={16} />, 
           duration: "4 Weeks", 
           price: "$7.00", 
@@ -111,7 +111,7 @@ const colors = {
         },
         { 
           name: "Freelancing & Online Income", 
-          href: "/course/freelancing-online-income", 
+          href: "/course/freelancing-online-income/view-more", 
           icon: <Rocket size={16} />, 
           duration: "4 Weeks", 
           price: "$7.00", 
@@ -128,7 +128,7 @@ const colors = {
       items: [
         { 
           name: "Women in Tech Scholarship", 
-          href: "/course/women-tech-scholarship", 
+          href: "/course/women-tech-scholarship/view-more", 
           icon: <Medal size={16} />, 
           badge: "Apply Now", 
           description: "50% tuition support for women",
@@ -136,7 +136,7 @@ const colors = {
         },
         { 
           name: "Return to Work Program", 
-          href: "/course/return-to-work", 
+          href: "/course/return-to-work/view-more", 
           icon: <Rocket size={16} />, 
           badge: "Flexible", 
           description: "For professionals on career breaks",
@@ -144,7 +144,7 @@ const colors = {
         },
         { 
           name: "Tech Leadership for Women", 
-          href: "/course/tech-leadership", 
+          href: "/course/tech-leadership/view-more", 
           icon: <Crown size={16} />, 
           badge: "Mentorship", 
           description: "Executive skills development",
@@ -152,7 +152,7 @@ const colors = {
         },
         { 
           name: "Coding for Beginners", 
-          href: "/course/coding-beginners", 
+          href: "/course/coding-beginners/view-more", 
           icon: <Code size={16} />, 
           badge: "Free", 
           description: "Start your coding journey",
@@ -160,7 +160,7 @@ const colors = {
         },
         { 
           name: "Women Entrepreneurs", 
-          href: "/course/tech-entrepreneurship", 
+          href: "/course/tech-entrepreneurship/view-more", 
           icon: <Briefcase size={16} />, 
           badge: "Workshop", 
           description: "Build and scale your startup",

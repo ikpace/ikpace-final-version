@@ -66,7 +66,6 @@ function App() {
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/register" element={<Layout><Register /></Layout>} />
           <Route path="/courses" element={<Layout><Courses /></Layout>} />
-          <Route path="/course/:id" element={<Layout><CourseEnroll /></Layout>} />                {/* Enroll Now - Purple page (15+ courses) */}
           <Route path="/course/:id/view-more" element={<Layout><CourseViewMore /></Layout>} />   {/* View More - Blue/Orange page (5 courses) */}
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />

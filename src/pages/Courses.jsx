@@ -151,7 +151,7 @@ export default function Courses() {
   const totalStudents = courses.reduce((acc, course) => acc + course.enrolled, 0).toLocaleString()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-20 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header - Clean and Simple */}
         <div className="text-center mb-10">
@@ -287,39 +287,21 @@ export default function Courses() {
                   </div>
                   
                   <div className="flex gap-2">
-                    {/* Enroll Now Button */}
-                    <Link
-                      to={`/course/${course.id}`}
-                      className="px-4 py-1.5 rounded-full text-xs font-medium text-white hover:scale-105 transition-all shadow-sm"
-                      style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
-                    >
-                      Enroll
-                    </Link>
-                    
-                    {/* View More Button */}
-                    <Link
-                      to={`/course/${course.id}/view-more`}
-                      className="px-4 py-1.5 rounded-full text-xs font-medium border hover:bg-gray-50 transition-all"
-                      style={{ borderColor: colors.primary, color: colors.primary }}
-                    >
-                      Details
-                    </Link>
-                  </div>
+                      
+                      <Link
+                        to={`/course/${course.id}/view-more`}
+                        className="text-xs font-semibold px-4 py-2 rounded-full transition-all hover:scale-105 text-white shadow-sm"
+                        style={{
+                          background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+                        }}
+                      >
+                        Details
+                      </Link>
+                    </div>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* View All Courses Link */}
-        <div className="text-center mt-10">
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-2 text-base font-medium hover:gap-3 transition-all"
-            style={{ color: colors.primary }}
-          >
-            View All Courses <ArrowRight size={16} />
-          </Link>
         </div>
 
         {/* Simple Promo Banner */}
