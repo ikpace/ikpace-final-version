@@ -8,7 +8,6 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Courses from "./pages/Courses";
-import CourseEnroll from "./pages/CourseEnroll";      // For Enroll Now button (Purple - 15+ courses)
 import CourseViewMore from "./pages/CourseViewMore";  // For View More button (Blue/Orange - 5 courses)
 import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";

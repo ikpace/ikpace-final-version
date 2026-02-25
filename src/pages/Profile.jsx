@@ -208,7 +208,7 @@ export default function Profile() {
   ]
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#eef2f6] py-8 px-4 ${darkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#eef2f6] py-28 px-4 ${darkMode ? 'dark' : ''}`}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">

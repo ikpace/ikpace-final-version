@@ -88,7 +88,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-gray py-8 px-4">
+    <div className="min-h-screen bg-neutral-gray py-28 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="card mb-8 bg-gradient-to-r from-primary via-primary-dark to-secondary text-white overflow-hidden relative">
           <div className="absolute top-0 right-0 opacity-10">

@@ -189,7 +189,7 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden" style={{ 
+      <section className="relative py-28 overflow-hidden" style={{ 
         background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`
       }}>
         <div className="absolute inset-0 opacity-10">

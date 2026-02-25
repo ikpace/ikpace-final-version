@@ -380,7 +380,7 @@ export default function CourseDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-16 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-28 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#1A3D7C] border-t-transparent mx-auto mb-6"></div>
           <h3 className="text-2xl font-semibold text-[#1A3D7C] mb-2">
