@@ -19,6 +19,12 @@ import Checkout from "./pages/Checkout";
 import Profile from './pages/Profile';
 import MyCourses from './pages/MyCourses';
 import Certificates from './pages/Certificates';
+import PaymentSuccess from './pages/PaymentSuccess';  // Payment success page after checkout
+import CourseCurriculum from './pages/CourseCurriculum'; // ADDED: Course curriculum page
+
+// ========== LEARNING PAGE IMPORT ==========
+import CoursePlayer from './pages/CoursePlayer';  // Import the course player/learning page
+// import EnhancedCoursePlayer from './pages/EnhancedCoursePlayer'; // Alternative if you prefer the enhanced version
 
 // ========== NEW IMPORTS FOR NAVBAR DROPDOWN PAGES ==========
 // Community Pages
@@ -68,6 +74,13 @@ function App() {
           <Route path="/courses" element={<Layout><Courses /></Layout>} />
           <Route path="/course/:id" element={<Layout><CourseEnroll /></Layout>} />                {/* Enroll Now - Purple page (15+ courses) */}
           <Route path="/course/:id/view-more" element={<Layout><CourseViewMore /></Layout>} />   {/* View More - Blue/Orange page (5 courses) */}
+          
+          {/* ========== LEARNING & CURRICULUM ROUTES ========== */}
+          <Route path="/learn/:courseId" element={<Layout><CoursePlayer /></Layout>} />           {/* Learning page after enrollment */}
+          <Route path="/course-curriculum/:slug" element={<Layout><CourseCurriculum /></Layout>} />  {/* ADDED: Course curriculum page */}
+          {/* Alternative if you prefer enhanced version: */}
+          {/* <Route path="/learn/:courseId" element={<Layout><EnhancedCoursePlayer /></Layout>} /> */}
+          
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
           <Route path="/profile" element={<Layout><Profile /></Layout>} />
@@ -76,7 +89,10 @@ function App() {
           <Route path="/career-ready" element={<Layout><CareerReady /></Layout>} />
           <Route path="/community" element={<Layout><Community /></Layout>} />
           <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
+          
+          {/* ========== PAYMENT ROUTES ========== */}
           <Route path="/checkout/:courseId" element={<Layout><Checkout /></Layout>} />
+          <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />         {/* Payment success page after checkout */}
 
           {/* ========== COMMUNITY DROPDOWN ROUTES ========== */}
           <Route path="/community/forums" element={<Layout><CommunityForums /></Layout>} />

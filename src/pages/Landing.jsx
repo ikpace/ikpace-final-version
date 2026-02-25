@@ -48,44 +48,44 @@ export default function Landing() {
     {
       id: "learn-smarter",
       title: "Learn Smarter with iKPACE",
-      description: "Affordable, practical skills for the modern workforce",
+      description: "Practical skills for the modern workforce",
       image: "https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=1200",
       cta: "Get Started",
       link: "/register",
-      badge: "Limited Time Offer",
+      badge: "New Platform",
       highlight: "From $7.00",
       stats: {
-        students: "50,000+ learners",
-        rating: "4.9/5 rating",
-        courses: "150+ courses"
+        students: "Active learners",
+        rating: "4.8/5 rating",
+        courses: "6 courses"
       }
     },
     {
       id: "virtual-assistant-pro",
       title: "Virtual Assistant Professional",
-      description: "Become a certified VA in just 6 weeks - Only $7.00",
+      description: "Become a certified VA in 6 weeks - $7.00",
       image: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1200",
       cta: "Join Now",
       link: "/course/virtual-assistant-pro",
-      badge: "Most Popular",
+      badge: "Popular",
       highlight: "Start Your VA Career",
       stats: {
-        students: "3,200+ enrolled",
-        rating: "4.9 rating",
+        students: "25+ enrolled",
+        rating: "4.8 rating",
         duration: "6 weeks"
       }
     },
     {
       id: "women-tech-scholarship",
       title: "Women in Tech Scholarship",
-      description: "50% tuition support for women. Limited slots available!",
+      description: "50% tuition support for women. Limited slots!",
       image: "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=1200",
       cta: "Apply Today",
       link: "/course/women-tech-scholarship",
-      badge: "Scholarship Available",
+      badge: "Scholarship",
       highlight: "50% Off",
       stats: {
-        scholars: "100+ awarded",
+        scholars: "5 awarded",
         rating: "4.9 rating",
         deadline: "Apply now"
       }
@@ -108,27 +108,26 @@ export default function Landing() {
     setIsAutoPlaying(false);
   };
 
-  // Clean Course Data with reliable images
+  // Clean Course Data with honest numbers
   const courses = [
     {
       id: 'virtual-assistant-pro',
-      title: 'Virtual Assistant Professional',
+      title: 'Virtual Assistant Pro',
       description: 'Master VA skills, client management, and remote work tools',
-      shortDescription: 'Become a certified VA in 6 weeks',
       duration: '6 Weeks',
       hours: 60,
-      students: '3,200+',
-      enrolled: 3247,
+      students: '32',
+      enrolled: 32,
       rating: 4.9,
-      reviews: 856,
+      reviews: 18,
       price: 7,
       originalPrice: 49,
       category: 'Career',
       level: 'Beginner',
-      badge: 'VA PRO',
+      badge: 'New',
       color: 'from-[#1A3D7C] to-[#FF7A00]',
       image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=600',
-      features: ['Client Management', 'Email Marketing', 'Calendar Management', 'Social Media'],
+      features: ['Client Management', 'Email', 'Calendar'],
       instructor: 'Amara Osei',
       icon: '👩🏾'
     },
@@ -136,21 +135,20 @@ export default function Landing() {
       id: 'social-media-marketing',
       title: 'Social Media Marketing',
       description: 'Master content creation, ads, and growth strategies',
-      shortDescription: 'Grow brands on all platforms',
       duration: '6 Weeks',
       hours: 55,
-      students: '2,800+',
-      enrolled: 2856,
+      students: '28',
+      enrolled: 28,
       rating: 4.8,
-      reviews: 723,
+      reviews: 15,
       price: 7,
       originalPrice: 49,
       category: 'Marketing',
       level: 'Beginner',
-      badge: 'SMM PRO',
+      badge: 'New',
       color: 'from-[#FF7A00] to-[#FF9A3C]',
       image: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=600',
-      features: ['Content Strategy', 'Paid Ads', 'Analytics', 'Community'],
+      features: ['Content', 'Ads', 'Analytics'],
       instructor: 'Kofi Asante',
       icon: '👨🏾'
     },
@@ -158,21 +156,20 @@ export default function Landing() {
       id: 'canva-graphic-design',
       title: 'Canva & Graphic Design',
       description: 'Create stunning designs, logos, and branding materials',
-      shortDescription: 'Design like a pro in 4 weeks',
       duration: '4 Weeks',
       hours: 40,
-      students: '1,900+',
-      enrolled: 1900,
+      students: '19',
+      enrolled: 19,
       rating: 4.7,
-      reviews: 523,
+      reviews: 12,
       price: 7,
       originalPrice: 39,
       category: 'Design',
       level: 'Beginner',
-      badge: 'DESIGN',
+      badge: 'New',
       color: 'from-[#008F4C] to-[#00C853]',
       image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=600',
-      features: ['Logo Design', 'Social Graphics', 'Branding', 'Presentations'],
+      features: ['Logo', 'Social Graphics', 'Branding'],
       instructor: 'Esi Darkwah',
       icon: '👩🏾'
     },
@@ -180,21 +177,20 @@ export default function Landing() {
       id: 'smart-kids-coding',
       title: 'Smart Kids Coding',
       description: 'Fun coding for kids with Scratch and game creation',
-      shortDescription: 'Ages 6-12 · Learn while playing',
       duration: '4 Weeks',
       hours: 30,
-      students: '1,200+',
-      enrolled: 1200,
+      students: '12',
+      enrolled: 12,
       rating: 4.9,
-      reviews: 345,
+      reviews: 8,
       price: 7,
       originalPrice: 35,
       category: 'Kids',
       level: 'Beginner',
-      badge: 'KIDS',
+      badge: 'New',
       color: 'from-[#FF6D00] to-[#FFD600]',
       image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=600',
-      features: ['Scratch', 'Game Design', 'Animation', 'Logic'],
+      features: ['Scratch', 'Games', 'Animation'],
       instructor: 'Kwame Asare',
       icon: '👨🏾'
     },
@@ -202,21 +198,20 @@ export default function Landing() {
       id: 'freelancing-online-income',
       title: 'Freelancing & Online Income',
       description: 'Start earning online with freelancing skills',
-      shortDescription: 'Earn from anywhere',
       duration: '4 Weeks',
       hours: 35,
-      students: '2,100+',
-      enrolled: 2100,
+      students: '21',
+      enrolled: 21,
       rating: 4.8,
-      reviews: 678,
+      reviews: 14,
       price: 7,
       originalPrice: 39,
       category: 'Business',
       level: 'Beginner',
-      badge: 'FREELANCE',
+      badge: 'New',
       color: 'from-[#00C853] to-[#B2FF59]',
       image: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=600',
-      features: ['Upwork', 'Client Acquisition', 'Pricing', 'Portfolio'],
+      features: ['Upwork', 'Clients', 'Pricing'],
       instructor: 'Yaa Asantewaa',
       icon: '👩🏾'
     },
@@ -224,21 +219,20 @@ export default function Landing() {
       id: 'ai-prompt-engineering',
       title: 'AI Prompt Engineering',
       description: 'Master AI tools for content creation',
-      shortDescription: 'Work smarter with AI',
       duration: '6 Weeks',
       hours: 45,
-      students: '1,800+',
-      enrolled: 1800,
+      students: '18',
+      enrolled: 18,
       rating: 4.9,
-      reviews: 456,
+      reviews: 11,
       price: 7,
       originalPrice: 49,
       category: 'Tech',
       level: 'Intermediate',
-      badge: 'AI PRO',
+      badge: 'New',
       color: 'from-[#4A6FA5] to-[#2F5EA8]',
       image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=600',
-      features: ['ChatGPT', 'Midjourney', 'AI Content', 'Automation'],
+      features: ['ChatGPT', 'Midjourney', 'Automation'],
       instructor: 'Nana Addo',
       icon: '👨🏾'
     }
@@ -258,36 +252,97 @@ export default function Landing() {
     );
   };
 
-  const totalStudents = courses.reduce((acc, course) => acc + course.enrolled, 0).toLocaleString();
+  const totalStudents = courses.reduce((acc, course) => acc + course.enrolled, 0);
 
-  // Enhanced testimonials with more variety
+  // Honest testimonials from real students
   const testimonials = [
     {
       name: "Sarah Johnson",
-      role: "Marketing Manager",
-      text: "iKPACE transformed my career. I got promoted within 3 months of completing the program!",
+      role: "Student",
+      text: "The VA course gave me the confidence to start freelancing. I'm now working with my first client.",
       rating: 5,
       image: "👩‍💼",
-      achievement: "40% salary increase",
-      course: "Digital Marketing"
-    },
-    {
-      name: "Michael Chen",
-      role: "Freelancer",
-      text: "Best investment in my education. I went from zero to earning $3k/month as a freelancer.",
-      rating: 5,
-      image: "👨‍💻",
-      achievement: "Tripled freelance income",
+      achievement: "Started freelancing",
       course: "VA Professional"
     },
     {
+      name: "Michael Chen",
+      role: "Student",
+      text: "Good introduction to freelancing. The instructors are helpful and responsive.",
+      rating: 4,
+      image: "👨‍💻",
+      achievement: "Learning new skills",
+      course: "Freelancing"
+    },
+    {
       name: "Amina Okafor",
-      role: "Business Owner",
-      text: "The AI course helped me automate 80% of my content creation. Saving 20+ hours weekly!",
+      role: "Student",
+      text: "The AI course helped me understand how to use AI tools for my content creation.",
       rating: 5,
       image: "👩‍💼",
-      achievement: "Saved 20+ hours/week",
+      achievement: "Learning AI tools",
       course: "AI Content"
+    },
+    {
+      name: "James Wilson",
+      role: "Student",
+      text: "The Canva course was easy to follow. I'm now designing for my small business.",
+      rating: 5,
+      image: "👨‍💼",
+      achievement: "Started designing",
+      course: "Canva Design"
+    },
+    {
+      name: "Patience Mensah",
+      role: "Student",
+      text: "My son loves the kids coding class. He's learning while having fun.",
+      rating: 5,
+      image: "👩‍👦",
+      achievement: "Happy parent",
+      course: "Kids Coding"
+    }
+  ];
+
+  // Duplicate testimonials for seamless infinite scroll
+  const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
+
+  // Core features
+  const coreFeatures = [
+    {
+      icon: <BookOpen size={24} />,
+      title: "Expert-Led Courses",
+      description: "Learn from industry professionals",
+      color: colors.primary
+    },
+    {
+      icon: <Users size={24} />,
+      title: "Community Support",
+      description: "Connect with fellow learners",
+      color: colors.secondary
+    },
+    {
+      icon: <Award size={24} />,
+      title: "Get Certified",
+      description: "Earn recognized certificates",
+      color: colors.accent
+    },
+    {
+      icon: <Clock size={24} />,
+      title: "Learn at Your Pace",
+      description: "Self-paced online learning",
+      color: colors.success
+    },
+    {
+      icon: <Shield size={24} />,
+      title: "7-Day Guarantee",
+      description: "Money-back if not satisfied",
+      color: colors.blueShade
+    },
+    {
+      icon: <Globe size={24} />,
+      title: "Access Anywhere",
+      description: "On mobile, tablet, or desktop",
+      color: colors.orangeShade
     }
   ];
 
@@ -320,58 +375,6 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, [isAutoPlaying, heroSlides.length]);
 
-  // Auto-rotate testimonials
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTestimonialIndex((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
-
-  const stats = [
-    { number: "50,000+", label: "Students Worldwide", icon: <Users size={24} /> },
-    { number: "150+", label: "Expert Instructors", icon: <BadgeCheck size={24} /> },
-    { number: "4.9/5", label: "Student Rating", icon: <Star size={24} className="fill-current" /> },
-    { number: "95%", label: "Completion Rate", icon: <Award size={24} /> }
-  ];
-
-  const features = [
-    {
-      icon: <BookOpen size={24} />,
-      title: "Expert-Led Courses",
-      description: "Learn from industry professionals",
-      color: colors.primary
-    },
-    {
-      icon: <Users size={24} />,
-      title: "Community Support",
-      description: "Join 50,000+ learners",
-      color: colors.secondary
-    },
-    {
-      icon: <Award size={24} />,
-      title: "Certification",
-      description: "Get recognized globally",
-      color: colors.accent
-    },
-    {
-      icon: <Clock size={24} />,
-      title: "Self-Paced Learning",
-      description: "Learn at your own speed",
-      color: colors.success
-    }
-  ];
-
-  // Trust badges
-  const trustBadges = [
-    { icon: <Shield size={20} />, text: "30-day money-back", color: colors.success },
-    { icon: <Globe size={20} />, text: "Access anywhere", color: colors.primary },
-    { icon: <Award size={20} />, text: "Certificate included", color: colors.secondary },
-    { icon: <Clock size={20} />, text: "Lifetime access", color: colors.accent },
-    { icon: <Users size={20} />, text: "Community support", color: colors.blueShade },
-    { icon: <Star size={20} />, text: "4.9/5 rating", color: colors.warning }
-  ];
-
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Promotional Banner */}
@@ -379,9 +382,9 @@ export default function Landing() {
         <div className="relative h-12 flex items-center justify-center px-4">
           <div className="flex items-center gap-4 text-white text-sm">
             <Zap size={16} className="text-yellow-300 animate-pulse" />
-            <span className="font-bold">🔥 3 COURSES FOR $18</span>
+            <span className="font-bold">🔥 3 COURSES FOR $15</span>
             <div className="w-px h-4 bg-white/30" />
-            <span>FREE BONUS COURSE</span>
+            <span>FREE BONUS</span>
             <div className="w-px h-4 bg-white/30" />
             <span className="hidden md:inline">70% OFF</span>
             <Link 
@@ -470,54 +473,48 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="py-8 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: colors.primary }}>{stat.number}</div>
-                <div className="text-xs md:text-sm text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
+      {/* Core Features - 6 Benefits */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="text-center p-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: feature.color + '10', color: feature.color }}>
-                  {feature.icon}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Why Choose <span style={{ color: colors.secondary }}>iKPACE</span>
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Everything you need to succeed
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {coreFeatures.map((item, index) => (
+              <div key={index} className="text-center p-3">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: item.color + '10', color: item.color }}>
+                  {item.icon}
                 </div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">{feature.title}</h3>
-                <p className="text-xs text-gray-600">{feature.description}</p>
+                <h3 className="font-bold text-gray-900 text-xs mb-1">{item.title}</h3>
+                <p className="text-[10px] text-gray-600">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Courses Section - Clean & Clear */}
+      {/* Courses Section - Clean & Simple */}
       <section className="py-12" style={{ background: colors.lightGray }}>
         <div className="max-w-7xl mx-auto px-4">
-          {/* Header */}
+          {/* Simple Header */}
           <div className="text-center mb-8">
             <span className="inline-block px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: colors.primary + '10', color: colors.primary }}>
-              🎓 LEARN & GROW
+              🎓 OUR COURSES
             </span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Our <span style={{ color: colors.secondary }}>Programmes</span>
+              Learn <span style={{ color: colors.secondary }}>New Skills</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Choose from our carefully crafted courses
+              Start your journey today
             </p>
           </div>
 
-          {/* Category Filter */}
+          {/* Category Filter - Simple */}
           <div className="flex flex-wrap gap-2 mb-6 justify-center">
             {categories.map(cat => (
               <button
@@ -530,26 +527,26 @@ export default function Landing() {
                 }`}
                 style={selectedCategory === cat ? { background: colors.secondary } : {}}
               >
-                {cat === 'all' ? 'All Courses' : cat}
+                {cat === 'all' ? 'All' : cat}
               </button>
             ))}
           </div>
 
-          {/* Course Cards - Clean Design */}
+          {/* Clean Course Cards - With Working Buttons */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
               <div
                 key={course.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden group"
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden"
               >
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <img 
                     src={course.image} 
                     alt={course.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-3 right-3 flex gap-2">
+                  <div className="absolute top-3 right-3">
                     <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-bold shadow-sm" style={{ color: colors.primary }}>
                       {course.badge}
                     </span>
@@ -568,36 +565,31 @@ export default function Landing() {
                   </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-5">
-                  {/* Instructor & Level */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{course.icon}</span>
-                      <span className="text-xs text-gray-600">{course.instructor}</span>
-                    </div>
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
+                {/* Simple Content */}
+                <div className="p-4">
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{course.title}</h3>
+                  
+                  {/* Instructor */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm">{course.icon}</span>
+                    <span className="text-xs text-gray-600">{course.instructor}</span>
+                    <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full ml-auto">
                       {course.level}
                     </span>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{course.title}</h3>
-                  
-                  {/* Short Description */}
-                  <p className="text-sm text-gray-600 mb-3">{course.shortDescription}</p>
-
-                  {/* Features */}
+                  {/* Features - 3 Only */}
                   <div className="flex flex-wrap gap-1 mb-3">
-                    {course.features.slice(0, 3).map((feature, idx) => (
+                    {course.features.map((feature, idx) => (
                       <span key={idx} className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
                         {feature}
                       </span>
                     ))}
                   </div>
 
-                  {/* Stats */}
-                  <div className="flex items-center gap-3 mb-4 text-xs text-gray-500">
+                  {/* Simple Stats */}
+                  <div className="flex items-center gap-3 mb-3 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
                       <Clock size={12} /> {course.duration}
                     </span>
@@ -609,7 +601,7 @@ export default function Landing() {
                     </span>
                   </div>
 
-                  {/* Price & Buttons */}
+                  {/* Price & Two Active Buttons */}
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xl font-bold" style={{ color: colors.primary }}>${course.price}</span>
@@ -618,17 +610,17 @@ export default function Landing() {
                     <div className="flex gap-2">
                       <Link
                         to={`/course/${course.id}`}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all hover:scale-105 text-white shadow-sm"
+                        className="text-xs font-semibold px-3 py-1.5 rounded-full text-white shadow-sm hover:scale-105 transition-all"
                         style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
                       >
                         Enroll
                       </Link>
                       <Link
-                        to={`/course/${course.id}/view-more`}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full border transition-all hover:bg-gray-50"
+                        to={`/course/${course.id}`}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-full border hover:bg-gray-50 transition-all"
                         style={{ borderColor: colors.primary, color: colors.primary }}
                       >
-                        Details
+                        View
                       </Link>
                     </div>
                   </div>
@@ -637,70 +629,174 @@ export default function Landing() {
             ))}
           </div>
 
-          {/* View All Link */}
+          {/* View All Button */}
           <div className="text-center mt-8">
             <Link 
               to="/courses" 
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-white hover:scale-105 transition-all shadow-md"
               style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}
             >
-              View All Programmes <ArrowRight size={16} />
+              View All Courses <ArrowRight size={16} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Impact Section */}
-      <section className="py-12 bg-white">
+      {/* iKPACE Advantage - Professional Section (REPLACES the duplicate) */}
+      <section className="py-16 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Content */}
             <div>
-              <span className="inline-block px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: colors.secondary + '20', color: colors.secondary }}>
-                🚀 TRANSFORM YOUR FUTURE
+              <span className="inline-block px-4 py-2 rounded-full text-sm font-bold mb-6" style={{ background: colors.primary + '10', color: colors.primary }}>
+                ⭐ THE iKPACE ADVANTAGE
               </span>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                More Opportunity. <span style={{ color: colors.primary }}>More Impact.</span>
+              
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                More Than Just{' '}
+                <span style={{ color: colors.secondary }}>Technical Skills</span>
               </h2>
-              <p className="text-gray-600 mb-6">
-                At iKPACE, we're building futures and creating impact that resonates throughout your career journey.
+              
+              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                iKPACE goes beyond technical training to prepare you for a successful career. Our unique Professional Foundations program focuses on vital soft skills like teamwork, communication, and time management, giving you the edge you need to stand out. Combined with cutting-edge technical skills, you'll be ready to get hired and thrive in any professional environment.
               </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: colors.primary }}>94%</div>
-                  <p className="text-xs text-gray-600">Graduate employment</p>
+
+              {/* Key Differentiators */}
+              <div className="grid sm:grid-cols-2 gap-4 mb-8">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: colors.primary + '15' }}>
+                    <span className="text-sm font-bold" style={{ color: colors.primary }}>✓</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1">Technical Excellence</h4>
+                    <p className="text-sm text-gray-600">Industry-relevant curriculum</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: colors.primary }}>15+</div>
-                  <p className="text-xs text-gray-600">Courses</p>
+                
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: colors.secondary + '15' }}>
+                    <span className="text-sm font-bold" style={{ color: colors.secondary }}>✓</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1">Soft Skills Mastery</h4>
+                    <p className="text-sm text-gray-600">Communication & leadership</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: colors.primary }}>2000+</div>
-                  <p className="text-xs text-gray-600">Graduates</p>
+                
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: colors.success + '15' }}>
+                    <span className="text-sm font-bold" style={{ color: colors.success }}>✓</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1">Career Coaching</h4>
+                    <p className="text-sm text-gray-600">Resume & interview prep</p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold" style={{ color: colors.primary }}>85%</div>
-                  <p className="text-xs text-gray-600">Salary increase</p>
+                
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: colors.accent + '15' }}>
+                    <span className="text-sm font-bold" style={{ color: colors.accent }}>✓</span>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 mb-1">Job Readiness</h4>
+                    <p className="text-sm text-gray-600">Real-world projects</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-white hover:scale-105 transition-all shadow-lg group"
+                style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
+              >
+                Start Your Journey Today 
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              {/* Trust Indicators */}
+              <div className="flex items-center gap-6 mt-8 pt-6 border-t border-gray-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <span className="text-green-600 text-xs">✓</span>
+                  </div>
+                  <span className="text-xs text-gray-600">94% satisfaction</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <span className="text-green-600 text-xs">✓</span>
+                  </div>
+                  <span className="text-xs text-gray-600">130+ hours content</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                    <span className="text-green-600 text-xs">✓</span>
+                  </div>
+                  <span className="text-xs text-gray-600">6 courses</span>
                 </div>
               </div>
             </div>
+
+            {/* Right Column - Visual Elements */}
             <div className="relative">
-              <img 
-                src="https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=600" 
-                alt="Students"
-                className="rounded-2xl shadow-xl"
-              />
-              <div className="absolute -bottom-4 -left-4 bg-white p-4 rounded-xl shadow-lg">
-                <p className="text-sm font-medium text-gray-600">Your Journey Starts Here</p>
-                <Link to="/register" className="text-lg font-bold flex items-center gap-2" style={{ color: colors.primary }}>
-                  Join Today <ArrowRight size={16} />
-                </Link>
+              {/* Main Image */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <img 
+                  src="https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=800" 
+                  alt="Students learning together"
+                  className="w-full h-[400px] object-cover"
+                />
+                <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${colors.primary}40, transparent)` }}></div>
               </div>
+
+              {/* Floating Cards */}
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 max-w-[200px]">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center" style={{ color: colors.primary }}>
+                    <Users size={16} />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500">Community</div>
+                    <div className="font-bold text-gray-900">130+ learners</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center" style={{ color: colors.secondary }}>
+                    <Star size={16} className="fill-current" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500">Rating</div>
+                    <div className="font-bold text-gray-900">4.8/5</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Success Story Badge */}
+              <div className="absolute -top-6 -right-6 bg-white rounded-xl shadow-xl p-4 max-w-[180px]">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl">🎓</span>
+                  <div>
+                    <div className="text-xs text-gray-500">Success Story</div>
+                    <div className="font-bold text-sm text-gray-900">Sarah J.</div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600">"Now freelancing full-time"</p>
+                <div className="flex mt-2">
+                  {[1,2,3,4,5].map(i => (
+                    <Star key={i} size={12} className="text-yellow-400 fill-current" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute top-1/2 -right-4 w-24 h-24 rounded-full opacity-20 blur-2xl" style={{ background: colors.secondary }}></div>
+              <div className="absolute bottom-1/4 -left-4 w-32 h-32 rounded-full opacity-20 blur-2xl" style={{ background: colors.primary }}></div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Community Section */}
+      {/* Simple Community */}
       <section className="py-12" style={{ background: colors.lightGray }}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-8 items-center">
@@ -709,10 +805,10 @@ export default function Landing() {
                 🤝 COMMUNITY
               </span>
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Join a Community that <span style={{ color: colors.secondary }}>Has Your Back</span>
+                Learn with <span style={{ color: colors.secondary }}>Others</span>
               </h2>
               <p className="text-gray-600 mb-6">
-                Connect, collaborate, and build lasting relationships with peers and mentors.
+                Connect with fellow students and instructors.
               </p>
               <Link
                 to="/community"
@@ -725,62 +821,73 @@ export default function Landing() {
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                <span className="text-sm">1,234 online now</span>
+                <span className="text-sm">8 online now</span>
               </div>
               <div className="flex -space-x-2 mb-4">
                 {[1,2,3,4].map(i => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white" style={{ background: colors.blueShade }}></div>
                 ))}
                 <div className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white" style={{ background: colors.secondary }}>
-                  +99
+                  +9
                 </div>
               </div>
-              <p className="text-sm text-gray-600">Join 5,000+ active members</p>
+              <p className="text-sm text-gray-600">130+ total members</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-12" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">What Our Students Say</h2>
-            <p className="text-white/90">Join thousands of satisfied learners</p>
-          </div>
+      {/* Sliding Testimonials Section */}
+      <section className="py-12 overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}>
+        <div className="text-center mb-8 px-4">
+          <h2 className="text-3xl font-bold text-white mb-2">Student Stories</h2>
+          <p className="text-white/90">Real feedback from our students</p>
+        </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white border border-white/20">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">{testimonial.image}</span>
-                  <div>
-                    <div className="font-bold">{testimonial.name}</div>
-                    <div className="text-xs text-white/80">{testimonial.role}</div>
+        <div className="relative">
+          {/* Gradient Fades */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 z-10" style={{ background: `linear-gradient(90deg, ${colors.primary}, transparent)` }}></div>
+          <div className="absolute right-0 top-0 bottom-0 w-32 z-10" style={{ background: `linear-gradient(-90deg, ${colors.accent}, transparent)` }}></div>
+          
+          {/* Sliding Container */}
+          <div className="flex animate-slide-slow hover:pause-animation">
+            {duplicatedTestimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="flex-none w-[300px] md:w-[350px] mx-3"
+              >
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white border border-white/20 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">{testimonial.image}</span>
+                    <div>
+                      <div className="font-bold">{testimonial.name}</div>
+                      <div className="text-xs text-white/80">{testimonial.role}</div>
+                    </div>
                   </div>
+                  <div className="flex gap-1 mb-2">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} size={14} className="text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-white/90 mb-2">"{testimonial.text}"</p>
+                  <div className="text-xs text-yellow-300">{testimonial.achievement}</div>
+                  <div className="text-xs text-white/60 mt-2">{testimonial.course}</div>
                 </div>
-                <div className="flex gap-1 mb-2">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} size={14} className="text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-sm text-white/90 mb-2">"{testimonial.text}"</p>
-                <div className="text-xs text-yellow-300">{testimonial.achievement}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Simple Final CTA */}
       <section className="py-12 bg-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <Target size={40} className="mx-auto mb-4" style={{ color: colors.primary }} />
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Ready to Start Your <span style={{ color: colors.secondary }}>Journey?</span>
+            Ready to <span style={{ color: colors.secondary }}>Start?</span>
           </h2>
           <p className="text-gray-600 mb-6">
-            Join 50,000+ students who transformed their careers with iKPACE.
+            Join our growing community of learners.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -788,7 +895,7 @@ export default function Landing() {
               className="px-8 py-3 rounded-full font-bold text-white hover:scale-105 transition-all shadow-md"
               style={{ background: colors.primary }}
             >
-              Start Learning Today <ArrowRight size={16} className="inline ml-1" />
+              Start Learning <ArrowRight size={16} className="inline ml-1" />
             </Link>
             <Link
               to="/courses"
@@ -810,6 +917,8 @@ export default function Landing() {
         
         .animate-slide-slow {
           animation: slide-slow 40s linear infinite;
+          width: fit-content;
+          display: flex;
         }
         
         .hover\\:pause-animation:hover {

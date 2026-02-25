@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CheckCircle, Home, BookOpen, Download } from "lucide-react";
+import { CheckCircle, Home, BookOpen, Download, ArrowRight } from "lucide-react";
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
@@ -15,6 +15,14 @@ export default function PaymentSuccess() {
     }
   }, [location.state, navigate]);
 
+  // Colors to match your brand
+  const colors = {
+    primary: "#1A3D7C",
+    secondary: "#FF7A00",
+    purple: "#7329ce",
+    darkPurple: "#4610db"
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 pt-16">
       <div className="max-w-4xl mx-auto px-4 py-12">
@@ -26,7 +34,7 @@ export default function PaymentSuccess() {
 
           {/* Success Message */}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            ?? Enrollment Successful!
+            🎉 Enrollment Successful!
           </h1>
 
           <p className="text-xl text-gray-600 mb-8">
@@ -104,17 +112,21 @@ export default function PaymentSuccess() {
                 state: {
                   enrollmentId: enrollmentId,
                   courseName: course?.title,
-                  userDetails: userDetails
+                  userDetails: userDetails,
+                  course: course
                 }
               })}
-              className="px-8 py-4 bg-gradient-to-r from-[#7329ce] to-[#4610db] text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              className="px-8 py-4 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              style={{ background: `linear-gradient(135deg, ${colors.purple}, ${colors.darkPurple})` }}
             >
               🚀 Start Learning Now
+              <ArrowRight className="w-5 h-5" />
             </button>
 
             <button
               onClick={() => navigate("/dashboard")}
-              className="px-8 py-4 bg-white border-2 border-[#7329ce] text-[#7329ce] font-bold rounded-xl hover:bg-gray-50 transition-all"
+              className="px-8 py-4 bg-white border-2 font-bold rounded-xl hover:bg-gray-50 transition-all"
+              style={{ borderColor: colors.purple, color: colors.purple }}
             >
               Go to Dashboard
             </button>
