@@ -51,11 +51,11 @@ export default function Checkout() {
         setLoading(true);
 
         if (courseId) {
-          // Try to fetch from Supabase first
+          // Try to fetch from Supabase first using slug
           const { data, error } = await supabase
             .from('courses')
             .select('*')
-            .eq('id', courseId)
+            .eq('slug', courseId)
             .single();
 
           if (error) {
@@ -63,14 +63,19 @@ export default function Checkout() {
             // Fall back to sample data
             const sampleCourse = getSampleCourse(courseId);
             if (sampleCourse) {
-              setCourse(sampleCourse);
+              setCourse({
+                ...sampleCourse,
+                id: courseId, // Use slug as ID for sample courses
+                isSample: true
+              });
             } else {
               navigate('/courses');
             }
           } else if (data) {
-            // Map Supabase data
+            // Map Supabase data - keep the UUID as course.id
             const formattedCourse = {
-              id: data.id,
+              id: data.id,  // This is the UUID from database
+              slug: data.slug,
               title: data.title || 'Course',
               price: parseFloat(data.price) || 7,
               originalPrice: parseFloat(data.original_price) || 49,
@@ -81,7 +86,8 @@ export default function Checkout() {
               students: data.enrollment_count || 32,
               rating: data.rating || 4.8,
               level: data.level || 'Beginner',
-              category: data.category || 'Career'
+              category: data.category || 'Career',
+              isSample: false
             };
             setCourse(formattedCourse);
           }
@@ -92,7 +98,11 @@ export default function Checkout() {
         console.error('Error loading course:', error);
         const sampleCourse = getSampleCourse(courseId);
         if (sampleCourse) {
-          setCourse(sampleCourse);
+          setCourse({
+            ...sampleCourse,
+            id: courseId,
+            isSample: true
+          });
         } else {
           navigate('/courses');
         }
@@ -108,7 +118,6 @@ export default function Checkout() {
   const getSampleCourse = (id) => {
     const sampleCourses = {
       'virtual-assistant-pro': {
-        id: 'virtual-assistant-pro',
         title: 'Virtual Assistant Professional',
         price: 7,
         originalPrice: 49,
@@ -122,7 +131,6 @@ export default function Checkout() {
         category: 'Career'
       },
       'social-media-marketing': {
-        id: 'social-media-marketing',
         title: 'Social Media Marketing',
         price: 7,
         originalPrice: 49,
@@ -136,7 +144,6 @@ export default function Checkout() {
         category: 'Marketing'
       },
       'canva-graphic-design': {
-        id: 'canva-graphic-design',
         title: 'Canva & Graphic Design',
         price: 7,
         originalPrice: 39,
@@ -150,7 +157,6 @@ export default function Checkout() {
         category: 'Design'
       },
       'smart-kids-coding': {
-        id: 'smart-kids-coding',
         title: 'Smart Kids Coding',
         price: 7,
         originalPrice: 35,
@@ -164,7 +170,6 @@ export default function Checkout() {
         category: 'Kids'
       },
       'freelancing-online-income': {
-        id: 'freelancing-online-income',
         title: 'Freelancing & Online Income',
         price: 7,
         originalPrice: 39,
@@ -178,7 +183,6 @@ export default function Checkout() {
         category: 'Business'
       },
       'ai-prompt-engineering': {
-        id: 'ai-prompt-engineering',
         title: 'AI Prompt Engineering',
         price: 7,
         originalPrice: 49,
@@ -215,7 +219,7 @@ export default function Checkout() {
 
   const handleApplyPromo = () => {
     if (promoCode.toUpperCase() === 'WELCOME10') {
-      setDiscount(0.1); // 10% discount
+      setDiscount(0.1);
       setPromoApplied(true);
       alert('Promo code applied! 10% discount added.');
     } else {
@@ -257,21 +261,52 @@ export default function Checkout() {
     handler.openIframe();
   };
 
-  // ========== FIXED: Using payments table with all columns added ==========
+  // ========== FIXED: Properly handles UUID for database ==========
   const savePayment = async (response) => {
     console.log("Payment success:", response.reference);
 
     try {
-      // Insert into payments table - now with all columns matching your database
+      // Check if user is logged in
+      if (!user) {
+        console.error("No user logged in");
+        alert("Please log in to complete enrollment");
+        navigate("/login");
+        return;
+      }
+
+      // For sample courses (not in database), we can't save to payments table
+      if (course.isSample) {
+        console.log("Sample course detected - skipping database save");
+        navigate("/payment-success", {
+          state: {
+            course: course,
+            userDetails: formData,
+            amount: calculateTotal(),
+            enrollmentId: response.reference,
+          },
+        });
+        return;
+      }
+
+      // Ensure course has UUID from database
+      if (!course || !course.id) {
+        console.error("Course data missing or invalid");
+        alert("Error: Course information missing");
+        return;
+      }
+
+      console.log("Using course UUID:", course.id);
+
+      // Prepare payment data with the correct UUID
       const paymentData = {
-        user_id: user?.id,
+        user_id: user.id,
         user_email: formData.email,
         full_name: formData.fullName,
-        phone: formData.phone,
-        course_id: course.id,
+        phone: formData.phone || null,
+        course_id: course.id,  // This is the UUID from database
         course_title: course.title,
         amount: calculateTotal(),
-        discount: discount * 100,
+        discount: discount * 100 || 0,
         promo_code: promoApplied ? promoCode : null,
         reference: response.reference,
         status: "success",
@@ -283,65 +318,61 @@ export default function Checkout() {
 
       console.log("Inserting payment data:", paymentData);
 
-      const { data: paymentResult, error: paymentError } = await supabase
+      // Insert into payments table
+      const { error: paymentError } = await supabase
         .from("payments")
-        .insert([paymentData])
-        .select()
-        .single();
+        .insert([paymentData]);
 
       if (paymentError) {
         console.error("Error saving payment:", paymentError);
-        console.error("Error code:", paymentError.code);
-        console.error("Error message:", paymentError.message);
         console.error("Error details:", paymentError.details);
-        alert("Payment succeeded but saving failed. Please contact support with your payment reference: " + response.reference);
-        return;
+        console.error("Error message:", paymentError.message);
+        
+        // Try a minimal insert as fallback
+        const minimalData = {
+          user_id: user.id,
+          user_email: formData.email,
+          full_name: formData.fullName,
+          course_id: course.id,
+          course_title: course.title,
+          amount: calculateTotal(),
+          reference: response.reference,
+          status: "success"
+        };
+        
+        const { error: fallbackError } = await supabase
+          .from("payments")
+          .insert([minimalData]);
+          
+        if (fallbackError) {
+          console.error("Fallback also failed:", fallbackError);
+          alert("Payment succeeded but saving failed. Please contact support with your payment reference: " + response.reference);
+          return;
+        }
+        
+        console.log("Payment saved with minimal data");
+      } else {
+        console.log("Payment saved successfully");
       }
 
-      console.log("Payment saved successfully:", paymentResult);
-
-      // Check if enrollment exists
-      const { data: existingEnrollment } = await supabase
+      // Create enrollment
+      const { error: enrollError } = await supabase
         .from("enrollments")
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('course_id', course.id)
-        .maybeSingle();
+        .insert([{
+          user_id: user.id,
+          course_id: course.id,
+          user_email: formData.email,
+          user_name: formData.fullName,
+          amount: calculateTotal(),
+          payment_reference: response.reference,
+          status: "active",
+          enrolled_at: new Date().toISOString(),
+          progress_percentage: 0
+        }]);
 
-      if (existingEnrollment) {
-        // Update existing enrollment
-        const { error: updateError } = await supabase
-          .from("enrollments")
-          .update({
-            payment_status: "success",
-            transaction_reference: response.reference,
-            enrolled_at: new Date().toISOString(),
-            status: "active"
-          })
-          .eq('id', existingEnrollment.id);
-
-        if (updateError) {
-          console.error("Error updating enrollment:", updateError);
-        }
-      } else {
-        // Create new enrollment
-        const { error: insertError } = await supabase
-          .from("enrollments")
-          .insert([
-            {
-              user_id: user?.id,
-              course_id: course.id,
-              payment_status: "success",
-              transaction_reference: response.reference,
-              enrolled_at: new Date().toISOString(),
-              progress_percentage: 0,
-              status: "active"
-            }
-          ]);
-
-        if (insertError) {
-          console.error("Error creating enrollment:", insertError);
-        }
+      if (enrollError) {
+        console.error("Error creating enrollment:", enrollError);
+        // Don't alert here, payment already succeeded
       }
 
       // Success - redirect to payment success page
@@ -357,8 +388,8 @@ export default function Checkout() {
       });
 
     } catch (error) {
-      console.error("Unexpected error:", error);
-      alert("An unexpected error occurred. Please contact support.");
+      console.error("Unexpected error in savePayment:", error);
+      alert("An unexpected error occurred. Please contact support with reference: " + response.reference);
     }
   };
   // ========== END FIXED FUNCTION ==========
@@ -441,7 +472,7 @@ export default function Checkout() {
           <ChevronRight className="w-4 h-4" />
           <Link to="/courses" className="hover:text-gray-900">Courses</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to={`/course/${course.id}`} className="hover:text-gray-900 line-clamp-1 max-w-[200px]">{course.title}</Link>
+          <Link to={`/course/${course.slug || course.id}`} className="hover:text-gray-900 line-clamp-1 max-w-[200px]">{course.title}</Link>
           <ChevronRight className="w-4 h-4" />
           <span className="text-gray-900 font-medium">Checkout</span>
         </div>
@@ -459,7 +490,7 @@ export default function Checkout() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Course Info & Form */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Course Info Card - Fixed Image */}
+            {/* Course Info Card */}
             <div className="bg-white rounded-xl shadow-md p-6">
               <div className="flex items-start gap-4">
                 <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
@@ -810,7 +841,7 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* Simple Footer - Clean & Professional */}
+        {/* Simple Footer */}
         <div className="mt-12 border-t border-gray-200 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             
