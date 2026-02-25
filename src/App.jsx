@@ -103,9 +103,19 @@ function App() {
           } /> */}
 
 
-<Route path="/student-dashboard" element={<StudentDashboard />} />
+<Route path="/student-dashboard" element={
+  <Layout>
+  <StudentDashboard />
+  
+  </Layout>
+
+  } />
        
-       <Route path="/courses/:courseId" element={<CourseD />} />
+       <Route path="/courses/:courseId" element={
+        <Layout>
+        <CourseD />
+        </Layout>
+        } />
        <Route path="*" element={<NotFound />} />
 
           {/* ========== COMMUNITY DROPDOWN ROUTES ========== */}
