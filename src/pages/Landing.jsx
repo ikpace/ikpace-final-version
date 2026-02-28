@@ -108,7 +108,7 @@ export default function Landing() {
     setIsAutoPlaying(false);
   };
 
-  // Clean Course Data with honest numbers
+  // Clean Course Data - REMOVED instructor names and original prices
   const courses = [
     {
       id: 'virtual-assistant-pro',
@@ -121,14 +121,12 @@ export default function Landing() {
       rating: 4.9,
       reviews: 18,
       price: 7,
-      originalPrice: 49,
       category: 'Career',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#1A3D7C] to-[#FF7A00]',
       image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=600',
       features: ['Client Management', 'Email', 'Calendar'],
-      instructor: 'Amara Osei',
       icon: '👩🏾'
     },
     {
@@ -142,14 +140,12 @@ export default function Landing() {
       rating: 4.8,
       reviews: 15,
       price: 7,
-      originalPrice: 49,
       category: 'Marketing',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#FF7A00] to-[#FF9A3C]',
       image: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=600',
       features: ['Content', 'Ads', 'Analytics'],
-      instructor: 'Kofi Asante',
       icon: '👨🏾'
     },
     {
@@ -163,14 +159,12 @@ export default function Landing() {
       rating: 4.7,
       reviews: 12,
       price: 7,
-      originalPrice: 39,
       category: 'Design',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#008F4C] to-[#00C853]',
       image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=600',
       features: ['Logo', 'Social Graphics', 'Branding'],
-      instructor: 'Esi Darkwah',
       icon: '👩🏾'
     },
     {
@@ -184,14 +178,12 @@ export default function Landing() {
       rating: 4.9,
       reviews: 8,
       price: 7,
-      originalPrice: 35,
       category: 'Kids',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#FF6D00] to-[#FFD600]',
       image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=600',
       features: ['Scratch', 'Games', 'Animation'],
-      instructor: 'Kwame Asare',
       icon: '👨🏾'
     },
     {
@@ -205,14 +197,12 @@ export default function Landing() {
       rating: 4.8,
       reviews: 14,
       price: 7,
-      originalPrice: 39,
       category: 'Business',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#00C853] to-[#B2FF59]',
       image: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=600',
       features: ['Upwork', 'Clients', 'Pricing'],
-      instructor: 'Yaa Asantewaa',
       icon: '👩🏾'
     },
     {
@@ -226,14 +216,12 @@ export default function Landing() {
       rating: 4.9,
       reviews: 11,
       price: 7,
-      originalPrice: 49,
       category: 'Tech',
       level: 'Intermediate',
       badge: 'New',
       color: 'from-[#4A6FA5] to-[#2F5EA8]',
       image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=600',
       features: ['ChatGPT', 'Midjourney', 'Automation'],
-      instructor: 'Nana Addo',
       icon: '👨🏾'
     }
   ];
@@ -498,7 +486,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Courses Section - Clean & Simple */}
+      {/* Courses Section - Clean & Simple - MODIFIED AS REQUESTED */}
       <section className="py-12" style={{ background: colors.lightGray }}>
         <div className="max-w-7xl mx-auto px-4">
           {/* Simple Header */}
@@ -510,7 +498,7 @@ export default function Landing() {
               Learn <span style={{ color: colors.secondary }}>New Skills</span>
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Start your journey today
+              Start your journey today for just $7
             </p>
           </div>
 
@@ -527,12 +515,12 @@ export default function Landing() {
                 }`}
                 style={selectedCategory === cat ? { background: colors.secondary } : {}}
               >
-                {cat === 'all' ? 'All' : cat}
+                {cat === 'all' ? 'All Courses' : cat}
               </button>
             ))}
           </div>
 
-          {/* Clean Course Cards - With Working Buttons */}
+          {/* Clean Course Cards - MODIFIED: No instructor names, only $7 price, single View Details button */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses.map((course) => (
               <div
@@ -544,7 +532,7 @@ export default function Landing() {
                   <img 
                     src={course.image} 
                     alt={course.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-3 right-3">
                     <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-bold shadow-sm" style={{ color: colors.primary }}>
@@ -565,16 +553,14 @@ export default function Landing() {
                   </button>
                 </div>
 
-                {/* Simple Content */}
+                {/* Simple Content - NO INSTRUCTOR NAMES */}
                 <div className="p-4">
                   {/* Title */}
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{course.title}</h3>
                   
-                  {/* Instructor */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-sm">{course.icon}</span>
-                    <span className="text-xs text-gray-600">{course.instructor}</span>
-                    <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full ml-auto">
+                  {/* Level Badge Only - Removed instructor */}
+                  <div className="flex justify-end mb-3">
+                    <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full">
                       {course.level}
                     </span>
                   </div>
@@ -601,28 +587,19 @@ export default function Landing() {
                     </span>
                   </div>
 
-                  {/* Price & Two Active Buttons */}
+                  {/* Price & Single View Details Button - BRIGHT COLOR */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-xl font-bold" style={{ color: colors.primary }}>${course.price}</span>
-                      <span className="text-gray-400 text-xs line-through ml-2">${course.originalPrice}</span>
+                      <span className="text-2xl font-bold" style={{ color: colors.primary }}>${course.price}</span>
+                      <span className="text-xs text-gray-500 ml-2">one-time</span>
                     </div>
-                    <div className="flex gap-2">
-                      <Link
-                        to={`/course/${course.id}`}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full text-white shadow-sm hover:scale-105 transition-all"
-                        style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
-                      >
-                        Enroll
-                      </Link>
-                      <Link
-                        to={`/course/${course.id}`}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full border hover:bg-gray-50 transition-all"
-                        style={{ borderColor: colors.primary, color: colors.primary }}
-                      >
-                        View
-                      </Link>
-                    </div>
+                    <Link
+                      to={`/course/${course.id}`}
+                      className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold text-white shadow-md hover:scale-105 transition-all"
+                      style={{ background: colors.secondary }}
+                    >
+                      View Details <ArrowRight size={14} />
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -636,13 +613,13 @@ export default function Landing() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-white hover:scale-105 transition-all shadow-md"
               style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}
             >
-              View All Courses <ArrowRight size={16} />
+              Browse All Courses <ArrowRight size={16} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* iKPACE Advantage - Professional Section (REPLACES the duplicate) */}
+      {/* iKPACE Advantage - Professional Section */}
       <section className="py-16 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">

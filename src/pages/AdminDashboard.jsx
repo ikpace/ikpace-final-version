@@ -7,7 +7,8 @@ import {
   Home, LogOut, Search, Database, Plus, Edit, Trash2, Eye,
   BarChart3, CreditCard, UserPlus, BookPlus, Shield, Filter,
   Download, Calendar, MessageSquare, Settings, Bell, ChevronDown,
-  Target, Award, Cpu, Zap, Activity, ExternalLink, ArrowRight
+  Target, Award, Cpu, Zap, Activity, ExternalLink, ArrowRight,
+  Video, FileText, Clock, Globe, Layers, PlayCircle
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -19,12 +20,19 @@ export default function AdminDashboard() {
   // Data states
   const [users, setUsers] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [topics, setTopics] = useState([]);
   const [payments, setPayments] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
+  
+  // Selected course for topic management
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courseTopics, setCourseTopics] = useState([]);
   
   // Modal states
   const [showAddUser, setShowAddUser] = useState(false);
   const [showAddCourse, setShowAddCourse] = useState(false);
+  const [showAddTopic, setShowAddTopic] = useState(false);
+  const [showTopicManager, setShowTopicManager] = useState(false);
   
   // Form states
   const [newUser, setNewUser] = useState({
@@ -40,6 +48,18 @@ export default function AdminDashboard() {
     price: 7.00,
     duration_weeks: 8,
     level: "beginner",
+    category: "career",
+    is_published: true
+  });
+
+  const [newTopic, setNewTopic] = useState({
+    week_number: 1,
+    title: "",
+    description: "",
+    content_type: "video",
+    video_url: "",
+    duration: "10 min",
+    order_index: 1,
     is_published: true
   });
 
@@ -47,6 +67,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCourses: 0,
+    totalTopics: 0,
     totalRevenue: 0,
     activeEnrollments: 0,
     monthlyGrowth: 23,
@@ -64,15 +85,17 @@ export default function AdminDashboard() {
       const toastId = toast.loading("Loading dashboard data...");
       
       // Fetch all data in parallel
-      const [usersRes, coursesRes, paymentsRes, enrollmentsRes] = await Promise.all([
+      const [usersRes, coursesRes, topicsRes, paymentsRes, enrollmentsRes] = await Promise.all([
         supabase.from("user_profiles").select("*"),
         supabase.from("courses").select("*"),
+        supabase.from("topics").select("*"),
         supabase.from("payments").select("*"),
         supabase.from("enrollments").select("*")
       ]);
 
       setUsers(usersRes.data || []);
       setCourses(coursesRes.data || []);
+      setTopics(topicsRes.data || []);
       setPayments(paymentsRes.data || []);
       setEnrollments(enrollmentsRes.data || []);
 
@@ -85,6 +108,7 @@ export default function AdminDashboard() {
       setStats({
         totalUsers: usersRes.data?.length || 0,
         totalCourses: coursesRes.data?.length || 0,
+        totalTopics: topicsRes.data?.length || 0,
         totalRevenue: totalRevenue,
         activeEnrollments: enrollmentsRes.data?.length || 0,
         monthlyGrowth: 23,
@@ -92,7 +116,7 @@ export default function AdminDashboard() {
         successRate: Math.round(successRate)
       });
 
-      toast.success(`Loaded ${usersRes.data?.length || 0} users, ${coursesRes.data?.length || 0} courses`, { id: toastId });
+      toast.success(`Loaded ${coursesRes.data?.length || 0} courses, ${topicsRes.data?.length || 0} topics`, { id: toastId });
     } catch (error) {
       console.error("Error:", error);
       toast.error("Failed to load data");
@@ -106,7 +130,6 @@ export default function AdminDashboard() {
     const toastId = toast.loading("Creating user...");
     
     try {
-      // First create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
@@ -114,7 +137,6 @@ export default function AdminDashboard() {
 
       if (authError) throw authError;
 
-      // Then create user profile
       const { error: profileError } = await supabase.from("user_profiles").insert([{
         id: authData.user.id,
         email: newUser.email,
@@ -139,7 +161,6 @@ export default function AdminDashboard() {
     const toastId = toast.loading("Creating course...");
     
     try {
-      // Generate slug from title
       const slug = newCourse.title.toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
@@ -161,12 +182,95 @@ export default function AdminDashboard() {
         price: 7.00,
         duration_weeks: 8,
         level: "beginner",
+        category: "career",
         is_published: true
       });
       fetchData();
     } catch (error) {
       console.error("Error adding course:", error);
       toast.error(error.message || "Failed to create course", { id: toastId });
+    }
+  };
+
+  const handleAddTopic = async (e) => {
+    e.preventDefault();
+    if (!selectedCourse) {
+      toast.error("Please select a course first");
+      return;
+    }
+
+    const toastId = toast.loading("Adding topic...");
+    
+    try {
+      const { error } = await supabase.from("topics").insert([{
+        course_id: selectedCourse.id,
+        week_number: newTopic.week_number,
+        title: newTopic.title,
+        description: newTopic.description,
+        content_type: newTopic.content_type,
+        video_url: newTopic.video_url,
+        duration: newTopic.duration,
+        order_index: newTopic.order_index,
+        is_published: newTopic.is_published
+      }]);
+
+      if (error) throw error;
+
+      toast.success("Topic added successfully!", { id: toastId });
+      setShowAddTopic(false);
+      setNewTopic({
+        week_number: 1,
+        title: "",
+        description: "",
+        content_type: "video",
+        video_url: "",
+        duration: "10 min",
+        order_index: 1,
+        is_published: true
+      });
+      
+      // Refresh topics for selected course
+      if (selectedCourse) {
+        const { data } = await supabase
+          .from("topics")
+          .select("*")
+          .eq("course_id", selectedCourse.id)
+          .order("week_number")
+          .order("order_index");
+        setCourseTopics(data || []);
+      }
+      fetchData();
+    } catch (error) {
+      console.error("Error adding topic:", error);
+      toast.error(error.message || "Failed to add topic", { id: toastId });
+    }
+  };
+
+  const handleDeleteTopic = async (topicId) => {
+    if (!window.confirm("Are you sure you want to delete this topic?")) return;
+    
+    const toastId = toast.loading("Deleting topic...");
+    try {
+      const { error } = await supabase.from("topics").delete().eq("id", topicId);
+      
+      if (error) throw error;
+
+      toast.success("Topic deleted successfully!", { id: toastId });
+      
+      // Refresh topics for selected course
+      if (selectedCourse) {
+        const { data } = await supabase
+          .from("topics")
+          .select("*")
+          .eq("course_id", selectedCourse.id)
+          .order("week_number")
+          .order("order_index");
+        setCourseTopics(data || []);
+      }
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting topic:", error);
+      toast.error("Failed to delete topic", { id: toastId });
     }
   };
 
@@ -214,6 +318,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const openTopicManager = (course) => {
+    setSelectedCourse(course);
+    loadCourseTopics(course.id);
+    setShowTopicManager(true);
+  };
+
+  const loadCourseTopics = async (courseId) => {
+    const { data } = await supabase
+      .from("topics")
+      .select("*")
+      .eq("course_id", courseId)
+      .order("week_number")
+      .order("order_index");
+    setCourseTopics(data || []);
+  };
+
   // Filter data based on search
   const filteredUsers = users.filter(user =>
     user.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -238,7 +358,7 @@ export default function AdminDashboard() {
           <div className="text-center">
             <div className="relative">
               <div className="w-24 h-24 border-4 border-gray-200 rounded-full"></div>
-              <div className="absolute top-0 left-0 w-24 h-24 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <div className="absolute top-0 left-0 w-24 h-24 border-4 border-[#1A3D7C] border-t-transparent rounded-full animate-spin"></div>
             </div>
             <p className="mt-6 text-gray-600 text-lg font-medium">Loading admin dashboard...</p>
             <p className="text-gray-500">Fetching real-time data from Supabase</p>
@@ -257,11 +377,11 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-r from-primary to-secondary rounded-2xl shadow-lg">
+              <div className="p-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] rounded-2xl shadow-lg">
                 <Shield className="text-white" size={28} />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] bg-clip-text text-transparent">
                   Admin Dashboard
                 </h1>
                 <p className="text-gray-600">Manage your complete IKPACE platform</p>
@@ -271,7 +391,7 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-3">
               <button
                 onClick={fetchData}
-                className="flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-xl transition-all duration-200 font-medium"
+                className="flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-[#1A3D7C] hover:bg-gray-100 rounded-xl transition-all duration-200 font-medium"
                 title="Refresh Data"
               >
                 <RefreshCw size={20} />
@@ -280,7 +400,7 @@ export default function AdminDashboard() {
               
               <button
                 onClick={() => navigate("/")}
-                className="flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-xl transition-all duration-200 font-medium"
+                className="flex items-center gap-2 px-5 py-2.5 text-gray-700 hover:text-[#1A3D7C] hover:bg-gray-100 rounded-xl transition-all duration-200 font-medium"
               >
                 <Home size={20} />
                 Home
@@ -317,7 +437,7 @@ export default function AdminDashboard() {
               value: stats.totalCourses, 
               icon: BookOpen, 
               color: "green", 
-              change: `${stats.activeEnrollments} enrollments`,
+              change: `${stats.totalTopics} topics`,
               bg: "from-green-50 to-green-100",
               iconBg: "bg-green-500"
             },
@@ -366,6 +486,7 @@ export default function AdminDashboard() {
                 { id: "overview", label: "Overview", icon: BarChart3 },
                 { id: "users", label: `Users (${users.length})`, icon: Users },
                 { id: "courses", label: `Courses (${courses.length})`, icon: BookOpen },
+                { id: "topics", label: `Topics (${topics.length})`, icon: Layers },
                 { id: "payments", label: `Payments (${payments.length})`, icon: CreditCard },
                 { id: "enrollments", label: `Enrollments (${enrollments.length})`, icon: CheckCircle }
               ].map((tab) => (
@@ -374,8 +495,8 @@ export default function AdminDashboard() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-4 font-medium whitespace-nowrap transition-all duration-200 ${
                     activeTab === tab.id
-                      ? "text-primary border-b-2 border-primary bg-blue-50"
-                      : "text-gray-600 hover:text-primary hover:bg-gray-50"
+                      ? "text-[#1A3D7C] border-b-2 border-[#1A3D7C] bg-blue-50"
+                      : "text-gray-600 hover:text-[#1A3D7C] hover:bg-gray-50"
                   }`}
                 >
                   <tab.icon size={20} />
@@ -396,7 +517,7 @@ export default function AdminDashboard() {
                   placeholder={`Search ${activeTab}...`}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-2xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                 />
                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                   <Filter size={20} className="text-gray-400" />
@@ -411,7 +532,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border">
                     <h3 className="font-bold text-xl text-gray-900 mb-4 flex items-center">
-                      <Activity size={22} className="mr-2 text-primary" />
+                      <Activity size={22} className="mr-2 text-[#1A3D7C]" />
                       Platform Health
                     </h3>
                     <div className="space-y-4">
@@ -423,56 +544,56 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-700">API Response Time</span>
-                        <span className="font-bold">124ms</span>
+                        <span className="text-gray-700">Total Topics</span>
+                        <span className="font-bold">{stats.totalTopics}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-700">Uptime</span>
-                        <span className="font-bold text-green-600">99.9%</span>
+                        <span className="text-gray-700">Total Courses</span>
+                        <span className="font-bold">{stats.totalCourses}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border">
                     <h3 className="font-bold text-xl text-gray-900 mb-4 flex items-center">
-                      <Zap size={22} className="mr-2 text-primary" />
+                      <Zap size={22} className="mr-2 text-[#1A3D7C]" />
                       Quick Actions
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setShowAddUser(true)}
-                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all text-center group"
+                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-[#1A3D7C] hover:shadow-md transition-all text-center group"
                       >
-                        <UserPlus size={24} className="text-primary mx-auto mb-2" />
-                        <div className="font-medium text-gray-900 group-hover:text-primary">Add User</div>
+                        <UserPlus size={24} className="text-[#1A3D7C] mx-auto mb-2" />
+                        <div className="font-medium text-gray-900 group-hover:text-[#1A3D7C]">Add User</div>
                       </button>
                       <button
                         onClick={() => setShowAddCourse(true)}
-                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all text-center group"
+                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-[#1A3D7C] hover:shadow-md transition-all text-center group"
                       >
-                        <BookPlus size={24} className="text-primary mx-auto mb-2" />
-                        <div className="font-medium text-gray-900 group-hover:text-primary">Add Course</div>
+                        <BookPlus size={24} className="text-[#1A3D7C] mx-auto mb-2" />
+                        <div className="font-medium text-gray-900 group-hover:text-[#1A3D7C]">Add Course</div>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("topics")}
+                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-[#1A3D7C] hover:shadow-md transition-all text-center group"
+                      >
+                        <Video size={24} className="text-[#FF7A00] mx-auto mb-2" />
+                        <div className="font-medium text-gray-900 group-hover:text-[#FF7A00]">Add Topic</div>
                       </button>
                       <button
                         onClick={fetchData}
-                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all text-center group"
+                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-[#1A3D7C] hover:shadow-md transition-all text-center group"
                       >
-                        <RefreshCw size={24} className="text-primary mx-auto mb-2" />
-                        <div className="font-medium text-gray-900 group-hover:text-primary">Refresh Data</div>
-                      </button>
-                      <button
-                        onClick={() => window.open("https://supabase.com/dashboard/project/agiyudvwmaanwpsozcsh", "_blank")}
-                        className="p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all text-center group"
-                      >
-                        <Database size={24} className="text-primary mx-auto mb-2" />
-                        <div className="font-medium text-gray-900 group-hover:text-primary">Supabase</div>
+                        <RefreshCw size={24} className="text-[#1A3D7C] mx-auto mb-2" />
+                        <div className="font-medium text-gray-900 group-hover:text-[#1A3D7C]">Refresh Data</div>
                       </button>
                     </div>
                   </div>
 
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 border">
                     <h3 className="font-bold text-xl text-gray-900 mb-4 flex items-center">
-                      <Target size={22} className="mr-2 text-primary" />
+                      <Target size={22} className="mr-2 text-[#1A3D7C]" />
                       Recent Activity
                     </h3>
                     <div className="space-y-3">
@@ -484,7 +605,7 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                               <div className="font-medium">Payment: {payment.reference}</div>
-                              <div className="text-gray-500 text-sm">${payment.amount} � {payment.status}</div>
+                              <div className="text-gray-500 text-sm">${payment.amount} • {payment.status}</div>
                             </div>
                           </div>
                           <div className="text-gray-500 text-sm">
@@ -497,7 +618,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Database Info */}
-                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20">
+                <div className="bg-gradient-to-r from-[#1A3D7C]/10 to-[#FF7A00]/10 rounded-2xl p-8 border border-[#1A3D7C]/20">
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-bold text-2xl text-gray-900 mb-2 flex items-center">
@@ -509,22 +630,22 @@ export default function AdminDashboard() {
                       </p>
                       <div className="flex items-center mt-4 gap-6">
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-primary">{users.length + courses.length + payments.length + enrollments.length}</div>
+                          <div className="text-3xl font-bold text-[#1A3D7C]">{users.length + courses.length + topics.length + payments.length + enrollments.length}</div>
                           <div className="text-gray-600 text-sm">Total Records</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-green-600">4</div>
+                          <div className="text-3xl font-bold text-green-600">5</div>
                           <div className="text-gray-600 text-sm">Active Tables</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-3xl font-bold text-blue-600">{stats.totalRevenue.toFixed(2)}</div>
-                          <div className="text-gray-600 text-sm">Total Revenue</div>
+                          <div className="text-3xl font-bold text-[#FF7A00]">{topics.length}</div>
+                          <div className="text-gray-600 text-sm">Topics/Lessons</div>
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={fetchData}
-                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                     >
                       <RefreshCw size={20} />
                       Sync Data
@@ -544,7 +665,7 @@ export default function AdminDashboard() {
                   </div>
                   <button
                     onClick={() => setShowAddUser(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                   >
                     <Plus size={20} />
                     Add New User
@@ -615,7 +736,7 @@ export default function AdminDashboard() {
                       <p className="text-gray-500 text-lg">No users found</p>
                       <button
                         onClick={() => setSearch("")}
-                        className="text-primary hover:underline mt-2"
+                        className="text-[#1A3D7C] hover:underline mt-2"
                       >
                         Clear search
                       </button>
@@ -635,7 +756,7 @@ export default function AdminDashboard() {
                   </div>
                   <button
                     onClick={() => setShowAddCourse(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                   >
                     <Plus size={20} />
                     Add New Course
@@ -645,12 +766,12 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredCourses.map((course) => (
                     <div key={course.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                      <div className="h-48 bg-gradient-to-r from-primary/20 to-secondary/20 relative overflow-hidden">
+                      <div className="h-48 bg-gradient-to-r from-[#1A3D7C]/20 to-[#FF7A00]/20 relative overflow-hidden">
                         {course.thumbnail_url ? (
                           <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <BookOpen className="text-primary/40" size={64} />
+                            <BookOpen className="text-[#1A3D7C]/40" size={64} />
                           </div>
                         )}
                         <div className="absolute top-4 right-4">
@@ -664,7 +785,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="p-6">
-                        <h4 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                        <h4 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-[#1A3D7C] transition-colors">
                           {course.title}
                         </h4>
                         <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
@@ -685,8 +806,12 @@ export default function AdminDashboard() {
                         </div>
                         
                         <div className="flex items-center gap-3">
-                          <button className="flex-1 py-3 text-primary hover:bg-blue-50 rounded-xl font-medium transition-colors">
-                            Edit
+                          <button 
+                            onClick={() => openTopicManager(course)}
+                            className="flex-1 py-3 bg-[#1A3D7C] text-white rounded-xl hover:bg-[#2F5EA8] transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                          >
+                            <Layers size={16} />
+                            Manage Topics
                           </button>
                           <button
                             onClick={() => handleDeleteCourse(course.id)}
@@ -705,12 +830,79 @@ export default function AdminDashboard() {
                       <p className="text-gray-500 text-lg">No courses found</p>
                       <button
                         onClick={() => setSearch("")}
-                        className="text-primary hover:underline mt-2"
+                        className="text-[#1A3D7C] hover:underline mt-2"
                       >
                         Clear search
                       </button>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Topics Tab */}
+            {activeTab === "topics" && (
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">Topic Management</h3>
+                    <p className="text-gray-600">Manage all course topics and learning materials</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {courses.map((course) => {
+                    const courseTopicCount = topics.filter(t => t.course_id === course.id).length;
+                    
+                    return (
+                      <div key={course.id} className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-all">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-bold text-gray-900">{course.title}</h4>
+                          <span className="px-3 py-1 bg-[#1A3D7C]/10 text-[#1A3D7C] rounded-full text-sm font-bold">
+                            {courseTopicCount} Topics
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+                          {topics
+                            .filter(t => t.course_id === course.id)
+                            .sort((a, b) => a.week_number - b.week_number)
+                            .map(topic => (
+                              <div key={topic.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  {topic.content_type === 'video' ? (
+                                    <Video size={16} className="text-[#FF7A00]" />
+                                  ) : (
+                                    <FileText size={16} className="text-[#1A3D7C]" />
+                                  )}
+                                  <div>
+                                    <div className="font-medium text-gray-800">Week {topic.week_number}: {topic.title}</div>
+                                    <div className="text-xs text-gray-500">{topic.duration} • {topic.content_type}</div>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleDeleteTopic(topic.id)}
+                                  className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            ))}
+                        </div>
+                        
+                        <button
+                          onClick={() => {
+                            setSelectedCourse(course);
+                            setShowAddTopic(true);
+                          }}
+                          className="w-full py-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2"
+                        >
+                          <Plus size={18} />
+                          Add Topic to {course.title}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -723,7 +915,7 @@ export default function AdminDashboard() {
                     <h3 className="text-2xl font-bold text-gray-900">Payment History</h3>
                     <p className="text-gray-600">Track all transactions and revenue</p>
                   </div>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg transition-all font-medium">
+                  <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white rounded-xl hover:shadow-lg transition-all font-medium">
                     <Download size={20} />
                     Export Report
                   </button>
@@ -785,7 +977,7 @@ export default function AdminDashboard() {
                     <h3 className="text-2xl font-bold text-gray-900">Course Enrollments</h3>
                     <p className="text-gray-600">Track all student enrollments and progress</p>
                   </div>
-                  <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg transition-all font-medium">
+                  <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white rounded-xl hover:shadow-lg transition-all font-medium">
                     <Download size={20} />
                     Export List
                   </button>
@@ -829,7 +1021,7 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                                   <div 
-                                    className="bg-gradient-to-r from-primary to-secondary h-2.5 rounded-full transition-all duration-500" 
+                                    className="bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] h-2.5 rounded-full transition-all duration-500" 
                                     style={{ width: `${enrollment.progress || 0}%` }}
                                   ></div>
                                 </div>
@@ -876,7 +1068,7 @@ export default function AdminDashboard() {
                   required
                   value={newUser.full_name}
                   onChange={(e) => setNewUser({...newUser, full_name: e.target.value})}
-                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   placeholder="John Doe"
                 />
               </div>
@@ -888,7 +1080,7 @@ export default function AdminDashboard() {
                   required
                   value={newUser.email}
                   onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   placeholder="john@example.com"
                 />
               </div>
@@ -900,7 +1092,7 @@ export default function AdminDashboard() {
                   required
                   value={newUser.password}
                   onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   placeholder="Minimum 8 characters"
                 />
                 <p className="text-sm text-gray-500 mt-2">Default password: Test@1234</p>
@@ -911,7 +1103,7 @@ export default function AdminDashboard() {
                 <select
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                 >
                   <option value="student">Student</option>
                   <option value="instructor">Instructor</option>
@@ -929,7 +1121,7 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all text-lg"
+                  className="flex-1 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all text-lg"
                 >
                   Create User
                 </button>
@@ -956,7 +1148,7 @@ export default function AdminDashboard() {
                   required
                   value={newCourse.title}
                   onChange={(e) => setNewCourse({...newCourse, title: e.target.value})}
-                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   placeholder="Digital Marketing Mastery"
                 />
               </div>
@@ -967,7 +1159,7 @@ export default function AdminDashboard() {
                   required
                   value={newCourse.description}
                   onChange={(e) => setNewCourse({...newCourse, description: e.target.value})}
-                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   rows="4"
                   placeholder="Brief description of what students will learn..."
                 />
@@ -982,7 +1174,7 @@ export default function AdminDashboard() {
                     min="0"
                     value={newCourse.price}
                     onChange={(e) => setNewCourse({...newCourse, price: parseFloat(e.target.value) || 0})}
-                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   />
                 </div>
                 
@@ -993,7 +1185,7 @@ export default function AdminDashboard() {
                     min="1"
                     value={newCourse.duration_weeks}
                     onChange={(e) => setNewCourse({...newCourse, duration_weeks: parseInt(e.target.value) || 8})}
-                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   />
                 </div>
               </div>
@@ -1004,7 +1196,7 @@ export default function AdminDashboard() {
                   <select
                     value={newCourse.level}
                     onChange={(e) => setNewCourse({...newCourse, level: e.target.value})}
-                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   >
                     <option value="beginner">Beginner</option>
                     <option value="intermediate">Intermediate</option>
@@ -1013,16 +1205,32 @@ export default function AdminDashboard() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Category</label>
                   <select
-                    value={newCourse.is_published}
-                    onChange={(e) => setNewCourse({...newCourse, is_published: e.target.value === "true"})}
-                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all"
+                    value={newCourse.category}
+                    onChange={(e) => setNewCourse({...newCourse, category: e.target.value})}
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
                   >
-                    <option value="true">Published</option>
-                    <option value="false">Draft</option>
+                    <option value="career">Career</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="design">Design</option>
+                    <option value="kids">Kids</option>
+                    <option value="business">Business</option>
+                    <option value="tech">Tech</option>
                   </select>
                 </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                <select
+                  value={newCourse.is_published}
+                  onChange={(e) => setNewCourse({...newCourse, is_published: e.target.value === "true"})}
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                >
+                  <option value="true">Published</option>
+                  <option value="false">Draft</option>
+                </select>
               </div>
               
               <div className="flex gap-4 pt-6">
@@ -1035,9 +1243,136 @@ export default function AdminDashboard() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all text-lg"
+                  className="flex-1 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all text-lg"
                 >
                   Create Course
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Topic Modal */}
+      {showAddTopic && selectedCourse && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md transform transition-all duration-300 scale-100">
+            <div className="p-8 border-b border-gray-200">
+              <h3 className="text-2xl font-bold text-gray-900">Add Topic to {selectedCourse.title}</h3>
+              <p className="text-gray-600 mt-2">Create a new lesson or learning material</p>
+            </div>
+            
+            <form onSubmit={handleAddTopic} className="p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Week *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={newTopic.week_number}
+                    onChange={(e) => setNewTopic({...newTopic, week_number: parseInt(e.target.value) || 1})}
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Order *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={newTopic.order_index}
+                    onChange={(e) => setNewTopic({...newTopic, order_index: parseInt(e.target.value) || 1})}
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Topic Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={newTopic.title}
+                  onChange={(e) => setNewTopic({...newTopic, title: e.target.value})}
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                  placeholder="Introduction to the topic"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={newTopic.description}
+                  onChange={(e) => setNewTopic({...newTopic, description: e.target.value})}
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                  rows="3"
+                  placeholder="What students will learn in this topic"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Content Type</label>
+                <select
+                  value={newTopic.content_type}
+                  onChange={(e) => setNewTopic({...newTopic, content_type: e.target.value})}
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                >
+                  <option value="video">Video</option>
+                  <option value="article">Article</option>
+                  <option value="quiz">Quiz</option>
+                  <option value="assignment">Assignment</option>
+                </select>
+              </div>
+              
+              {newTopic.content_type === 'video' && (
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Video URL</label>
+                  <input
+                    type="url"
+                    value={newTopic.video_url}
+                    onChange={(e) => setNewTopic({...newTopic, video_url: e.target.value})}
+                    className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                    placeholder="https://www.youtube.com/embed/..."
+                  />
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Duration</label>
+                <input
+                  type="text"
+                  value={newTopic.duration}
+                  onChange={(e) => setNewTopic({...newTopic, duration: e.target.value})}
+                  className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-4 focus:ring-[#1A3D7C]/20 focus:border-[#1A3D7C] transition-all"
+                  placeholder="10 min"
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={newTopic.is_published}
+                  onChange={(e) => setNewTopic({...newTopic, is_published: e.target.checked})}
+                  className="w-5 h-5 mr-3"
+                />
+                <label className="text-gray-700 font-medium">Publish immediately</label>
+              </div>
+              
+              <div className="flex gap-4 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAddTopic(false)}
+                  className="flex-1 py-4 text-gray-700 hover:bg-gray-100 rounded-xl font-bold text-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-[#1A3D7C] to-[#FF7A00] text-white font-bold py-4 rounded-xl hover:shadow-xl transition-all text-lg"
+                >
+                  Add Topic
                 </button>
               </div>
             </form>

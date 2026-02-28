@@ -25,7 +25,7 @@ export default function Courses() {
     white: "#FFFFFF"
   }
 
-  // Courses with HONEST numbers (realistic for a startup)
+  // Courses with HONEST numbers - REMOVED instructor names and original prices
   const courses = [
     {
       id: 'virtual-assistant-pro',
@@ -38,14 +38,12 @@ export default function Courses() {
       rating: 4.9,
       reviews: 18,
       price: 7,
-      originalPrice: 49,
       category: 'Career',
       level: 'Beginner',
       badge: 'Popular',
       color: 'from-[#1A3D7C] to-[#FF7A00]',
       image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
       features: ['Client Management', 'Email', 'Calendar'],
-      instructor: 'Amara Osei',
       icon: '👩🏾'
     },
     {
@@ -59,14 +57,12 @@ export default function Courses() {
       rating: 4.8,
       reviews: 15,
       price: 7,
-      originalPrice: 49,
       category: 'Marketing',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#FF7A00] to-[#FF9A3C]',
       image: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
       features: ['Content', 'Ads', 'Analytics'],
-      instructor: 'Kofi Asante',
       icon: '👨🏾'
     },
     {
@@ -80,14 +76,12 @@ export default function Courses() {
       rating: 4.7,
       reviews: 12,
       price: 7,
-      originalPrice: 39,
       category: 'Design',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#008F4C] to-[#00C853]',
       image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
       features: ['Logo', 'Social Graphics', 'Branding'],
-      instructor: 'Esi Darkwah',
       icon: '👩🏾'
     },
     {
@@ -101,14 +95,12 @@ export default function Courses() {
       rating: 4.9,
       reviews: 8,
       price: 7,
-      originalPrice: 35,
       category: 'Kids',
       level: 'Beginner',
       badge: 'New',
       color: 'from-[#FF6D00] to-[#FFD600]',
       image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
       features: ['Scratch', 'Games', 'Animation'],
-      instructor: 'Kwame Asare',
       icon: '👨🏾'
     },
     {
@@ -122,14 +114,12 @@ export default function Courses() {
       rating: 4.8,
       reviews: 14,
       price: 7,
-      originalPrice: 39,
       category: 'Business',
       level: 'Beginner',
       badge: 'Popular',
       color: 'from-[#00C853] to-[#B2FF59]',
       image: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
       features: ['Upwork', 'Clients', 'Pricing'],
-      instructor: 'Yaa Asantewaa',
       icon: '👩🏾'
     },
     {
@@ -143,14 +133,12 @@ export default function Courses() {
       rating: 4.9,
       reviews: 11,
       price: 7,
-      originalPrice: 49,
       category: 'Tech',
       level: 'Intermediate',
       badge: 'New',
       color: 'from-[#4A6FA5] to-[#2F5EA8]',
       image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=600&h=400&fit=crop',
       features: ['ChatGPT', 'Midjourney', 'Automation'],
-      instructor: 'Nana Addo',
       icon: '👨🏾'
     }
   ]
@@ -183,7 +171,7 @@ export default function Courses() {
             Our <span style={{ color: colors.secondary }}>Courses</span>
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {totalStudents} students have enrolled in our courses. Join them today!
+            {totalStudents} students have enrolled in our courses. Join them today for just $7!
           </p>
         </div>
 
@@ -205,7 +193,7 @@ export default function Courses() {
           ))}
         </div>
 
-        {/* Course Cards - Clean with Working Links */}
+        {/* Course Cards - MODIFIED: No instructor names, only $7 price, single View Details button */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map((course) => (
             <div 
@@ -253,14 +241,10 @@ export default function Courses() {
                 </button>
               </Link>
               
-              {/* Content */}
+              {/* Content - NO INSTRUCTOR NAMES */}
               <div className="p-5">
-                {/* Instructor and Level */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{course.icon}</span>
-                    <span className="text-sm text-gray-600">{course.instructor}</span>
-                  </div>
+                {/* Level Badge Only - Removed instructor */}
+                <div className="flex justify-end mb-2">
                   <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
                     {course.level}
                   </span>
@@ -303,32 +287,21 @@ export default function Courses() {
                   </span>
                 </div>
                 
-                {/* Price and Buttons - All Working Links */}
+                {/* Price and Single View Details Button - BRIGHT COLOR */}
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                   <div>
-                    <span className="text-xl font-bold" style={{ color: colors.primary }}>${course.price}</span>
-                    <span className="text-gray-400 text-xs line-through ml-2">${course.originalPrice}</span>
+                    <span className="text-2xl font-bold" style={{ color: colors.primary }}>${course.price}</span>
+                    <span className="text-xs text-gray-500 ml-2">one-time</span>
                   </div>
                   
-                  <div className="flex gap-2">
-                    {/* Enroll Button - Direct to checkout */}
-                    <Link
-                      to={`/checkout/${course.id}`}
-                      className="px-4 py-1.5 rounded-full text-xs font-medium text-white hover:scale-105 transition-all shadow-sm"
-                      style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
-                    >
-                      Enroll Now
-                    </Link>
-                    
-                    {/* Details Button - Course info page */}
-                    <Link
-                      to={`/course/${course.id}`}
-                      className="px-4 py-1.5 rounded-full text-xs font-medium border hover:bg-gray-50 transition-all"
-                      style={{ borderColor: colors.primary, color: colors.primary }}
-                    >
-                      View Course
-                    </Link>
-                  </div>
+                  {/* Single View Details Button - Removed Enroll Now */}
+                  <Link
+                    to={`/course/${course.id}`}
+                    className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-sm font-semibold text-white shadow-md hover:scale-105 transition-all"
+                    style={{ background: colors.secondary }}
+                  >
+                    View Details <ArrowRight size={14} />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -369,8 +342,7 @@ export default function Courses() {
           <p className="text-xs text-white/70 mt-3">{totalStudents} students already learning</p>
         </div>
 
-        {/* Browse More Link */}
-       
+        {/* Browse More Link - Removed as it was empty */}
       </div>
     </div>
   )

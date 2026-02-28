@@ -13,7 +13,8 @@ import {
   Wifi, Monitor, Smartphone, Headphones, Camera,
   Settings, Database, Server, Cloud, Terminal,
   Mail as EmailIcon, CreditCard, ShoppingBag, BarChart,
-  PieChart, Lock, Bitcoin, Megaphone, ThumbsUp, Medal
+  PieChart, Lock, Bitcoin, Megaphone, ThumbsUp, Medal,
+  Plus, Minus
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -22,9 +23,16 @@ export default function CourseDetail() {
   const navigate = useNavigate()
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('overview')
   const [enrolled, setEnrolled] = useState(false)
   const [bookmarked, setBookmarked] = useState(false)
+  
+  // Dropdown states
+  const [openSections, setOpenSections] = useState({
+    overview: true,
+    curriculum: false,
+    requirements: false,
+    reviews: false
+  })
 
   // Brand colors
   const colors = {
@@ -40,6 +48,14 @@ export default function CourseDetail() {
     white: "#FFFFFF"
   }
 
+  // Toggle section function
+  const toggleSection = (section) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
+
   // ==================== ALL COURSES WITH HONEST NUMBERS ====================
   const allCourses = {
     // Virtual Assistant Course
@@ -50,7 +66,6 @@ export default function CourseDetail() {
       description: 'Master administrative skills, communication, and client acquisition to become a successful virtual assistant.',
       fullDescription: 'This 6-week program covers everything you need to become a professional virtual assistant. Learn to manage emails, calendars, documents, and social media for clients. Graduate with a professional portfolio and certification.',
       price: 7,
-      originalPrice: 49,
       duration: '6 Weeks',
       students: 32,
       rating: 4.9,
@@ -72,7 +87,6 @@ export default function CourseDetail() {
         'Lifetime access',
         '30-day money-back'
       ],
-      discount: 85,
       color: `from-[${colors.primary}] to-[${colors.secondary}]`,
       learningOutcomes: [
         'Understand VA services and work ethics',
@@ -155,7 +169,6 @@ export default function CourseDetail() {
       description: 'Learn to create engaging content, run ads, and grow your audience.',
       fullDescription: 'This 6-week course teaches you social media marketing fundamentals. Master content creation, scheduling, analytics, and paid advertising strategies across major platforms.',
       price: 7,
-      originalPrice: 49,
       duration: '6 Weeks',
       students: 28,
       rating: 4.8,
@@ -177,7 +190,6 @@ export default function CourseDetail() {
         'Lifetime access',
         '30-day money-back'
       ],
-      discount: 85,
       color: `from-[${colors.secondary}] to-[${colors.orangeShade}]`,
       learningOutcomes: [
         'Understand major social media platforms',
@@ -260,7 +272,6 @@ export default function CourseDetail() {
       description: 'Learn to create professional designs, logos, and branding materials.',
       fullDescription: 'This 4-week course teaches you color theory, typography, and design principles. Create logos, flyers, posters, and complete social media branding kits using Canva. Graduate with a professional portfolio.',
       price: 7,
-      originalPrice: 39,
       duration: '4 Weeks',
       students: 19,
       rating: 4.7,
@@ -282,7 +293,6 @@ export default function CourseDetail() {
         'Lifetime access',
         '30-day money-back'
       ],
-      discount: 82,
       color: `from-[${colors.success}] to-[#00C853]`,
       learningOutcomes: [
         'Understand color theory, fonts & layout principles',
@@ -352,7 +362,6 @@ export default function CourseDetail() {
       description: 'Introduce kids to coding through Scratch! Build animations, stories, and games.',
       fullDescription: 'This 4-week coding program is designed for children ages 6–12. Using Scratch, kids learn coding fundamentals through fun projects — building animations, stories, and their own games.',
       price: 7,
-      originalPrice: 35,
       duration: '4 Weeks',
       students: 12,
       rating: 4.9,
@@ -374,7 +383,6 @@ export default function CourseDetail() {
         'Parent updates',
         '30-day money-back'
       ],
-      discount: 80,
       color: 'from-[#FF6D00] to-[#FFD600]',
       learningOutcomes: [
         'Understand what coding is',
@@ -445,7 +453,6 @@ export default function CourseDetail() {
       description: 'Learn to find clients, set rates, and build sustainable online income.',
       fullDescription: 'This 4-week course teaches you how to start freelancing, find clients, set your rates, and build sustainable online income through platforms like Upwork and Fiverr.',
       price: 7,
-      originalPrice: 39,
       duration: '4 Weeks',
       students: 21,
       rating: 4.8,
@@ -467,7 +474,6 @@ export default function CourseDetail() {
         'Certificate',
         '30-day money-back'
       ],
-      discount: 82,
       color: `from-[${colors.success}] to-[#B2FF59]`,
       learningOutcomes: [
         'Understand freelancing landscape',
@@ -538,7 +544,6 @@ export default function CourseDetail() {
       description: 'Learn to use ChatGPT, Midjourney, and other AI tools effectively.',
       fullDescription: 'This 6-week course teaches you to master AI prompt engineering. Learn techniques for content creation, automation, and problem-solving using ChatGPT, Claude, and other AI tools.',
       price: 7,
-      originalPrice: 49,
       duration: '6 Weeks',
       students: 18,
       rating: 4.9,
@@ -560,7 +565,6 @@ export default function CourseDetail() {
         'AI tools guide',
         '30-day money-back'
       ],
-      discount: 85,
       color: `from-[${colors.blueShade}] to-[${colors.accent}]`,
       learningOutcomes: [
         'Master advanced prompt engineering',
@@ -648,7 +652,6 @@ export default function CourseDetail() {
                 description: data.description || 'Master practical skills that will help you grow.',
                 fullDescription: data.full_description || data.description || 'This course covers everything you need to get started. Learn at your own pace with practical projects.',
                 price: 7,
-                originalPrice: parseFloat(data.original_price) || 49,
                 duration: data.duration || 'Self-paced',
                 students: data.enrollment_count || 5,
                 rating: data.rating || 4.5,
@@ -669,8 +672,6 @@ export default function CourseDetail() {
                   'Lifetime access',
                   'Community access'
                 ],
-                discount: 85,
-                color: `from-[${colors.primary}] to-[${colors.secondary}]`,
                 learningOutcomes: [
                   'Master the fundamental concepts',
                   'Build practical projects',
@@ -869,18 +870,10 @@ export default function CourseDetail() {
             <div className="md:w-1/3 mt-8 md:mt-0">
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
                 <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col mb-4">
                     <div className="text-4xl font-bold text-white">${course.price}</div>
-                    {course.originalPrice > course.price && (
-                      <div className="text-xl line-through text-white/70">${course.originalPrice}</div>
-                    )}
+                    <div className="text-sm text-white/80 mt-1">One-time payment • Lifetime access</div>
                   </div>
-                  {course.discount > 0 && (
-                    <div className="text-yellow-300 font-bold mb-2">
-                      Save {course.discount}%
-                    </div>
-                  )}
-                  <div className="text-sm text-white/80">One-time payment • Lifetime access</div>
                 </div>
 
                 <button
@@ -910,128 +903,145 @@ export default function CourseDetail() {
         <div className="md:flex gap-8">
           {/* Left Content */}
           <div className="md:w-2/3">
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
-              {['overview', 'curriculum', 'requirements', 'reviews'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-4 font-medium capitalize whitespace-nowrap transition-colors ${
-                    activeTab === tab 
-                      ? 'border-b-2' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                  style={activeTab === tab ? { borderColor: colors.primary, color: colors.primary } : {}}
-                >
-                  {tab === 'overview' && 'Overview'}
-                  {tab === 'curriculum' && 'Curriculum'}
-                  {tab === 'requirements' && 'Requirements'}
-                  {tab === 'reviews' && 'Reviews'}
-                </button>
-              ))}
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'overview' && (
-              <div className="space-y-8">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">About This Course</h3>
-                  <p className="text-gray-700 text-lg leading-relaxed">{course.fullDescription}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">What You'll Learn</h3>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    {course.learningOutcomes?.map((outcome, index) => (
-                      <div key={index} className="flex items-start bg-white p-3 rounded-lg border border-gray-200">
-                        <CheckCircle className="mr-2 flex-shrink-0 mt-0.5" size={18} style={{ color: colors.success }} />
-                        <span className="text-gray-700">{outcome}</span>
-                      </div>
-                    ))}
+            {/* Dropdown Sections - Overview */}
+            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => toggleSection('overview')}
+                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+              >
+                <h3 className="text-xl font-bold text-gray-900">Overview</h3>
+                {openSections.overview ? (
+                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                ) : (
+                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                )}
+              </button>
+              
+              {openSections.overview && (
+                <div className="p-4 bg-white border-t border-gray-200 space-y-6">
+                  <div>
+                    <p className="text-gray-700 text-lg leading-relaxed">{course.fullDescription}</p>
                   </div>
-                </div>
 
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Course Details</h3>
-                  <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold" style={{ color: colors.primary }}>{course.lessons}</div>
-                        <div className="text-sm text-gray-600">Lessons</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold" style={{ color: colors.secondary }}>{course.projects}</div>
-                        <div className="text-sm text-gray-600">Projects</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold" style={{ color: colors.success }}>{course.weeksToComplete}</div>
-                        <div className="text-sm text-gray-600">Duration</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold" style={{ color: colors.accent }}>{course.timeCommitment}</div>
-                        <div className="text-sm text-gray-600">Weekly effort</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Tools You'll Need</h3>
-                  <div className="bg-white rounded-xl border border-gray-200 p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {course.toolsNeeded?.map((tool, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: colors.primary + '15' }}>
-                            <Settings className="w-4 h-4" style={{ color: colors.primary }} />
-                          </div>
-                          <span className="text-gray-700">{tool}</span>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">What You'll Learn</h4>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {course.learningOutcomes?.map((outcome, index) => (
+                        <div key={index} className="flex items-start bg-gray-50 p-3 rounded-lg">
+                          <CheckCircle className="mr-2 flex-shrink-0 mt-0.5" size={18} style={{ color: colors.success }} />
+                          <span className="text-gray-700">{outcome}</span>
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
 
-            {activeTab === 'curriculum' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900">Course Curriculum</h3>
-                  <div className="text-gray-600 text-sm">
-                    {course.lessons} lessons • {course.projects} projects
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Course Details</h4>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold" style={{ color: colors.primary }}>{course.lessons}</div>
+                          <div className="text-sm text-gray-600">Lessons</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold" style={{ color: colors.secondary }}>{course.projects}</div>
+                          <div className="text-sm text-gray-600">Projects</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold" style={{ color: colors.success }}>{course.weeksToComplete}</div>
+                          <div className="text-sm text-gray-600">Duration</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-2xl font-bold" style={{ color: colors.accent }}>{course.timeCommitment}</div>
+                          <div className="text-sm text-gray-600">Weekly effort</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Tools You'll Need</h4>
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {course.toolsNeeded?.map((tool, index) => (
+                          <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: colors.primary + '15' }}>
+                              <Settings className="w-4 h-4" style={{ color: colors.primary }} />
+                            </div>
+                            <span className="text-gray-700">{tool}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                {course.modules?.map((module, moduleIndex) => (
-                  <div key={moduleIndex} className="border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="bg-gray-50 p-4 flex justify-between items-center">
-                      <div>
+              )}
+            </div>
+
+            {/* Dropdown Sections - Curriculum */}
+            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => toggleSection('curriculum')}
+                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+              >
+                <h3 className="text-xl font-bold text-gray-900">Curriculum</h3>
+                {openSections.curriculum ? (
+                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                ) : (
+                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                )}
+              </button>
+              
+              {openSections.curriculum && (
+                <div className="p-4 bg-white border-t border-gray-200 space-y-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-gray-600 text-sm">
+                      {course.lessons} lessons • {course.projects} projects
+                    </p>
+                  </div>
+                  {course.modules?.map((module, moduleIndex) => (
+                    <div key={moduleIndex} className="border border-gray-200 rounded-xl overflow-hidden">
+                      <div className="bg-gray-50 p-4">
                         <h4 className="font-bold text-gray-900">{module.title}</h4>
                         <div className="flex items-center mt-1 text-gray-600 text-sm">
                           <Clock size={14} className="mr-1" />
                           {module.duration} • {module.lessons} lessons
                         </div>
                       </div>
+                      <div className="p-4 bg-white">
+                        <ul className="space-y-2">
+                          {module.topics?.map((topic, topicIndex) => (
+                            <li key={topicIndex} className="flex items-center py-2 border-b border-gray-100 last:border-0">
+                              <Video size={16} className="text-gray-400 mr-3" />
+                              <span className="text-gray-700">{topic}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                    <div className="p-4 bg-white">
-                      <ul className="space-y-2">
-                        {module.topics?.map((topic, topicIndex) => (
-                          <li key={topicIndex} className="flex items-center py-2 border-b border-gray-100 last:border-0">
-                            <Video size={16} className="text-gray-400 mr-3" />
-                            <span className="text-gray-700">{topic}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
 
-            {activeTab === 'requirements' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Requirements</h3>
-                  <div className="bg-white rounded-xl border border-gray-200 p-6">
+            {/* Dropdown Sections - Requirements */}
+            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => toggleSection('requirements')}
+                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+              >
+                <h3 className="text-xl font-bold text-gray-900">Requirements</h3>
+                {openSections.requirements ? (
+                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                ) : (
+                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                )}
+              </button>
+              
+              {openSections.requirements && (
+                <div className="p-4 bg-white border-t border-gray-200 space-y-6">
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Prerequisites</h4>
                     <ul className="space-y-3">
                       {course.requirements?.map((req, index) => (
                         <li key={index} className="flex items-start gap-3">
@@ -1043,73 +1053,87 @@ export default function CourseDetail() {
                       ))}
                     </ul>
                   </div>
-                </div>
 
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Who This Course Is For</h3>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    {[
-                      'Beginners starting a new career',
-                      'Professionals upgrading skills',
-                      'Entrepreneurs building a business',
-                      'Career changers',
-                      'Self-learners',
-                      'Anyone interested in personal growth'
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center bg-white p-3 rounded-lg border border-gray-200">
-                        <div className="w-1.5 h-1.5 rounded-full mr-2" style={{ background: colors.secondary }}></div>
-                        <span className="text-gray-700">{item}</span>
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-3">Who This Course Is For</h4>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {[
+                        'Beginners starting a new career',
+                        'Professionals upgrading skills',
+                        'Entrepreneurs building a business',
+                        'Career changers',
+                        'Self-learners',
+                        'Anyone interested in personal growth'
+                      ].map((item, index) => (
+                        <div key={index} className="flex items-center bg-gray-50 p-3 rounded-lg">
+                          <div className="w-1.5 h-1.5 rounded-full mr-2" style={{ background: colors.secondary }}></div>
+                          <span className="text-gray-700">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Dropdown Sections - Reviews */}
+            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => toggleSection('reviews')}
+                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+              >
+                <h3 className="text-xl font-bold text-gray-900">Reviews</h3>
+                {openSections.reviews ? (
+                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                ) : (
+                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                )}
+              </button>
+              
+              {openSections.reviews && (
+                <div className="p-4 bg-white border-t border-gray-200 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="text-3xl font-bold mr-3" style={{ color: colors.primary }}>{course.rating}</div>
+                      <div>
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={16} className={`${i < Math.floor(course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                        <div className="text-gray-600 text-sm">{course.reviews} reviews</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {course.testimonials?.map((testimonial, index) => (
+                      <div key={index} className="bg-gray-50 rounded-xl p-6">
+                        <div className="flex items-center mb-3">
+                          <div className="flex">
+                            {[...Array(testimonial.rating)].map((_, i) => (
+                              <Star key={i} size={14} className="text-yellow-400 fill-current mr-1" />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ background: colors.primary + '15' }}>
+                            <span className="text-xs font-bold" style={{ color: colors.primary }}>
+                              {testimonial.name.charAt(0)}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="font-medium text-gray-900">{testimonial.name}</div>
+                            <div className="text-gray-600 text-sm">{testimonial.role}</div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {activeTab === 'reviews' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-2xl font-bold text-gray-900">Student Reviews</h3>
-                  <div className="flex items-center">
-                    <div className="text-3xl font-bold mr-3" style={{ color: colors.primary }}>{course.rating}</div>
-                    <div>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={16} className={`${i < Math.floor(course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
-                        ))}
-                      </div>
-                      <div className="text-gray-600 text-sm">{course.reviews} reviews</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {course.testimonials?.map((testimonial, index) => (
-                    <div key={index} className="bg-white border border-gray-200 rounded-xl p-6">
-                      <div className="flex items-center mb-3">
-                        <div className="flex">
-                          {[...Array(testimonial.rating)].map((_, i) => (
-                            <Star key={i} size={14} className="text-yellow-400 fill-current mr-1" />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ background: colors.primary + '15' }}>
-                          <span className="text-xs font-bold" style={{ color: colors.primary }}>
-                            {testimonial.name.charAt(0)}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900">{testimonial.name}</div>
-                          <div className="text-gray-600 text-sm">{testimonial.role}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Right Sidebar */}
@@ -1150,9 +1174,6 @@ export default function CourseDetail() {
               <div className="rounded-2xl p-6 text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
                 <h4 className="font-bold text-xl mb-4">Start Learning Today!</h4>
                 <div className="text-3xl font-bold mb-2">${course.price}</div>
-                {course.originalPrice > course.price && (
-                  <div className="text-white/80 line-through mb-1">${course.originalPrice}</div>
-                )}
                 <div className="text-white/80 mb-6">One-time payment • Lifetime access</div>
                 <button
                   onClick={handleEnrollNow}

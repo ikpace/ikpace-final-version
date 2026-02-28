@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 import { 
   Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff, 
   Shield, Sparkles, BookOpen, Users, Award, ChevronRight,
@@ -43,13 +44,29 @@ export default function Login() {
     }
   }, [])
 
+  // 🔧 FIXED: HandleSubmit with proper admin redirect
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
-      await signIn(email.trim(), password.trim())
+      console.log("========== LOGIN DEBUG START ==========")
+      console.log("1. Attempting to sign in with:", email)
+      
+      // Sign in the user
+      const user = await signIn(email.trim(), password.trim())
+      console.log("2. Sign in result - user:", user)
+      
+      if (!user || !user.id) {
+        console.error("No user ID returned from signIn")
+        setError('Login successful but user data incomplete. Please try again.')
+        setLoading(false)
+        return
+      }
+      
+      console.log("3. User ID:", user.id)
+      console.log("3a. User email:", user.email)
       
       // Save email if remember me is checked
       if (rememberMe) {
@@ -58,7 +75,78 @@ export default function Login() {
         localStorage.removeItem('rememberedEmail')
       }
       
-      navigate(from, { replace: true })
+      // 🔥 CRITICAL FIX: First check admin emails directly (fastest)
+      const adminEmails = ['newadmin@ikpace.com', 'test@ikpace.com', 'kendevdash@gmail.com', 'testadmin@test.com'];
+      if (adminEmails.includes(user.email)) {
+        console.log("🔥 ADMIN EMAIL DETECTED - FORCING REDIRECT TO /teacher")
+        
+        // Ensure the user has admin role in profiles
+        await supabase
+          .from('profiles')
+          .upsert({ 
+            id: user.id, 
+            email: user.email, 
+            role: 'admin' 
+          }, { onConflict: 'id' })
+        
+        navigate('/teacher', { replace: true })
+        return
+      }
+      
+      console.log("4. Fetching profile for user ID:", user.id)
+      
+      // Check user role from profiles table
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      console.log("5. Profile query result:", { 
+        profile, 
+        error: profileError,
+        errorCode: profileError?.code,
+        errorMessage: profileError?.message
+      })
+
+      if (profile) {
+        console.log("6. Profile found! Role:", profile.role)
+        
+        // Redirect based on role
+        if (profile.role === 'admin' || profile.role === 'instructor') {
+          console.log("7. ✅ Admin/Instructor detected - redirecting to /teacher")
+          navigate('/teacher', { replace: true })
+        } else {
+          console.log("7. ❌ Student detected - redirecting to dashboard")
+          navigate(from, { replace: true })
+        }
+      } else {
+        console.log("6. No profile found, creating one...")
+        
+        // Create profile with role based on email
+        const role = adminEmails.includes(user.email) ? 'admin' : 'student'
+        
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: user.id, 
+            email: user.email || email,
+            role: role
+          }])
+        
+        if (insertError) {
+          console.error('Error creating profile:', insertError)
+        }
+        
+        // Redirect based on role
+        if (role === 'admin') {
+          navigate('/teacher', { replace: true })
+        } else {
+          navigate('/dashboard', { replace: true })
+        }
+      }
+      
+      console.log("========== LOGIN DEBUG END ==========")
     } catch (err) {
       console.error("LOGIN ERROR:", err)
       setError(err.message || 'Invalid email or password. Please try again.')
@@ -93,12 +181,7 @@ export default function Login() {
         <div className="relative z-10 flex flex-col justify-between p-16 text-white">
           <div>
             <Link to="/" className="inline-flex items-center gap-3 mb-16 group">
-              <img 
-                
-                
-              />
-              
-             
+              <img />
             </Link>
 
             <h1 className="text-5xl font-bold mb-6">

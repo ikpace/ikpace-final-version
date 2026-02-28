@@ -7,6 +7,8 @@ import LiveChatSupport from './components/LiveChatSupport';
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword"; // ✅ ADDED
+import ResetPassword from "./pages/ResetPassword";   // ✅ ADDED
 import Courses from "./pages/Courses";
 import CourseEnroll from "./pages/CourseEnroll";      // For Enroll Now button (Purple - 15+ courses)
 import CourseViewMore from "./pages/CourseViewMore";  // For View More button (Blue/Orange - 5 courses)
@@ -15,16 +17,33 @@ import Dashboard from "./pages/Dashboard";
 import CareerReady from "./pages/CareerReady";
 import Community from "./pages/Community";
 import AdminDashboard from "./pages/AdminDashboard";
+import TeacherDashboard from "./pages/TeacherDashboard"; // ✅ ADDED: Teacher Dashboard
 import Checkout from "./pages/Checkout";
 import Profile from './pages/Profile';
 import MyCourses from './pages/MyCourses';
 import Certificates from './pages/Certificates';
 import PaymentSuccess from './pages/PaymentSuccess';  // Payment success page after checkout
-import CourseCurriculum from './pages/CourseCurriculum'; // ADDED: Course curriculum page
+import CourseCurriculum from './pages/CourseCurriculum'; // Course curriculum page
+import About from './pages/About'; // ✅ ADDED: Main About page
+import Programs from './pages/Programs'; // ✅ ADDED: Programs page
+import WomenInTech from './pages/WomenInTech'; // ✅ ADDED: Women in Tech main page
+import TeacherAccess from './pages/TeacherAccess';
 
 // ========== LEARNING PAGE IMPORT ==========
 import CoursePlayer from './pages/CoursePlayer';  // Import the course player/learning page
 // import EnhancedCoursePlayer from './pages/EnhancedCoursePlayer'; // Alternative if you prefer the enhanced version
+
+// ========== NEW IMPORT FOR TOPIC VIEW ==========
+import TopicView from './pages/TopicView'; // Add this import for individual topic viewing
+
+// ========== NEW IMPORT FOR DIRECT TEACHER ACCESS ==========
+import DirectTeacher from './pages/DirectTeacher'; // Direct teacher login page
+
+// ========== NEW IMPORT FOR COMPLETE TEACHER DASHBOARD ==========
+import CompleteTeacherDashboard from './pages/CompleteTeacherDashboard';
+
+// ========== NEW IMPORT FOR ADMIN CHAT DASHBOARD ==========
+import AdminChatDashboard from './pages/AdminChatDashboard';
 
 // ========== NEW IMPORTS FOR NAVBAR DROPDOWN PAGES ==========
 // Community Pages
@@ -71,24 +90,44 @@ function App() {
           <Route path="/" element={<Layout><Landing /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />
           <Route path="/register" element={<Layout><Register /></Layout>} />
+          <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />     {/* ✅ ADDED */}
+          <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />       {/* ✅ ADDED */}
           <Route path="/courses" element={<Layout><Courses /></Layout>} />
+          <Route path="/programs" element={<Layout><Programs /></Layout>} />                 {/* ✅ Programs page */}
+          <Route path="/women-tech" element={<Layout><WomenInTech /></Layout>} />            {/* ✅ Women in Tech main page */}
           <Route path="/course/:id" element={<Layout><CourseEnroll /></Layout>} />                {/* Enroll Now - Purple page (15+ courses) */}
           <Route path="/course/:id/view-more" element={<Layout><CourseViewMore /></Layout>} />   {/* View More - Blue/Orange page (5 courses) */}
           
           {/* ========== LEARNING & CURRICULUM ROUTES ========== */}
           <Route path="/learn/:courseId" element={<Layout><CoursePlayer /></Layout>} />           {/* Learning page after enrollment */}
-          <Route path="/course-curriculum/:slug" element={<Layout><CourseCurriculum /></Layout>} />  {/* ADDED: Course curriculum page */}
+          <Route path="/course-curriculum/:slug" element={<Layout><CourseCurriculum /></Layout>} />  {/* Course curriculum page */}
+          
+          {/* ========== TOPIC VIEW ROUTES ========== */}
+          <Route path="/learn/:courseId/topic/:topicId" element={<Layout><TopicView /></Layout>} />  {/* Individual topic page (preferred path) */}
+          <Route path="/topic/:courseId/:topicId" element={<Layout><TopicView /></Layout>} />        {/* Alternative shorter path */}
+          
           {/* Alternative if you prefer enhanced version: */}
           {/* <Route path="/learn/:courseId" element={<Layout><EnhancedCoursePlayer /></Layout>} /> */}
           
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+          <Route path="/teacher" element={<Layout><TeacherDashboard /></Layout>} />             {/* ✅ ADDED: Teacher Dashboard */}
           <Route path="/profile" element={<Layout><Profile /></Layout>} />
           <Route path="/my-courses" element={<Layout><MyCourses /></Layout>} />
           <Route path="/certificates" element={<Layout><Certificates /></Layout>} />
           <Route path="/career-ready" element={<Layout><CareerReady /></Layout>} />
           <Route path="/community" element={<Layout><Community /></Layout>} />
           <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
+          
+          {/* ========== DIRECT TEACHER ACCESS ROUTES ========== */}
+          <Route path="/direct-teacher" element={<DirectTeacher />} />  {/* No Layout wrapper - bypasses navbar */}
+          <Route path="/teacher-access" element={<TeacherAccess />} />
+          
+          {/* ========== NEW COMPLETE TEACHER DASHBOARD ROUTE ========== */}
+          <Route path="/complete-teacher" element={<CompleteTeacherDashboard />} />  {/* Full featured teacher dashboard */}
+          
+          {/* ========== ADMIN CHAT DASHBOARD ROUTE ========== */}
+          <Route path="/admin/chats" element={<Layout><AdminChatDashboard /></Layout>} />  {/* Admin chat management */}
           
           {/* ========== PAYMENT ROUTES ========== */}
           <Route path="/checkout/:courseId" element={<Layout><Checkout /></Layout>} />
@@ -102,6 +141,7 @@ function App() {
           <Route path="/community/ambassador" element={<Layout><CommunityAmbassador /></Layout>} />
 
           {/* ========== ABOUT DROPDOWN ROUTES ========== */}
+          <Route path="/about" element={<Layout><About /></Layout>} />                             {/* ✅ Main About page */}
           <Route path="/about/mission" element={<Layout><AboutMission /></Layout>} />
           <Route path="/about/team" element={<Layout><AboutTeam /></Layout>} />
           <Route path="/about/success-stories" element={<Layout><AboutSuccessStories /></Layout>} />

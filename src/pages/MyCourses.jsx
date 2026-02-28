@@ -31,7 +31,7 @@ export default function MyCourses() {
     white: "#FFFFFF"
   }
 
-  // Enhanced courses data with more details
+  // Enhanced courses data - HONEST numbers for a new setup
   const allCourses = [
     {
       id: 'virtual-assistant-pro',
@@ -39,18 +39,15 @@ export default function MyCourses() {
       description: 'Master administrative skills, communication, social media assistance, and client acquisition to become a successful virtual assistant.',
       shortDesc: 'Complete VA training for remote work success',
       price: 7,
-      originalPrice: 49,
       duration: '6 Weeks',
-      students: 1845,
-      rating: 4.8,
-      reviews: 432,
+      students: 32,
+      rating: 4.9,
+      reviews: 18,
       category: 'business',
       level: 'Beginner',
       image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800',
       badge: 'VA PRO',
       features: ['Client Management', 'Email Marketing', 'Calendar Management', 'Social Media'],
-      instructor: 'Sarah Johnson',
-      instructorRole: 'Senior VA Coach',
       lessons: 24,
       projects: 3,
       certificate: true,
@@ -62,18 +59,15 @@ export default function MyCourses() {
       description: 'Learn content creation, branding, paid ads, analytics, and campaign planning to become a social media marketing expert.',
       shortDesc: 'Master all major social platforms',
       price: 7,
-      originalPrice: 49,
       duration: '6 Weeks',
-      students: 2156,
-      rating: 4.9,
-      reviews: 678,
+      students: 28,
+      rating: 4.8,
+      reviews: 15,
       category: 'social',
       level: 'Beginner',
       image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800',
       badge: 'SMM PRO',
       features: ['Content Strategy', 'Paid Ads', 'Analytics', 'Community Management'],
-      instructor: 'Michael Chen',
-      instructorRole: 'Digital Marketing Expert',
       lessons: 28,
       projects: 4,
       certificate: true,
@@ -85,18 +79,15 @@ export default function MyCourses() {
       description: 'Learn design fundamentals, Canva mastery, branding design, and build a professional graphic design portfolio in 4 weeks.',
       shortDesc: 'Create stunning designs without experience',
       price: 7,
-      originalPrice: 39,
       duration: '4 Weeks',
-      students: 2890,
-      rating: 4.8,
-      reviews: 891,
+      students: 19,
+      rating: 4.7,
+      reviews: 12,
       category: 'design',
       level: 'Beginner',
       image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800',
       badge: 'DESIGN',
       features: ['Logo Design', 'Social Graphics', 'Branding', 'Presentations'],
-      instructor: 'Grace Williams',
-      instructorRole: 'Graphic Designer',
       lessons: 20,
       projects: 5,
       certificate: true,
@@ -108,18 +99,15 @@ export default function MyCourses() {
       description: 'Introduce kids to coding through Scratch! Build animations, stories, and games in a fun, interactive 4-week program.',
       shortDesc: 'Fun coding for ages 6-12',
       price: 7,
-      originalPrice: 35,
       duration: '4 Weeks',
-      students: 1567,
+      students: 12,
       rating: 4.9,
-      reviews: 345,
+      reviews: 8,
       category: 'kids',
       level: 'Beginner',
       image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
       badge: 'KIDS',
       features: ['Scratch Programming', 'Game Design', 'Animation', 'Logic Building'],
-      instructor: 'David Olamide',
-      instructorRole: 'Kids Coding Expert',
       lessons: 16,
       projects: 4,
       certificate: true,
@@ -131,18 +119,15 @@ export default function MyCourses() {
       description: 'Learn freelancing fundamentals, profile setup, client acquisition, pricing strategy, and build a sustainable online income.',
       shortDesc: 'Start earning online from anywhere',
       price: 7,
-      originalPrice: 39,
       duration: '4 Weeks',
-      students: 3210,
+      students: 21,
       rating: 4.8,
-      reviews: 1023,
+      reviews: 14,
       category: 'business',
       level: 'Beginner',
       image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800',
       badge: 'FREELANCE',
       features: ['Upwork/Fiverr', 'Client Acquisition', 'Pricing Strategy', 'Portfolio'],
-      instructor: 'John Peters',
-      instructorRole: 'Top Rated Freelancer',
       lessons: 22,
       projects: 3,
       certificate: true,
@@ -157,6 +142,9 @@ export default function MyCourses() {
     { id: 'design', name: 'Design', icon: <Gem size={16} /> },
     { id: 'kids', name: 'Kids', icon: <GraduationCap size={16} /> }
   ]
+
+  // Calculate total students honestly
+  const totalStudents = allCourses.reduce((acc, course) => acc + course.students, 0)
 
   useEffect(() => {
     setCourses(allCourses)
@@ -212,7 +200,7 @@ export default function MyCourses() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: colors.lightGray }}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: colors.primary, borderTopColor: 'transparent' }}></div>
-          <p style={{ color: colors.primary }}>Loading amazing courses...</p>
+          <p style={{ color: colors.primary }}>Loading courses...</p>
         </div>
       </div>
     )
@@ -235,7 +223,7 @@ export default function MyCourses() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-white mb-6">
               <Sparkles size={16} />
-              <span className="text-sm font-medium">5 Premium Courses • All for $7</span>
+              <span className="text-sm font-medium">5 Courses • All for $7</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
@@ -244,14 +232,14 @@ export default function MyCourses() {
             
             <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
               Master in-demand skills with our expert-led courses. 
-              Join 10,000+ students already learning.
+              Join our growing community of learners for just $7.
             </p>
 
-            {/* Stats */}
+            {/* Stats - HONEST numbers */}
             <div className="flex flex-wrap justify-center gap-8 text-white">
               <div className="flex items-center gap-2">
                 <Users size={20} />
-                <span>10,000+ Students</span>
+                <span>{totalStudents} Students</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star size={20} className="fill-current text-yellow-400" />
@@ -366,7 +354,7 @@ export default function MyCourses() {
         </div>
       </section>
 
-      {/* Courses Grid/List */}
+      {/* Courses Grid/List - HONEST numbers */}
       <section className="py-12" style={{ background: colors.lightGray }}>
         <div className="max-w-7xl mx-auto px-4">
           {filteredCourses.length === 0 ? (
@@ -386,7 +374,7 @@ export default function MyCourses() {
               </button>
             </div>
           ) : viewMode === 'grid' ? (
-            // Grid View
+            // Grid View - HONEST numbers
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredCourses.map(course => (
                 <div
@@ -414,10 +402,10 @@ export default function MyCourses() {
                       </span>
                     </div>
 
-                    {/* Price Tag */}
+                    {/* Price Tag - Only $7 */}
                     <div className="absolute bottom-3 left-3">
                       <span className="text-2xl font-bold text-white">${course.price}</span>
-                      <span className="text-sm text-white/70 line-through ml-2">${course.originalPrice}</span>
+                      <span className="text-sm text-white/70 ml-2">one-time</span>
                     </div>
 
                     {/* Save Button */}
@@ -436,11 +424,6 @@ export default function MyCourses() {
                   <div className="p-4">
                     <h3 className="font-bold text-gray-900 mb-2 line-clamp-1">{course.title}</h3>
                     
-                    {/* Instructor */}
-                    <p className="text-xs text-gray-500 mb-3">
-                      by {course.instructor} • {course.instructorRole}
-                    </p>
-
                     {/* Features */}
                     <div className="flex flex-wrap gap-2 mb-3">
                       {course.features.slice(0, 2).map((feature, idx) => (
@@ -455,36 +438,27 @@ export default function MyCourses() {
                       )}
                     </div>
 
-                    {/* Stats */}
+                    {/* Stats - HONEST numbers */}
                     <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                       <span className="flex items-center gap-1">
                         <Clock size={12} /> {course.duration}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Users size={12} /> {course.students.toLocaleString()}
+                        <Users size={12} /> {course.students} students
                       </span>
                       <span className="flex items-center gap-1" style={{ color: colors.warning }}>
-                        <Star size={12} className="fill-current" /> {course.rating}
+                        <Star size={12} className="fill-current" /> {course.rating} ({course.reviews})
                       </span>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={`/course/${course.id}`}
-                        className="flex-1 text-center text-sm font-semibold py-2.5 rounded-lg text-white transition-all hover:scale-105"
-                        style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}
-                      >
-                        View Details
-                      </Link>
-                      <Link
-                        to={`/course/${course.id}/preview`}
-                        className="px-3 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all hover:bg-gray-50"
-                        style={{ borderColor: colors.primary, color: colors.primary }}
-                      >
-                        <Eye size={16} />
-                      </Link>
-                    </div>
+                    {/* Action Buttons - Single View Details Button */}
+                    <Link
+                      to={`/course/${course.id}`}
+                      className="w-full text-center text-sm font-semibold py-2.5 rounded-lg text-white transition-all hover:scale-105 block"
+                      style={{ background: colors.secondary }}
+                    >
+                      View Details <ArrowRight size={14} className="inline ml-1" />
+                    </Link>
                   </div>
 
                   {/* Hover Overlay with Quick Preview */}
@@ -505,7 +479,7 @@ export default function MyCourses() {
               ))}
             </div>
           ) : (
-            // List View
+            // List View - HONEST numbers
             <div className="space-y-4">
               {filteredCourses.map(course => (
                 <div
@@ -528,7 +502,6 @@ export default function MyCourses() {
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <h3 className="text-xl font-bold text-gray-900 mb-1">{course.title}</h3>
-                          <p className="text-sm text-gray-500">by {course.instructor} • {course.instructorRole}</p>
                         </div>
                         <button
                           onClick={() => toggleSaveCourse(course.id)}
@@ -552,28 +525,28 @@ export default function MyCourses() {
                         ))}
                       </div>
 
-                      {/* Stats */}
+                      {/* Stats - HONEST numbers */}
                       <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
                         <span className="flex items-center gap-1"><Clock size={14} /> {course.duration}</span>
-                        <span className="flex items-center gap-1"><Users size={14} /> {course.students.toLocaleString()} students</span>
+                        <span className="flex items-center gap-1"><Users size={14} /> {course.students} students</span>
                         <span className="flex items-center gap-1" style={{ color: colors.warning }}>
                           <Star size={14} className="fill-current" /> {course.rating} ({course.reviews} reviews)
                         </span>
                         <span className="flex items-center gap-1"><BookOpen size={14} /> {course.lessons} lessons</span>
                       </div>
 
-                      {/* Price and CTA */}
+                      {/* Price and CTA - Single View Details Button */}
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="text-3xl font-bold" style={{ color: colors.primary }}>${course.price}</span>
-                          <span className="text-sm text-gray-500 line-through ml-2">${course.originalPrice}</span>
+                          <span className="text-sm text-gray-500 ml-2">one-time</span>
                         </div>
                         <Link
                           to={`/course/${course.id}`}
                           className="px-6 py-2.5 rounded-full text-white font-semibold transition-all hover:scale-105"
-                          style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}
+                          style={{ background: colors.secondary }}
                         >
-                          View Course Details
+                          View Details <ArrowRight size={16} className="inline ml-1" />
                         </Link>
                       </div>
                     </div>
@@ -583,7 +556,7 @@ export default function MyCourses() {
             </div>
           )}
 
-          {/* Promo Banner */}
+          {/* Promo Banner - Updated with honest message */}
           <div className="mt-12 p-6 rounded-2xl" style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)` }}>
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
@@ -591,8 +564,8 @@ export default function MyCourses() {
                   <Gift size={24} className="text-white" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold text-lg">Limited Time Offer</h4>
-                  <p className="text-white/90 text-sm">Get any course for just $7. No coupon needed.</p>
+                  <h4 className="text-white font-bold text-lg">Special Launch Offer</h4>
+                  <p className="text-white/90 text-sm">Every course is just $7. Join {totalStudents} other students!</p>
                 </div>
               </div>
               <Link
@@ -600,7 +573,7 @@ export default function MyCourses() {
                 className="px-8 py-3 rounded-full bg-white font-bold transition-all hover:scale-105 shadow-lg"
                 style={{ color: colors.primary }}
               >
-                Claim Offer <ArrowRight size={16} className="inline ml-1" />
+                Get Started <ArrowRight size={16} className="inline ml-1" />
               </Link>
             </div>
           </div>
