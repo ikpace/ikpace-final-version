@@ -1,31 +1,26 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { dashboardService } from '../services/dashboardService'
 import { 
-  BookOpen, TrendingUp, Award, Clock, Flame, Target, 
+  BookOpen, Award, Clock, Flame, Target, 
   Sparkles, Bell, Brain, Zap, CheckCircle, XCircle,
-  HelpCircle, ChevronRight, Play, Pause, RotateCcw,
+  Info, ChevronRight, RotateCcw,
   Star, Users, MessageCircle, Gift, Rocket, Crown,
-  Medal, Gem, Calendar, BarChart, PieChart, Activity,
-  Coffee, Headphones, Download, Share2, ThumbsUp,
-  AlertCircle, Info, Shield, Globe, Heart, User,
-  CreditCard, DollarSign, ShoppingBag, Receipt,
-  Wallet, TrendingUp as Trending, BarChart3,
-  BookMarked, Clock3, CalendarDays,
-  MessageSquare, ThumbsUp as ThumbsUpIcon, X,
-  Send, Bot, Minimize2, Maximize2, Volume2, VolumeX,
+  Medal, Gem, Calendar, BarChart, Activity,
+  Globe, Heart, User,
+  CreditCard, Receipt,
+  TrendingUp as Trending, BarChart3,
+  MessageSquare,
+  X, Send, Bot, Minimize2, Maximize2,
   Settings, LogOut, Edit3, Camera, MapPin, Briefcase,
-  GraduationCap, Users2, Globe2, Smartphone, Mail,
-  Phone, Github, Linkedin, Twitter, Instagram,
-  Facebook, Youtube, Twitch, Disc, Code, Coffee as CoffeeIcon,
-  ChevronLeft, TrendingUp as TrendingIcon, LineChart, PieChart as PieChartIcon,
-  BarChart as BarChartIcon, Activity as ActivityIcon, Map, Compass
+  GraduationCap, Users2, Globe2, Phone,
+  Github, Linkedin, Twitter,
+  ChevronLeft, TrendingUp as TrendingIcon, LineChart,
+  Activity as ActivityIcon, Map, Compass,
+  Copy, Check, QrCode, Share, AlertCircle,
+  DollarSign, CalendarDays, BookMarked
 } from 'lucide-react'
-// import VideoPlayer from '../components/VideoPlayer' // REMOVED
-// import { videoConfig } from '../config/videos' // REMOVED
-// import WhatsAppCommunity from '../components/WhatsAppCommunity'
 
 export default function Dashboard() {
   const { profile, user } = useAuth()
@@ -47,43 +42,31 @@ export default function Dashboard() {
   const [streak, setStreak] = useState(0)
   const [totalSpent, setTotalSpent] = useState(0)
   const [nextMilestone, setNextMilestone] = useState(null)
-  const [learningPath, setLearningPath] = useState([])
-  const [weeklyGoal, setWeeklyGoal] = useState(300) // minutes
+  const [weeklyGoal, setWeeklyGoal] = useState(300)
   const [weeklyProgress, setWeeklyProgress] = useState(0)
-  const [showChat, setShowChat] = useState(false)
-  const [chatMessages, setChatMessages] = useState([])
-  const [newMessage, setNewMessage] = useState('')
   const [activeTab, setActiveTab] = useState('overview')
-  const [chatMinimized, setChatMinimized] = useState(false)
-  const [chatNotifications, setChatNotifications] = useState(0)
-  const [soundEnabled, setSoundEnabled] = useState(true)
   const [showProfileCard, setShowProfileCard] = useState(false)
   const [editingProfile, setEditingProfile] = useState(false)
-  const [recScrollPosition, setRecScrollPosition] = useState(0)
-  const recommendationsRef = useRef(null)
-  const chatEndRef = useRef(null)
   const [learningInsights, setLearningInsights] = useState({
     dailyAverage: 0,
     weeklyComparison: 0,
     topCategory: '',
-    completionRate: 0,
-    predictedCompletion: ''
+    completionRate: 0
   })
   const [growthMetrics, setGrowthMetrics] = useState({
     weeklyGrowth: 0,
-    monthlyGrowth: 0,
     consistencyScore: 0,
     learningVelocity: 0,
-    skillGap: 0,
     nextLevel: ''
   })
-  const [showLiveStats, setShowLiveStats] = useState(false)
   const [liveStats, setLiveStats] = useState({
     activeUsers: 0,
     newStudents: 0,
     completedLessons: 0,
     certificatesEarned: 0
   })
+  const [copied, setCopied] = useState(false)
+  const [showQR, setShowQR] = useState(false)
   const [profileForm, setProfileForm] = useState({
     full_name: profile?.full_name || '',
     username: profile?.username || '',
@@ -130,7 +113,7 @@ export default function Dashboard() {
     indigo: "#5A67D8"
   }
 
-  // AI Quiz Questions (same as before)
+  // Quiz Questions
   const quizQuestions = [
     {
       id: 1,
@@ -145,76 +128,81 @@ export default function Dashboard() {
       explanation: "HTML stands for Hyper Text Markup Language - the standard language for creating web pages.",
       category: "Web Development"
     },
-    // ... (keep all quiz questions from original)
+    {
+      id: 2,
+      question: "Which of the following is a JavaScript framework?",
+      options: [
+        "Django",
+        "Laravel",
+        "React",
+        "Flask"
+      ],
+      correct: 2,
+      explanation: "React is a JavaScript library for building user interfaces, developed by Facebook.",
+      category: "JavaScript"
+    },
+    {
+      id: 3,
+      question: "What does CSS stand for?",
+      options: [
+        "Computer Style Sheets",
+        "Creative Style Sheets",
+        "Cascading Style Sheets",
+        "Colorful Style Sheets"
+      ],
+      correct: 2,
+      explanation: "CSS stands for Cascading Style Sheets, used for styling web pages.",
+      category: "Web Development"
+    }
   ]
 
-  // Chat bot responses (enhanced)
-  const getBotResponse = (message) => {
-    const msg = message.toLowerCase()
-    
-    if (msg.includes('hello') || msg.includes('hi')) {
-      return `Hello ${profile?.full_name?.split(' ')[0] || 'there'}! 👋 I'm your learning assistant. How can I help you today?`
-    }
-    if (msg.includes('progress') || msg.includes('how am i doing')) {
-      return `You're doing great! You've completed ${stats.completedCourses} courses with a ${stats.learningStreak}-day streak. Your completion rate is ${learningInsights.completionRate}%! Keep it up! 🚀`
-    }
-    if (msg.includes('streak') || msg.includes('daily')) {
-      return `Your current streak is ${stats.learningStreak} days! ${stats.learningStreak > 7 ? '🔥 Amazing consistency!' : 'Keep going to build your streak!'}`
-    }
-    if (msg.includes('course') || msg.includes('learn')) {
-      return `You're currently enrolled in ${enrollments.length} courses. ${enrollments.filter(e => !e.completed).length} in progress. Want me to recommend what to study next?`
-    }
-    if (msg.includes('certificate')) {
-      return `You have ${certificates.length} certificates. You can download them from the Certificates tab. 🎓`
-    }
-    if (msg.includes('payment') || msg.includes('spent')) {
-      return `You've spent GHS ${totalSpent.toFixed(2)} on ${payments.length} courses. Great investment in yourself! 💰`
-    }
-    if (msg.includes('goal') || msg.includes('target')) {
-      return `Your weekly goal is ${weeklyGoal} minutes. You're at ${weeklyProgress} minutes (${Math.round((weeklyProgress/weeklyGoal)*100)}%). ${weeklyProgress >= weeklyGoal ? 'Goal achieved! 🎉' : `${weeklyGoal - weeklyProgress} minutes to go!`}`
-    }
-    if (msg.includes('help') || msg.includes('support')) {
-      return `I'm here to help! You can ask me about:
-      • Your progress and stats
-      • Course recommendations
-      • Learning tips
-      • Certificates and payments
-      • Weekly goals
-      • Or anything about iKPACE!`
-    }
-    if (msg.includes('quiz') || msg.includes('challenge')) {
-      return `Ready for a challenge? Go to the Daily Quiz tab to test your knowledge and earn streak points! 🧠`
-    }
-    if (msg.includes('compare') || msg.includes('better')) {
-      return `You're learning ${growthMetrics.learningVelocity}% faster than last week! Your consistency score is ${growthMetrics.consistencyScore}/100. Keep it up! 📈`
-    }
-    if (msg.includes('thank')) {
-      return `You're welcome! 😊 Keep learning and growing! Anything else?`
-    }
-    if (msg.includes('bye')) {
-      return `Goodbye! Remember: every minute of learning brings you closer to your goals! 👋`
-    }
-    
-    return `Thanks for your message about "${message}". I'll help you with that! Could you provide a bit more detail? 🤔`
-  }
-
-  // Scroll to bottom of chat
+  // Fetch live stats
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [chatMessages])
+    const fetchLiveStats = async () => {
+      try {
+        // Get total users count
+        const { count: totalUsers } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
 
-  // Live stats simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveStats({
-        activeUsers: Math.floor(Math.random() * 50) + 100,
-        newStudents: Math.floor(Math.random() * 10) + 20,
-        completedLessons: Math.floor(Math.random() * 100) + 500,
-        certificatesEarned: Math.floor(Math.random() * 20) + 50
-      })
-    }, 5000)
+        // Get active users (last 30 minutes)
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString()
+        const { count: activeUsers } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('last_active', thirtyMinutesAgo)
+
+        // Get new students today
+        const today = new Date().toISOString().split('T')[0]
+        const { count: newStudents } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gte('created_at', today)
+
+        // Get completed lessons
+        const { count: completedLessons } = await supabase
+          .from('activity_logs')
+          .select('*', { count: 'exact', head: true })
+          .eq('activity_type', 'lesson_complete')
+
+        // Get total certificates
+        const { count: certificatesEarned } = await supabase
+          .from('certificates')
+          .select('*', { count: 'exact', head: true })
+
+        setLiveStats({
+          activeUsers: activeUsers || Math.floor(totalUsers * 0.3) || 45,
+          newStudents: newStudents || 12,
+          completedLessons: completedLessons || 567,
+          certificatesEarned: certificatesEarned || 89
+        })
+      } catch (error) {
+        console.error('Error fetching live stats:', error)
+      }
+    }
+
+    fetchLiveStats()
+    const interval = setInterval(fetchLiveStats, 60000)
     return () => clearInterval(interval)
   }, [])
 
@@ -223,8 +211,14 @@ export default function Dashboard() {
       fetchDashboardData()
       fetchRealTimeData()
       calculateWeeklyProgress()
-      loadChatHistory()
       calculateLearningInsights()
+      
+      // Update user's last active timestamp
+      supabase
+        .from('profiles')
+        .update({ last_active: new Date().toISOString() })
+        .eq('id', user.id)
+        .then(() => {})
       
       // Set up real-time subscription for notifications
       const notificationSubscription = supabase
@@ -236,10 +230,6 @@ export default function Dashboard() {
           filter: `user_id=eq.${user.id}`
         }, payload => {
           setNotifications(prev => [payload.new, ...prev])
-          setChatNotifications(prev => prev + 1)
-          if (soundEnabled) {
-            playNotificationSound()
-          }
         })
         .subscribe()
 
@@ -266,70 +256,91 @@ export default function Dashboard() {
     return () => clearInterval(timer)
   }, [quizStarted, quizCompleted, timeLeft, currentQuestion, selectedAnswer])
 
-  const playNotificationSound = () => {
-    const audio = new Audio('/notification.mp3')
-    audio.play().catch(() => {})
-  }
+  const calculateLearningInsights = async () => {
+    if (!user) return
 
-  const loadChatHistory = async () => {
     try {
-      const { data } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: true })
-        .limit(50)
+      // Calculate daily average from activity logs
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
       
-      if (data) {
-        setChatMessages(data.map(msg => ({
-          id: msg.id,
-          text: msg.message,
-          sender: msg.sender,
-          time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        })))
-      }
+      const { data: activityData } = await supabase
+        .from('activity_logs')
+        .select('created_at, metadata')
+        .eq('user_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+
+      let totalMinutes = 0
+      activityData?.forEach(activity => {
+        if (activity.metadata?.duration) {
+          totalMinutes += activity.metadata.duration
+        }
+      })
+      const dailyAvg = activityData?.length ? Math.round(totalMinutes / 30) : 0
+
+      // Calculate completion rate
+      const completionRate = stats.totalCourses > 0 
+        ? Math.round((stats.completedCourses / stats.totalCourses) * 100) 
+        : 0
+      
+      // Find top category from enrollments
+      const categories = enrollments.map(e => e.courses?.category).filter(Boolean)
+      const categoryCounts = categories.reduce((acc, cat) => {
+        acc[cat] = (acc[cat] || 0) + 1
+        return acc
+      }, {})
+      const topCategory = Object.keys(categoryCounts).length > 0 
+        ? Object.keys(categoryCounts).reduce((a, b) => 
+            categoryCounts[a] > categoryCounts[b] ? a : b, '') 
+        : 'General'
+
+      // Calculate weekly growth
+      const lastWeek = new Date()
+      lastWeek.setDate(lastWeek.getDate() - 7)
+      const twoWeeksAgo = new Date()
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
+
+      const { data: lastWeekActivity } = await supabase
+        .from('activity_logs')
+        .select('metadata')
+        .eq('user_id', user.id)
+        .gte('created_at', lastWeek.toISOString())
+
+      const { data: previousWeekActivity } = await supabase
+        .from('activity_logs')
+        .select('metadata')
+        .eq('user_id', user.id)
+        .gte('created_at', twoWeeksAgo.toISOString())
+        .lt('created_at', lastWeek.toISOString())
+
+      const lastWeekMinutes = lastWeekActivity?.reduce((sum, act) => sum + (act.metadata?.duration || 0), 0) || 0
+      const previousWeekMinutes = previousWeekActivity?.reduce((sum, act) => sum + (act.metadata?.duration || 0), 0) || 0
+      
+      const weeklyComparison = previousWeekMinutes > 0 
+        ? Math.round(((lastWeekMinutes - previousWeekMinutes) / previousWeekMinutes) * 100)
+        : 15
+
+      setLearningInsights({
+        dailyAverage: dailyAvg,
+        weeklyComparison: Math.max(0, weeklyComparison),
+        topCategory: topCategory,
+        completionRate: completionRate
+      })
+
+      // Calculate consistency score
+      const consistencyScore = Math.min(100, Math.floor((dailyAvg / 60) * 100))
+
+      setGrowthMetrics({
+        weeklyGrowth: Math.max(0, weeklyComparison),
+        consistencyScore: consistencyScore,
+        learningVelocity: Math.floor(Math.random() * 30) + 10,
+        nextLevel: stats.completedCourses >= 5 ? 'Intermediate' : 
+                  stats.completedCourses >= 2 ? 'Beginner' : 'Getting Started'
+      })
+
     } catch (error) {
-      console.error('Error loading chat history:', error)
+      console.error('Error calculating insights:', error)
     }
-  }
-
-  const calculateLearningInsights = () => {
-    // Calculate learning insights based on user data
-    const dailyAvg = Math.floor((stats.totalLearningTime / (stats.learningStreak || 1)) * 60) // minutes
-    const completionRate = stats.totalCourses > 0 
-      ? Math.round((stats.completedCourses / stats.totalCourses) * 100) 
-      : 0
-    
-    // Find top category from enrollments
-    const categories = enrollments.map(e => e.courses?.category).filter(Boolean)
-    const categoryCounts = categories.reduce((acc, cat) => {
-      acc[cat] = (acc[cat] || 0) + 1
-      return acc
-    }, {})
-    const topCategory = Object.keys(categoryCounts).reduce((a, b) => 
-      categoryCounts[a] > categoryCounts[b] ? a : b, '')
-    
-    // Predict completion (simplified)
-    const predictedDate = new Date()
-    predictedDate.setDate(predictedDate.getDate() + (30 - stats.completedCourses) * 7)
-    
-    setLearningInsights({
-      dailyAverage: dailyAvg,
-      weeklyComparison: Math.floor(Math.random() * 30) + 10,
-      topCategory: topCategory || 'General',
-      completionRate: completionRate,
-      predictedCompletion: predictedDate.toLocaleDateString()
-    })
-
-    // Growth metrics
-    setGrowthMetrics({
-      weeklyGrowth: Math.floor(Math.random() * 25) + 15,
-      monthlyGrowth: Math.floor(Math.random() * 50) + 30,
-      consistencyScore: Math.floor(Math.random() * 30) + 60,
-      learningVelocity: Math.floor(Math.random() * 40) + 20,
-      skillGap: Math.floor(Math.random() * 5) + 1,
-      nextLevel: ['Beginner', 'Intermediate', 'Advanced', 'Expert'][Math.floor(Math.random() * 4)]
-    })
   }
 
   const fetchDashboardData = async () => {
@@ -347,10 +358,8 @@ export default function Dashboard() {
           courses (
             id,
             title,
-            slug,
             thumbnail_url,
             duration_weeks,
-            description,
             instructor,
             level,
             price,
@@ -360,9 +369,7 @@ export default function Dashboard() {
         .eq('user_id', user.id)
         .order('enrolled_at', { ascending: false })
 
-      if (enrollmentsError) {
-        console.error('Error fetching enrollments:', enrollmentsError)
-      }
+      if (enrollmentsError) throw enrollmentsError
 
       if (enrollmentsData) {
         setEnrollments(enrollmentsData)
@@ -377,17 +384,20 @@ export default function Dashboard() {
         }))
       }
 
-      // Fetch payments from dashboardService
-      try {
-        const paymentData = await dashboardService.getUserPayments(user.id)
-        if (paymentData) {
-          setPayments(paymentData)
-          const spent = paymentData.reduce((sum, p) => sum + (p.amount || 0), 0)
-          setTotalSpent(spent)
-          setStats(prev => ({ ...prev, totalSpent: spent, paymentCount: paymentData.length }))
-        }
-      } catch (paymentError) {
-        console.error('Error fetching payments:', paymentError)
+      // Fetch payments from Supabase
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (paymentsError) throw paymentsError
+
+      if (paymentsData) {
+        setPayments(paymentsData)
+        const spent = paymentsData.reduce((sum, p) => sum + (p.amount || 0), 0)
+        setTotalSpent(spent)
+        setStats(prev => ({ ...prev, totalSpent: spent, paymentCount: paymentsData.length }))
       }
 
       // Fetch certificates
@@ -396,8 +406,7 @@ export default function Dashboard() {
         .select(`
           *,
           courses (
-            title,
-            duration_weeks
+            title
           )
         `)
         .eq('user_id', user.id)
@@ -408,7 +417,7 @@ export default function Dashboard() {
         setStats(prev => ({ ...prev, certificatesCount: certificatesData.length }))
       }
 
-      // Fetch real notifications from Supabase
+      // Fetch notifications
       const { data: notificationsData } = await supabase
         .from('notifications')
         .select('*')
@@ -416,37 +425,22 @@ export default function Dashboard() {
         .order('created_at', { ascending: false })
         .limit(5)
 
-      if (notificationsData && notificationsData.length > 0) {
+      if (notificationsData) {
         setNotifications(notificationsData)
       }
 
-      // Get user stats from dashboardService
-      try {
-        const userStats = await dashboardService.getUserStats(user.id)
-        setStats(prev => ({
-          ...prev,
-          totalSpent: userStats.totalSpent || prev.totalSpent,
-          paymentCount: userStats.paymentCount || prev.paymentCount
-        }))
-      } catch (statsError) {
-        console.error('Error fetching user stats:', statsError)
-      }
-
-      // Fetch AI-powered recommendations based on user's interests
+      // Fetch recommendations
       const userCategories = enrollmentsData?.map(e => e.courses?.category).filter(Boolean) || []
       
-      // Get all courses except enrolled ones
       const { data: allCourses } = await supabase
         .from('courses')
         .select('*')
         .limit(10)
 
       if (allCourses) {
-        // Filter out enrolled courses
         const enrolledIds = enrollmentsData?.map(e => e.course_id) || []
         const availableCourses = allCourses.filter(c => !enrolledIds.includes(c.id))
         
-        // Sort by category match and rating
         const recommended = availableCourses
           .sort((a, b) => {
             const aMatch = userCategories.includes(a.category) ? 1 : 0
@@ -458,27 +452,15 @@ export default function Dashboard() {
           .map(course => ({
             id: course.id,
             title: course.title,
-            course: course.title,
             reason: userCategories.includes(course.category) 
               ? `Based on your interest in ${course.category}`
               : `Popular in ${course.category}`,
             image: course.thumbnail_url || 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=200',
             category: course.category,
-            rating: course.rating,
-            price: course.price,
-            duration: course.duration_weeks
+            price: course.price
           }))
         
         setRecommendations(recommended)
-      }
-
-      // Generate learning path
-      if (enrollmentsData) {
-        const nextCourses = enrollmentsData
-          .filter(e => !e.completed)
-          .sort((a, b) => b.progress_percentage - a.progress_percentage)
-          .slice(0, 2)
-        setLearningPath(nextCourses)
       }
 
       // Calculate next milestone
@@ -487,15 +469,23 @@ export default function Dashboard() {
       const next = milestones.find(m => m > totalCompleted) || 25
       setNextMilestone({ target: next, current: totalCompleted })
 
-      // Set profile stats
-      setStats(prev => ({
-        ...prev,
-        learningStreak: profile?.learning_streak || 7,
-        totalLearningTime: profile?.total_hours_learned || 42,
-        quizzesTaken: profile?.quizzes_taken || 12,
-        averageScore: profile?.avg_quiz_score || 85,
-        achievements: profile?.achievements_count || 5
-      }))
+      // Fetch user stats from profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (profileData) {
+        setStats(prev => ({
+          ...prev,
+          learningStreak: profileData.learning_streak || 0,
+          totalLearningTime: profileData.total_hours_learned || 0,
+          quizzesTaken: profileData.quizzes_taken || 0,
+          averageScore: profileData.avg_quiz_score || 0,
+          achievements: profileData.achievements_count || 0
+        }))
+      }
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -507,24 +497,32 @@ export default function Dashboard() {
   const fetchRealTimeData = async () => {
     if (!user) return
     
-    // Fetch recent activity
     const { data: activityData } = await supabase
       .from('activity_logs')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(5)
+      .limit(10)
 
     if (activityData) {
       setRecentActivity(activityData)
     }
   }
 
-  const calculateWeeklyProgress = () => {
-    // Calculate total minutes learned this week from actual data
-    // This would ideally come from your database
-    const total = Math.min(weeklyProgress + 45, weeklyGoal) // Simulated progress for now
-    setWeeklyProgress(total)
+  const calculateWeeklyProgress = async () => {
+    if (!user) return
+
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const { data: weeklyActivity } = await supabase
+      .from('activity_logs')
+      .select('metadata')
+      .eq('user_id', user.id)
+      .gte('created_at', sevenDaysAgo.toISOString())
+
+    const totalMinutes = weeklyActivity?.reduce((sum, act) => sum + (act.metadata?.duration || 0), 0) || 0
+    setWeeklyProgress(Math.min(totalMinutes, weeklyGoal))
   }
 
   const getGreeting = () => {
@@ -532,6 +530,26 @@ export default function Dashboard() {
     if (hour < 12) return 'Good Morning'
     if (hour < 18) return 'Good Afternoon'
     return 'Good Evening'
+  }
+
+  const getDisplayName = () => {
+    if (profile?.username) {
+      return profile.username;
+    }
+    if (profile?.full_name) {
+      return profile.full_name.split(' ')[0];
+    }
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'Learner';
+  }
+
+  const copyStudentId = () => {
+    const studentId = profile?.student_id || user?.id?.slice(0, 8) || 'IKP-001'
+    navigator.clipboard.writeText(studentId)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleStartQuiz = () => {
@@ -564,10 +582,43 @@ export default function Dashboard() {
       setQuizCompleted(true)
       setShowResult(true)
       
-      // Save quiz result to Supabase
       if (user) {
-        dashboardService.saveIQResult(user.id, score, quizQuestions)
-          .catch(err => console.error('Error saving quiz result:', err))
+        // Save quiz result
+        const finalScore = Math.round((score / quizQuestions.length) * 100)
+        
+        supabase
+          .from('profiles')
+          .update({ 
+            quizzes_taken: (stats.quizzesTaken || 0) + 1,
+            avg_quiz_score: stats.averageScore 
+              ? Math.round((stats.averageScore + finalScore) / 2)
+              : finalScore
+          })
+          .eq('id', user.id)
+          .then(() => {
+            setStats(prev => ({
+              ...prev,
+              quizzesTaken: (prev.quizzesTaken || 0) + 1,
+              averageScore: prev.averageScore 
+                ? Math.round((prev.averageScore + finalScore) / 2)
+                : finalScore
+            }))
+          })
+
+        // Create activity log
+        supabase
+          .from('activity_logs')
+          .insert([{
+            user_id: user.id,
+            activity_type: 'quiz',
+            metadata: {
+              description: `Completed quiz with score ${score}/${quizQuestions.length}`,
+              score: score,
+              total: quizQuestions.length,
+              date: new Date().toISOString()
+            }
+          }])
+          .then(() => {})
       }
     }
   }
@@ -598,54 +649,6 @@ export default function Dashboard() {
     }
   }
 
-  const sendChatMessage = async () => {
-    if (!newMessage.trim()) return
-
-    const userMsg = {
-      id: Date.now(),
-      text: newMessage,
-      sender: 'user',
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-    setChatMessages(prev => [...prev, userMsg])
-    setNewMessage('')
-    
-    // Save user message to Supabase
-    try {
-      await supabase.from('chat_messages').insert([{
-        user_id: user?.id,
-        message: newMessage,
-        sender: 'user'
-      }])
-    } catch (error) {
-      console.error('Error saving message:', error)
-    }
-    
-    // Simulate bot response
-    setTimeout(async () => {
-      const botResponse = getBotResponse(newMessage)
-      const botMsg = {
-        id: Date.now() + 1,
-        text: botResponse,
-        sender: 'bot',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-      setChatMessages(prev => [...prev, botMsg])
-      setChatNotifications(prev => prev + 1)
-      
-      // Save bot response to Supabase
-      try {
-        await supabase.from('chat_messages').insert([{
-          user_id: user?.id,
-          message: botResponse,
-          sender: 'bot'
-        }])
-      } catch (error) {
-        console.error('Error saving bot response:', error)
-      }
-    }, 1000)
-  }
-
   const handleProfileUpdate = async () => {
     try {
       const { error } = await supabase
@@ -656,25 +659,974 @@ export default function Dashboard() {
       if (error) throw error
       setEditingProfile(false)
       setShowProfileCard(false)
-      // Refresh profile
-      window.location.reload()
+      fetchDashboardData()
     } catch (error) {
       console.error('Error updating profile:', error)
     }
   }
 
-  const scrollRecommendations = (direction) => {
-    if (recommendationsRef.current) {
-      const scrollAmount = 300
-      const newPosition = direction === 'left' 
-        ? recScrollPosition - scrollAmount 
-        : recScrollPosition + scrollAmount
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', notificationId)
       
-      recommendationsRef.current.scrollTo({
-        left: newPosition,
-        behavior: 'smooth'
-      })
-      setRecScrollPosition(newPosition)
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+      )
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const renderTabContent = () => {
+    switch(activeTab) {
+      case 'overview':
+        return (
+          <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6 md:space-y-8">
+              
+              {/* AI Learning Assistant */}
+              <div 
+                onClick={() => setActiveTab('insights')}
+                className="cursor-pointer bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border-l-4 hover:shadow-xl transition-all" 
+                style={{ borderLeftColor: colors.secondary }}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 sm:mb-4">
+                  <div className="p-2 sm:p-3 rounded-xl" style={{ background: colors.secondary + '20' }}>
+                    <Bot size={20} className="sm:w-6 sm:h-6" style={{ color: colors.secondary }} />
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-xl font-bold" style={{ color: colors.primary }}>Your Learning Assistant</h3>
+                    <p className="text-xs sm:text-sm text-gray-600">Personalized insights based on your progress</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                  <div className="p-3 sm:p-4 rounded-xl bg-gray-50">
+                    <p className="text-xs text-gray-500 mb-1">Daily Average</p>
+                    <p className="text-lg sm:text-2xl font-bold" style={{ color: colors.primary }}>{learningInsights.dailyAverage} <span className="text-xs sm:text-sm font-normal text-gray-500">min</span></p>
+                    <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+                      <TrendingIcon size={10} /> {learningInsights.weeklyComparison}% vs last week
+                    </p>
+                  </div>
+                  <div className="p-3 sm:p-4 rounded-xl bg-gray-50">
+                    <p className="text-xs text-gray-500 mb-1">Top Interest</p>
+                    <p className="text-base sm:text-lg font-bold" style={{ color: colors.secondary }}>{learningInsights.topCategory}</p>
+                    <p className="text-xs text-gray-500 mt-1">Keep exploring!</p>
+                  </div>
+                </div>
+
+                <div className="p-3 sm:p-4 rounded-xl" style={{ background: colors.primary + '05' }}>
+                  <p className="text-xs sm:text-sm text-gray-700 mb-2">
+                    🎯 <span className="font-bold">Next milestone:</span> Complete {nextMilestone?.target} courses
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-700">
+                    ⏱️ <span className="font-bold">At your current pace:</span> Complete in {Math.floor(Math.random() * 5) + 2} days
+                  </p>
+                </div>
+              </div>
+
+              {/* AI Quiz Challenge */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+                  <div 
+                    onClick={() => setActiveTab('quiz')}
+                    className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-all"
+                  >
+                    <div className="p-2 sm:p-3 rounded-xl" style={{ background: colors.secondary + '20' }}>
+                      <Brain size={20} className="sm:w-6 sm:h-6" style={{ color: colors.secondary }} />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-xl font-bold" style={{ color: colors.primary }}>AI Daily Challenge</h3>
+                      <p className="text-xs sm:text-sm text-gray-600">Test your knowledge</p>
+                    </div>
+                  </div>
+                  {!showQuiz && (
+                    <button
+                      onClick={handleStartQuiz}
+                      className="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-full text-white font-medium hover:scale-105 transition-all text-xs sm:text-sm"
+                      style={{ background: colors.secondary }}
+                    >
+                      Start Quiz
+                    </button>
+                  )}
+                </div>
+
+                {showQuiz && !quizCompleted ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span style={{ color: colors.primary }}>Q{currentQuestion + 1}/{quizQuestions.length}</span>
+                      <span className="flex items-center gap-2">
+                        <Flame size={12} className={streak > 0 ? 'text-orange-500' : 'text-gray-400'} />
+                        <span>Streak: {streak}</span>
+                      </span>
+                    </div>
+                    
+                    <div className="h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full transition-all duration-300"
+                        style={{ 
+                          width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%`,
+                          background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+                        }}
+                      ></div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Clock size={14} className="text-gray-500" />
+                        <span className={`text-xs sm:text-sm font-bold ${timeLeft < 10 ? 'text-red-500' : 'text-gray-700'}`}>
+                          {timeLeft}s
+                        </span>
+                      </div>
+                      <span className="text-xs sm:text-sm text-gray-500">Score: {score}/{quizQuestions.length}</span>
+                    </div>
+
+                    <div className="p-3 sm:p-4 rounded-xl" style={{ background: colors.lightGray }}>
+                      <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                        <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full" style={{ background: colors.primary + '20', color: colors.primary }}>
+                          {quizQuestions[currentQuestion].category}
+                        </span>
+                      </div>
+                      <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
+                        {quizQuestions[currentQuestion].question}
+                      </h4>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        {quizQuestions[currentQuestion].options.map((option, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleAnswerSelect(index)}
+                            className={`w-full text-left p-2 sm:p-3 rounded-lg text-xs sm:text-sm transition-all ${
+                              selectedAnswer === index
+                                ? index === quizQuestions[currentQuestion].correct
+                                  ? 'bg-green-100 border border-green-500'
+                                  : 'bg-red-100 border border-red-500'
+                                : 'bg-white border border-gray-200 hover:border-orange-500'
+                            }`}
+                            disabled={selectedAnswer !== null}
+                          >
+                            <span className="flex items-center gap-2 sm:gap-3">
+                              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px] sm:text-xs">
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                              <span className="text-xs sm:text-sm">{option}</span>
+                              {selectedAnswer === index && (
+                                index === quizQuestions[currentQuestion].correct
+                                  ? <CheckCircle size={12} className="ml-auto text-green-500" />
+                                  : <XCircle size={12} className="ml-auto text-red-500" />
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {selectedAnswer !== null && (
+                      <div className="p-2 sm:p-3 rounded-lg bg-blue-50 border border-blue-200">
+                        <div className="flex items-start gap-1 sm:gap-2">
+                          <Info size={12} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-[10px] sm:text-xs text-blue-700">{quizQuestions[currentQuestion].explanation}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleNextQuestion}
+                      disabled={selectedAnswer === null}
+                      className="w-full py-2 sm:py-2.5 rounded-lg text-white font-medium transition-all disabled:opacity-50 text-xs sm:text-sm"
+                      style={{ background: colors.primary }}
+                    >
+                      {currentQuestion === quizQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+                    </button>
+                  </div>
+                ) : showResult ? (
+                  <div className="text-center py-4 sm:py-6">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full flex items-center justify-center" style={{ background: colors.secondary + '20' }}>
+                      <Award size={24} className="sm:w-8 sm:h-8" style={{ color: colors.secondary }} />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: colors.primary }}>Quiz Completed!</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mb-4">You scored {score} out of {quizQuestions.length}</p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center">
+                      <button
+                        onClick={handleRestartQuiz}
+                        className="px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 flex items-center justify-center gap-2"
+                        style={{ background: colors.primary + '10', color: colors.primary }}
+                      >
+                        <RotateCcw size={14} />
+                        Try Again
+                      </button>
+                      <button
+                        onClick={() => setShowQuiz(false)}
+                        className="px-4 sm:px-6 py-2 rounded-full text-white text-sm font-medium transition-all hover:scale-105"
+                        style={{ background: colors.secondary }}
+                      >
+                        Back
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {/* My Courses Section */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div 
+                    onClick={() => setActiveTab('courses')}
+                    className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition-all"
+                  >
+                    <h3 className="text-base sm:text-lg font-bold flex items-center gap-1 sm:gap-2" style={{ color: colors.primary }}>
+                      <BookOpen size={16} />
+                      Continue Learning
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={() => setActiveTab('courses')}
+                    className="text-xs font-medium hover:underline flex items-center gap-1" 
+                    style={{ color: colors.secondary }}
+                  >
+                    View All <ChevronRight size={12} />
+                  </button>
+                </div>
+
+                {enrollments.length === 0 ? (
+                  <div className="text-center py-4 sm:py-6">
+                    <BookOpen size={32} className="mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-600 mb-3">Start your learning journey today!</p>
+                    <button
+                      onClick={() => window.location.href = '/courses'}
+                      className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-white text-xs sm:text-sm font-medium hover:scale-105 transition-all"
+                      style={{ background: colors.primary }}
+                    >
+                      Browse Courses
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2 sm:space-y-3">
+                    {enrollments.slice(0, 2).map((enrollment) => (
+                      <div
+                        key={enrollment.id}
+                        onClick={() => window.location.href = `/learn/${enrollment.course_id}`}
+                        className="cursor-pointer block p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-all border border-gray-100"
+                      >
+                        <div className="flex gap-2 sm:gap-3">
+                          <img
+                            src={enrollment.courses?.thumbnail_url || 'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                            alt={enrollment.courses?.title}
+                            className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-lg"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-gray-900 text-xs sm:text-sm mb-1 truncate">{enrollment.courses?.title}</h4>
+                            <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-gray-500 mb-1">
+                              <span>{enrollment.courses?.duration_weeks} weeks</span>
+                              <span>•</span>
+                              <span>{enrollment.courses?.level}</span>
+                            </div>
+                            <div className="mt-1">
+                              <div className="flex items-center justify-between text-[10px] sm:text-xs mb-0.5">
+                                <span>Progress</span>
+                                <span className="font-bold" style={{ color: colors.primary }}>{Math.round(enrollment.progress_percentage || 0)}%</span>
+                              </div>
+                              <div className="h-1 sm:h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full"
+                                  style={{ 
+                                    width: `${enrollment.progress_percentage || 0}%`,
+                                    background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recent Activity */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <div 
+                    onClick={() => setActiveTab('activity')}
+                    className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition-all"
+                  >
+                    <h3 className="text-base sm:text-lg font-bold flex items-center gap-1 sm:gap-2" style={{ color: colors.primary }}>
+                      <Activity size={16} />
+                      Recent Activity
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={() => setActiveTab('activity')}
+                    className="text-xs font-medium hover:underline flex items-center gap-1" 
+                    style={{ color: colors.secondary }}
+                  >
+                    View All <ChevronRight size={12} />
+                  </button>
+                </div>
+
+                {recentActivity.length === 0 ? (
+                  <p className="text-xs sm:text-sm text-gray-500 text-center py-3">No recent activity</p>
+                ) : (
+                  <div className="space-y-2">
+                    {recentActivity.slice(0, 3).map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 transition-all cursor-pointer"
+                        onClick={() => {
+                          if (activity.metadata?.link) {
+                            window.location.href = activity.metadata.link
+                          }
+                        }}
+                      >
+                        <div className={`p-1 sm:p-1.5 rounded-lg flex-shrink-0 ${
+                          activity.activity_type === 'payment' ? 'bg-green-100' :
+                          activity.activity_type === 'quiz' ? 'bg-purple-100' :
+                          'bg-blue-100'
+                        }`}>
+                          {activity.activity_type === 'payment' && <CreditCard size={12} className="text-green-600" />}
+                          {activity.activity_type === 'quiz' && <Brain size={12} className="text-purple-600" />}
+                          {activity.activity_type === 'course' && <BookOpen size={12} className="text-blue-600" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm text-gray-700 truncate">{activity.metadata?.description || 'Activity'}</p>
+                          <p className="text-[10px] sm:text-xs text-gray-400">{new Date(activity.created_at).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-4 sm:space-y-6">
+              {/* Global Stats Card */}
+              <div 
+                onClick={() => setActiveTab('community')}
+                className="cursor-pointer bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 border-t-4 hover:shadow-xl transition-all" 
+                style={{ borderTopColor: colors.secondary }}
+              >
+                <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="p-1.5 sm:p-2 rounded-lg" style={{ background: colors.secondary + '10' }}>
+                    <Globe size={14} className="sm:w-4 sm:h-4" style={{ color: colors.secondary }} />
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold" style={{ color: colors.primary }}>iKPACE Global Stats</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="p-2 sm:p-3 rounded-lg bg-gray-50">
+                    <p className="text-[10px] sm:text-xs text-gray-500">Active Learners</p>
+                    <p className="text-base sm:text-lg font-bold" style={{ color: colors.primary }}>{liveStats.activeUsers}+</p>
+                  </div>
+                  <div className="p-2 sm:p-3 rounded-lg bg-gray-50">
+                    <p className="text-[10px] sm:text-xs text-gray-500">Countries</p>
+                    <p className="text-base sm:text-lg font-bold" style={{ color: colors.secondary }}>15+</p>
+                  </div>
+                </div>
+                <div className="text-[10px] sm:text-xs text-gray-600 mb-2 sm:mb-3">
+                  🎉 You're among <span className="font-bold text-green-600">{liveStats.activeUsers}+ learners</span> worldwide!
+                </div>
+                <div className="relative h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="absolute top-0 left-0 h-full bg-green-500" style={{ width: '65%' }}></div>
+                </div>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2">You're ahead of 65% of learners</p>
+              </div>
+
+              {/* Weekly Goal Progress */}
+              <div 
+                onClick={() => setActiveTab('insights')}
+                className="cursor-pointer bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-all"
+              >
+                <h3 className="text-sm sm:text-base font-bold mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2" style={{ color: colors.primary }}>
+                  <Target size={14} />
+                  Weekly Goal
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs sm:text-sm">
+                    <span className="text-gray-600">Learning Time</span>
+                    <span className="font-bold" style={{ color: colors.primary }}>{weeklyProgress} / {weeklyGoal} min</span>
+                  </div>
+                  <div className="h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full"
+                      style={{ 
+                        width: `${(weeklyProgress / weeklyGoal) * 100}%`,
+                        background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+                      }}
+                    ></div>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-gray-500">{weeklyGoal - weeklyProgress} minutes to go</p>
+                </div>
+              </div>
+
+              {/* Next Milestone */}
+              {nextMilestone && (
+                <div 
+                  onClick={() => setActiveTab('achievements')}
+                  className="cursor-pointer bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 hover:shadow-xl transition-all"
+                >
+                  <h3 className="text-sm sm:text-base font-bold mb-2 sm:mb-3 flex items-center gap-1 sm:gap-2" style={{ color: colors.primary }}>
+                    <Medal size={14} />
+                    Next Milestone
+                  </h3>
+                  <div className="text-center">
+                    <div className="text-xl sm:text-2xl font-bold mb-1" style={{ color: colors.secondary }}>{nextMilestone.current}/{nextMilestone.target}</div>
+                    <p className="text-[10px] sm:text-xs text-gray-600 mb-2">Courses Completed</p>
+                    <div className="h-1 sm:h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full"
+                        style={{ 
+                          width: `${(nextMilestone.current / nextMilestone.target) * 100}%`,
+                          background: colors.secondary
+                        }}
+                      ></div>
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1 sm:mt-2">{nextMilestone.target - nextMilestone.current} more to go</p>
+                  </div>
+                </div>
+              )}
+
+              {/* AI Recommendations */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <div 
+                    onClick={() => setActiveTab('recommendations')}
+                    className="flex items-center gap-1 sm:gap-2 cursor-pointer hover:opacity-80 transition-all"
+                  >
+                    <h3 className="text-sm sm:text-base font-bold flex items-center gap-1 sm:gap-2" style={{ color: colors.primary }}>
+                      <Sparkles size={14} />
+                      For You
+                    </h3>
+                  </div>
+                </div>
+
+                {recommendations.length === 0 ? (
+                  <p className="text-xs sm:text-sm text-gray-500 text-center py-3">Complete courses to get recommendations</p>
+                ) : (
+                  <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                    {recommendations.map((rec, index) => (
+                      <div 
+                        key={index} 
+                        onClick={() => window.location.href = `/course/${rec.id}`}
+                        className="cursor-pointer flex-none w-28 sm:w-36 snap-start bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all overflow-hidden"
+                      >
+                        <img src={rec.image} alt={rec.title} className="w-full h-12 sm:h-16 object-cover" />
+                        <div className="p-1.5 sm:p-2">
+                          <h4 className="font-bold text-[10px] sm:text-xs text-gray-900 mb-1 line-clamp-1">{rec.title}</h4>
+                          <p className="text-[8px] sm:text-[10px] text-gray-500 mb-1 line-clamp-2">{rec.reason}</p>
+                          <span className="text-[8px] sm:text-[10px] font-medium flex items-center gap-1 hover:underline" style={{ color: colors.secondary }}>
+                            View <ChevronRight size={6} className="sm:w-2 sm:h-2" />
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+                <h3 className="text-sm sm:text-base font-bold mb-2 sm:mb-3" style={{ color: colors.primary }}>Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+                  <button 
+                    onClick={() => window.location.href = '/courses'}
+                    className="p-1.5 sm:p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center"
+                  >
+                    <BookOpen size={12} className="mx-auto mb-1" style={{ color: colors.primary }} />
+                    <span className="text-[10px] sm:text-xs">Browse</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('community')}
+                    className="p-1.5 sm:p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center"
+                  >
+                    <Users size={12} className="mx-auto mb-1" style={{ color: colors.secondary }} />
+                    <span className="text-[10px] sm:text-xs">Community</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('certificates')}
+                    className="p-1.5 sm:p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center"
+                  >
+                    <Award size={12} className="mx-auto mb-1" style={{ color: colors.success }} />
+                    <span className="text-[10px] sm:text-xs">Certs</span>
+                  </button>
+                  <button 
+                    onClick={() => setShowProfileCard(true)}
+                    className="p-1.5 sm:p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center"
+                  >
+                    <User size={12} className="mx-auto mb-1" style={{ color: colors.warning }} />
+                    <span className="text-[10px] sm:text-xs">Profile</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'insights':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>📊 Your Learning Insights</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="p-4 sm:p-6 rounded-xl" style={{ background: colors.primary + '05' }}>
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="p-2 sm:p-3 rounded-xl" style={{ background: colors.primary + '15' }}>
+                    <Clock size={20} className="sm:w-6 sm:h-6" style={{ color: colors.primary }} />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Daily Average</p>
+                    <p className="text-lg sm:text-2xl font-bold">{learningInsights.dailyAverage} <span className="text-xs sm:text-sm font-normal">min</span></p>
+                  </div>
+                </div>
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <TrendingIcon size={12} /> {learningInsights.weeklyComparison}% vs last week
+                </p>
+              </div>
+
+              <div className="p-4 sm:p-6 rounded-xl" style={{ background: colors.secondary + '05' }}>
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="p-2 sm:p-3 rounded-xl" style={{ background: colors.secondary + '15' }}>
+                    <Target size={20} className="sm:w-6 sm:h-6" style={{ color: colors.secondary }} />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Completion Rate</p>
+                    <p className="text-lg sm:text-2xl font-bold">{learningInsights.completionRate}%</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600">{stats.completedCourses} of {stats.totalCourses} courses</p>
+              </div>
+
+              <div className="p-4 sm:p-6 rounded-xl" style={{ background: colors.success + '05' }}>
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="p-2 sm:p-3 rounded-xl" style={{ background: colors.success + '15' }}>
+                    <Compass size={20} className="sm:w-6 sm:h-6" style={{ color: colors.success }} />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-gray-500">Current Level</p>
+                    <p className="text-lg sm:text-2xl font-bold">{growthMetrics.nextLevel}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Learning Patterns</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="p-3 sm:p-4 border rounded-xl">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Most Productive Day</p>
+                  <p className="text-sm sm:text-base font-bold">Wednesday <span className="text-xs font-normal text-gray-500">(avg 45 min)</span></p>
+                </div>
+                <div className="p-3 sm:p-4 border rounded-xl">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-1">Peak Learning Hour</p>
+                  <p className="text-sm sm:text-base font-bold">10:00 AM <span className="text-xs font-normal text-gray-500">GMT</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case 'growth':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>📈 Your Growth Metrics</h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="p-4 sm:p-6 rounded-xl border">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <p className="text-xs sm:text-sm text-gray-600">Learning Velocity</p>
+                  <span className="text-xl sm:text-2xl font-bold" style={{ color: colors.secondary }}>{growthMetrics.learningVelocity}%</span>
+                </div>
+                <p className="text-[10px] sm:text-xs text-gray-500">Faster than last week</p>
+              </div>
+              <div className="p-4 sm:p-6 rounded-xl border">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <p className="text-xs sm:text-sm text-gray-600">Consistency Score</p>
+                  <span className="text-xl sm:text-2xl font-bold" style={{ color: colors.primary }}>{growthMetrics.consistencyScore}</span>
+                </div>
+                <p className="text-[10px] sm:text-xs text-gray-500">Out of 100</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
+              <h4 className="font-bold text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Growth Projection</h4>
+              <p className="text-xs sm:text-sm text-gray-600">At your current pace, you'll reach <span className="font-bold">Advanced</span> level in approximately 3 months.</p>
+              <div className="h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full bg-green-500" style={{ width: `${growthMetrics.consistencyScore}%` }}></div>
+              </div>
+              <p className="text-[10px] sm:text-xs text-gray-500">{growthMetrics.consistencyScore}% to next level</p>
+            </div>
+          </div>
+        )
+
+      case 'courses':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>My Courses</h3>
+            {enrollments.length === 0 ? (
+              <div className="text-center py-8 sm:py-12">
+                <BookOpen size={48} className="sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-2">No Courses Yet</h4>
+                <p className="text-sm text-gray-500 mb-4">Start your learning journey today</p>
+                <button
+                  onClick={() => window.location.href = '/courses'}
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-white text-sm font-medium"
+                  style={{ background: colors.primary }}
+                >
+                  Browse Courses <ChevronRight size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                {enrollments.map((enrollment) => (
+                  <div
+                    key={enrollment.id}
+                    onClick={() => window.location.href = `/learn/${enrollment.course_id}`}
+                    className="cursor-pointer p-3 sm:p-4 rounded-xl border border-gray-200 hover:shadow-lg transition-all"
+                  >
+                    <div className="flex gap-2 sm:gap-3">
+                      <img
+                        src={enrollment.courses?.thumbnail_url || 'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=100'}
+                        alt={enrollment.courses?.title}
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-gray-900 text-sm sm:text-base mb-1 truncate">{enrollment.courses?.title}</h4>
+                        <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-gray-500 mb-2">
+                          <span>{enrollment.courses?.duration_weeks} weeks</span>
+                          <span>•</span>
+                          <span>{enrollment.courses?.level}</span>
+                        </div>
+                        <div className="mt-2">
+                          <div className="flex items-center justify-between text-[10px] sm:text-xs mb-1">
+                            <span>Progress</span>
+                            <span className="font-bold" style={{ color: colors.primary }}>
+                              {Math.round(enrollment.progress_percentage || 0)}%
+                            </span>
+                          </div>
+                          <div className="h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className="h-full"
+                              style={{ 
+                                width: `${enrollment.progress_percentage || 0}%`,
+                                background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+
+      case 'payments':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-bold" style={{ color: colors.primary }}>Payment History</h3>
+              <div className="text-right">
+                <p className="text-xs sm:text-sm text-gray-500">Total Spent</p>
+                <p className="text-xl sm:text-2xl font-bold" style={{ color: colors.primary }}>GHS {totalSpent.toFixed(2)}</p>
+              </div>
+            </div>
+            {payments.length === 0 ? (
+              <div className="text-center py-8 sm:py-12">
+                <Receipt size={48} className="sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                <p className="text-sm text-gray-500">No payment history yet</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="inline-block min-w-full align-middle">
+                  <table className="min-w-full text-xs sm:text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-2 sm:py-3 px-2 sm:px-3 font-bold text-gray-700">Reference</th>
+                        <th className="text-left py-2 sm:py-3 px-2 sm:px-3 font-bold text-gray-700">Amount</th>
+                        <th className="text-left py-2 sm:py-3 px-2 sm:px-3 font-bold text-gray-700">Status</th>
+                        <th className="text-left py-2 sm:py-3 px-2 sm:px-3 font-bold text-gray-700">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {payments.map((payment) => (
+                        <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-2 sm:py-3 px-2 sm:px-3 font-mono text-[10px] sm:text-xs">{payment.reference || payment.id.slice(0, 8)}</td>
+                          <td className="py-2 sm:py-3 px-2 sm:px-3 font-bold text-xs sm:text-sm">GHS {parseFloat(payment.amount).toFixed(2)}</td>
+                          <td className="py-2 sm:py-3 px-2 sm:px-3">
+                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-full ${getStatusColor(payment.status)}`}>
+                              {payment.status}
+                            </span>
+                          </td>
+                          <td className="py-2 sm:py-3 px-2 sm:px-3 text-[10px] sm:text-xs text-gray-600">
+                            {new Date(payment.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )
+
+      case 'certificates':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>My Certificates</h3>
+            {certificates.length === 0 ? (
+              <div className="text-center py-8 sm:py-12">
+                <Award size={48} className="sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                <p className="text-sm text-gray-500">No certificates yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {certificates.map((cert) => (
+                  <div key={cert.id} className="border rounded-xl p-3 sm:p-4 hover:shadow-lg transition-all" style={{ borderColor: colors.primary + '20' }}>
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="p-1.5 sm:p-2 rounded-lg" style={{ background: colors.primary + '10' }}>
+                        <Award size={20} className="sm:w-6 sm:h-6" style={{ color: colors.primary }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-gray-900 text-sm sm:text-base mb-1 truncate">{cert.courses?.title}</h4>
+                        <p className="text-[10px] sm:text-xs text-gray-600 mb-1">Issued: {new Date(cert.issued_at).toLocaleDateString()}</p>
+                        <p className="text-[8px] sm:text-[10px] text-gray-500 mb-2">ID: {cert.certificate_id?.slice(0, 12)}</p>
+                        <button 
+                          onClick={() => window.open(`/certificate/${cert.id}`, '_blank')}
+                          className="text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-full border flex items-center gap-1 hover:bg-gray-50 transition-all"
+                        >
+                          <Download size={10} className="sm:w-3 sm:h-3" /> View
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+
+      case 'quiz':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>Daily Quiz Challenge</h3>
+            {!showQuiz ? (
+              <div className="text-center py-8 sm:py-12">
+                <Brain size={48} className="sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4" style={{ color: colors.secondary }} />
+                <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Test Your Knowledge</h4>
+                <p className="text-sm text-gray-500 mb-4 sm:mb-6">Answer questions and earn streak points</p>
+                <button
+                  onClick={handleStartQuiz}
+                  className="px-6 sm:px-8 py-2 sm:py-3 rounded-full text-white font-bold hover:scale-105 transition-all text-sm sm:text-base"
+                  style={{ background: colors.primary }}
+                >
+                  Start Quiz
+                </button>
+              </div>
+            ) : (
+              <div className="max-w-2xl mx-auto">
+                {!quizCompleted ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span style={{ color: colors.primary }}>Question {currentQuestion + 1}/{quizQuestions.length}</span>
+                      <span className="flex items-center gap-2">
+                        <Flame size={14} className={streak > 0 ? 'text-orange-500' : 'text-gray-400'} />
+                        <span>Streak: {streak}</span>
+                      </span>
+                    </div>
+                    
+                    <div className="h-2 sm:h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full transition-all duration-300"
+                        style={{ 
+                          width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%`,
+                          background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+                        }}
+                      ></div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Clock size={16} className="text-gray-500" />
+                        <span className={`text-sm sm:text-base font-bold ${timeLeft < 10 ? 'text-red-500' : 'text-gray-700'}`}>
+                          {timeLeft}s
+                        </span>
+                      </div>
+                      <span className="text-xs sm:text-sm text-gray-500">Score: {score}/{quizQuestions.length}</span>
+                    </div>
+
+                    <div className="p-4 sm:p-6 rounded-xl" style={{ background: colors.lightGray }}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: colors.primary + '20', color: colors.primary }}>
+                          {quizQuestions[currentQuestion].category}
+                        </span>
+                      </div>
+                      <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">
+                        {quizQuestions[currentQuestion].question}
+                      </h4>
+                      <div className="space-y-2 sm:space-y-3">
+                        {quizQuestions[currentQuestion].options.map((option, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleAnswerSelect(index)}
+                            className={`w-full text-left p-3 sm:p-4 rounded-lg text-sm sm:text-base transition-all ${
+                              selectedAnswer === index
+                                ? index === quizQuestions[currentQuestion].correct
+                                  ? 'bg-green-100 border border-green-500'
+                                  : 'bg-red-100 border border-red-500'
+                                : 'bg-white border border-gray-200 hover:border-orange-500'
+                            }`}
+                            disabled={selectedAnswer !== null}
+                          >
+                            <span className="flex items-center gap-2 sm:gap-3">
+                              <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs sm:text-sm">
+                                {String.fromCharCode(65 + index)}
+                              </span>
+                              <span className="text-sm sm:text-base">{option}</span>
+                              {selectedAnswer === index && (
+                                index === quizQuestions[currentQuestion].correct
+                                  ? <CheckCircle size={16} className="ml-auto text-green-500" />
+                                  : <XCircle size={16} className="ml-auto text-red-500" />
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {selectedAnswer !== null && (
+                      <div className="p-3 sm:p-4 rounded-lg bg-blue-50 border border-blue-200">
+                        <div className="flex items-start gap-2">
+                          <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-xs sm:text-sm text-blue-700">{quizQuestions[currentQuestion].explanation}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleNextQuestion}
+                      disabled={selectedAnswer === null}
+                      className="w-full py-3 sm:py-4 rounded-lg text-white font-medium transition-all disabled:opacity-50 text-sm sm:text-base"
+                      style={{ background: colors.primary }}
+                    >
+                      {currentQuestion === quizQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 sm:py-8">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full flex items-center justify-center" style={{ background: colors.secondary + '20' }}>
+                      <Award size={32} className="sm:w-10 sm:h-10" style={{ color: colors.secondary }} />
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold mb-2" style={{ color: colors.primary }}>Quiz Completed!</h3>
+                    <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">You scored {score} out of {quizQuestions.length}</p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button
+                        onClick={handleRestartQuiz}
+                        className="px-6 sm:px-8 py-2 sm:py-3 rounded-full text-sm sm:text-base font-medium transition-all hover:scale-105 flex items-center justify-center gap-2"
+                        style={{ background: colors.primary + '10', color: colors.primary }}
+                      >
+                        <RotateCcw size={16} />
+                        Try Again
+                      </button>
+                      <button
+                        onClick={() => setShowQuiz(false)}
+                        className="px-6 sm:px-8 py-2 sm:py-3 rounded-full text-white text-sm sm:text-base font-medium transition-all hover:scale-105"
+                        style={{ background: colors.secondary }}
+                      >
+                        Back to Dashboard
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )
+
+      case 'activity':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>Recent Activity</h3>
+            {recentActivity.length === 0 ? (
+              <div className="text-center py-8 sm:py-12">
+                <Activity size={48} className="sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                <p className="text-sm text-gray-500">No recent activity</p>
+              </div>
+            ) : (
+              <div className="space-y-2 sm:space-y-3">
+                {recentActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-all cursor-pointer"
+                    onClick={() => {
+                      if (activity.metadata?.link) {
+                        window.location.href = activity.metadata.link
+                      }
+                    }}
+                  >
+                    <div className={`p-2 sm:p-3 rounded-lg flex-shrink-0 ${
+                      activity.activity_type === 'payment' ? 'bg-green-100' :
+                      activity.activity_type === 'quiz' ? 'bg-purple-100' :
+                      'bg-blue-100'
+                    }`}>
+                      {activity.activity_type === 'payment' && <CreditCard size={16} className="text-green-600" />}
+                      {activity.activity_type === 'quiz' && <Brain size={16} className="text-purple-600" />}
+                      {activity.activity_type === 'course' && <BookOpen size={16} className="text-blue-600" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base font-medium text-gray-900">{activity.metadata?.description || 'Activity'}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{new Date(activity.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <ChevronRight size={16} className="text-gray-400" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+
+      case 'community':
+        return (
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: colors.primary }}>Community</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div 
+                onClick={() => window.location.href = '/community/students'}
+                className="p-4 sm:p-6 rounded-xl border border-gray-200 text-center hover:shadow-lg transition-all cursor-pointer"
+              >
+                <Users2 size={32} className="sm:w-10 sm:h-10 mx-auto mb-3" style={{ color: colors.primary }} />
+                <h4 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">Student Community</h4>
+                <p className="text-xs sm:text-sm text-gray-600 mb-4">Connect with {liveStats.activeUsers}+ learners</p>
+                <span className="inline-block px-4 sm:px-6 py-2 rounded-full text-white text-xs sm:text-sm font-medium" style={{ background: colors.primary }}>
+                  Join Discussion
+                </span>
+              </div>
+              <a 
+                href="https://chat.whatsapp.com/example" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="p-4 sm:p-6 rounded-xl border border-gray-200 text-center hover:shadow-lg transition-all block"
+              >
+                <MessageSquare size={32} className="sm:w-10 sm:h-10 mx-auto mb-3" style={{ color: colors.secondary }} />
+                <h4 className="font-bold text-gray-900 mb-2 text-sm sm:text-base">WhatsApp Group</h4>
+                <p className="text-xs sm:text-sm text-gray-600 mb-4">Active daily discussions</p>
+                <span className="inline-block px-4 sm:px-6 py-2 rounded-full text-white text-xs sm:text-sm font-medium" style={{ background: colors.secondary }}>
+                  Join Now
+                </span>
+              </a>
+            </div>
+          </div>
+        )
+
+      default:
+        return null
     }
   }
 
@@ -687,225 +1639,266 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Live Stats Bar - NEW */}
-        <div className="mb-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl p-4 border border-gray-100">
-          <div className="flex items-center justify-between flex-wrap gap-3">
+        {/* Live Stats Bar */}
+        <div className="mb-3 sm:mb-4 bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-3 w-3">
+              <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-green-500"></span>
               </span>
-              <span className="text-sm font-medium text-gray-700">iKPACE Live</span>
+              <span className="text-xs sm:text-sm font-medium text-gray-700">iKPACE Live</span>
             </div>
-            <div className="flex flex-wrap gap-4 text-xs">
-              <span className="flex items-center gap-1"><Users size={14} className="text-primary" /> {liveStats.activeUsers} active now</span>
-              <span className="flex items-center gap-1"><User size={14} className="text-secondary" /> {liveStats.newStudents} new today</span>
-              <span className="flex items-center gap-1"><BookOpen size={14} className="text-green-600" /> {liveStats.completedLessons} lessons</span>
-              <span className="flex items-center gap-1"><Award size={14} className="text-purple-600" /> {liveStats.certificatesEarned} certificates</span>
+            <div className="flex flex-wrap gap-2 sm:gap-4 text-xs">
+              <button onClick={() => setActiveTab('community')} className="flex items-center gap-1 hover:opacity-80 transition-all">
+                <Users size={12} className="text-primary" /> {liveStats.activeUsers} active
+              </button>
+              <button onClick={() => setActiveTab('community')} className="flex items-center gap-1 hover:opacity-80 transition-all">
+                <User size={12} className="text-secondary" /> {liveStats.newStudents} new
+              </button>
+              <button onClick={() => setActiveTab('activity')} className="flex items-center gap-1 hover:opacity-80 transition-all">
+                <BookOpen size={12} className="text-green-600" /> {liveStats.completedLessons} lessons
+              </button>
+              <button onClick={() => setActiveTab('certificates')} className="flex items-center gap-1 hover:opacity-80 transition-all">
+                <Award size={12} className="text-purple-600" /> {liveStats.certificatesEarned} certs
+              </button>
             </div>
-            <button 
-              onClick={() => setShowLiveStats(!showLiveStats)}
-              className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
-            >
-              {showLiveStats ? 'Hide' : 'Show'} details <ChevronRight size={12} className={`transition-transform ${showLiveStats ? 'rotate-90' : ''}`} />
-            </button>
           </div>
-          
-          {showLiveStats && (
-            <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-xs text-gray-500">Global Active Users</p>
-                <p className="text-lg font-bold" style={{ color: colors.primary }}>{liveStats.activeUsers}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">New Students (24h)</p>
-                <p className="text-lg font-bold" style={{ color: colors.secondary }}>{liveStats.newStudents}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Lessons Completed</p>
-                <p className="text-lg font-bold" style={{ color: colors.success }}>{liveStats.completedLessons}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Certificates Earned</p>
-                <p className="text-lg font-bold" style={{ color: colors.purple }}>{liveStats.certificatesEarned}</p>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Welcome Banner - Enhanced */}
-        <div className="mb-8 p-6 rounded-2xl text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}>
+        {/* Welcome Banner */}
+        <div className="mb-4 sm:mb-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}>
           <div className="absolute top-0 right-0 opacity-10">
-            <Sparkles size={150} />
+            <Sparkles size={100} className="sm:w-[150px] sm:h-[150px]" />
           </div>
           <div className="relative z-10">
-            {/* Top Row - Greeting and Profile Button */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl md:text-3xl font-bold">
-                  {getGreeting()}, {profile?.full_name?.split(' ')[0] || 'Learner'}!
+            {/* Top Row */}
+            <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold break-words">
+                  {getGreeting()}, <span className="text-yellow-300">{getDisplayName()}</span>!
                 </h1>
-                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs md:text-sm">
-                  ID: {profile?.student_id || user?.id?.slice(0, 8) || 'IKP-001'}
-                </span>
                 {streak > 0 && (
-                  <span className="px-3 py-1 bg-yellow-500 text-gray-900 rounded-full text-xs md:text-sm font-bold flex items-center gap-1 animate-pulse">
-                    <Flame size={14} />
+                  <span className="px-2 sm:px-3 py-1 bg-yellow-500 text-gray-900 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 animate-pulse">
+                    <Flame size={12} />
                     {streak}x Streak!
                   </span>
                 )}
               </div>
               <button
                 onClick={() => setShowProfileCard(!showProfileCard)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all text-sm"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all text-xs sm:text-sm"
               >
-                <User size={14} />
+                <User size={12} />
                 <span className="hidden sm:inline">Profile</span>
               </button>
             </div>
 
-            {/* Personalized Message */}
-            <p className="text-base md:text-lg text-white/90 mb-4">
-              {enrollments.length > 0 
-                ? `You're making great progress! ${stats.learningStreak} day streak • ${learningInsights.completionRate}% completion rate` 
-                : `Ready to start your learning journey? Browse our courses below.`}
-            </p>
+            {/* ID Section */}
+            <div className="mb-4 sm:mb-6">
+              <div className="inline-flex items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-md rounded-2xl p-2 sm:p-3 border border-white/20 shadow-xl">
+                <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 sm:p-3 rounded-xl shadow-lg">
+                  <Crown size={16} className="sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-xs text-white/60 font-medium tracking-wider">STUDENT ID</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm sm:text-base md:text-lg font-mono font-bold tracking-wider text-white">
+                      {profile?.student_id || user?.id?.slice(0, 8).toUpperCase() || 'IKP-001'}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={copyStudentId}
+                        className="p-1 hover:bg-white/20 rounded-lg transition-all group relative"
+                        title="Copy ID"
+                      >
+                        {copied ? (
+                          <Check size={12} className="sm:w-4 sm:h-4 text-green-300" />
+                        ) : (
+                          <Copy size={12} className="sm:w-4 sm:h-4 text-white/70 group-hover:text-white" />
+                        )}
+                      </button>
+                      <button 
+                        onClick={() => setShowQR(!showQR)}
+                        className="p-1 hover:bg-white/20 rounded-lg transition-all group relative"
+                        title="Show QR Code"
+                      >
+                        <QrCode size={12} className="sm:w-4 sm:h-4 text-white/70 group-hover:text-white" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="ml-auto flex items-center gap-1 bg-white/10 px-2 sm:px-3 py-1 rounded-full">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-[8px] sm:text-xs text-white/80">Active</span>
+                </div>
+              </div>
+              
+              {showQR && (
+                <div className="absolute mt-2 p-3 bg-white rounded-xl shadow-2xl border border-gray-200 z-20">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                    <QrCode size={48} className="sm:w-16 sm:h-16 text-gray-700" />
+                  </div>
+                  <p className="text-[8px] sm:text-xs text-center mt-1 text-gray-600">Scan to view profile</p>
+                </div>
+              )}
+            </div>
 
-            {/* Stats Row - Enhanced */}
-            <div className="flex flex-wrap gap-2 md:gap-3">
-              <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs md:text-sm">
-                <Flame size={14} className="text-yellow-300" />
+            {/* Stats Row */}
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3">
+              <button onClick={() => setActiveTab('insights')} className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm hover:bg-white/30 transition-all">
+                <Flame size={12} className="text-yellow-300" />
                 <span>{stats.learningStreak} day streak</span>
-              </div>
-              <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs md:text-sm">
-                <TrendingIcon size={14} className="text-green-300" />
-                <span>{growthMetrics.weeklyGrowth}% weekly growth</span>
-              </div>
-              <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs md:text-sm">
-                <Target size={14} className="text-yellow-300" />
-                <span>{weeklyProgress}/{weeklyGoal} min weekly</span>
-              </div>
-              <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs md:text-sm">
-                <Award size={14} className="text-yellow-300" />
-                <span>{certificates.length} certificates</span>
-              </div>
+              </button>
+              <button onClick={() => setActiveTab('growth')} className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm hover:bg-white/30 transition-all">
+                <TrendingIcon size={12} className="text-green-300" />
+                <span>{growthMetrics.weeklyGrowth}% growth</span>
+              </button>
+              <button onClick={() => setActiveTab('insights')} className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm hover:bg-white/30 transition-all">
+                <Target size={12} className="text-yellow-300" />
+                <span>{weeklyProgress}/{weeklyGoal} min</span>
+              </button>
+              <button onClick={() => setActiveTab('certificates')} className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm hover:bg-white/30 transition-all">
+                <Award size={12} className="text-yellow-300" />
+                <span>{certificates.length} certs</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Profile Card - Popup (same as before) */}
+        {/* Notifications Bar */}
+        {notifications.length > 0 && (
+          <div className="mb-4 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-gray-100">
+              <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: colors.primary }}>
+                <Bell size={16} />
+                Notifications ({notifications.filter(n => !n.read).length} new)
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {notifications.slice(0, 3).map(notification => (
+                <div 
+                  key={notification.id}
+                  className={`flex items-start gap-3 p-3 hover:bg-gray-50 transition-all cursor-pointer ${!notification.read ? 'bg-primary/5' : ''}`}
+                  onClick={() => {
+                    markNotificationAsRead(notification.id)
+                    if (notification.link) {
+                      window.location.href = notification.link
+                    }
+                  }}
+                >
+                  <div className={`p-2 rounded-lg ${!notification.read ? 'bg-primary/20' : 'bg-gray-100'}`}>
+                    {notification.type === 'achievement' && <Award size={16} style={{ color: colors.primary }} />}
+                    {notification.type === 'course' && <BookOpen size={16} style={{ color: colors.secondary }} />}
+                    {notification.type === 'payment' && <CreditCard size={16} style={{ color: colors.success }} />}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                    <p className="text-xs text-gray-500">{notification.message}</p>
+                    <p className="text-[10px] text-gray-400 mt-1">{new Date(notification.created_at).toLocaleDateString()}</p>
+                  </div>
+                  {!notification.read && (
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  )}
+                </div>
+              ))}
+              {notifications.length > 3 && (
+                <button 
+                  onClick={() => setActiveTab('notifications')}
+                  className="block w-full p-2 text-center text-xs text-primary hover:bg-gray-50 transition-all"
+                >
+                  View all notifications
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Profile Card Popup */}
         {showProfileCard && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => !editingProfile && setShowProfileCard(false)}>
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-              <div className="p-6 border-b flex items-center justify-between">
-                <h2 className="text-2xl font-bold" style={{ color: colors.primary }}>My Profile</h2>
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="p-4 sm:p-6 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+                <h2 className="text-xl sm:text-2xl font-bold" style={{ color: colors.primary }}>My Profile</h2>
                 <button onClick={() => setShowProfileCard(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
               
               {editingProfile ? (
-                <div className="p-6 space-y-4">
-                  {/* Profile edit form - same as before */}
-                  <div className="flex items-center justify-center mb-6">
+                <div className="p-4 sm:p-6 space-y-4">
+                  <div className="flex items-center justify-center mb-4 sm:mb-6">
                     <div className="relative">
-                      <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                         {profileForm.avatar_url ? (
                           <img src={profileForm.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                         ) : (
-                          <User size={48} className="text-gray-400" />
+                          <User size={32} className="sm:w-12 sm:h-12 text-gray-400" />
                         )}
                       </div>
-                      <button className="absolute bottom-0 right-0 p-2 rounded-full bg-white shadow-lg border">
-                        <Camera size={16} style={{ color: colors.primary }} />
+                      <button className="absolute bottom-0 right-0 p-1.5 sm:p-2 rounded-full bg-white shadow-lg border">
+                        <Camera size={12} className="sm:w-4 sm:h-4" style={{ color: colors.primary }} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Full Name</label>
                       <input
                         type="text"
                         value={profileForm.full_name}
                         onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
+                        className="w-full px-3 sm:px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Username</label>
                       <input
                         type="text"
                         value={profileForm.username}
                         onChange={(e) => setProfileForm({...profileForm, username: e.target.value})}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
+                        className="w-full px-3 sm:px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
                       />
                     </div>
-                    <div className="col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                    <div className="col-span-1 sm:col-span-2">
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Bio</label>
                       <textarea
                         value={profileForm.bio}
                         onChange={(e) => setProfileForm({...profileForm, bio: e.target.value})}
                         rows={3}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
+                        className="w-full px-3 sm:px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Location</label>
                       <input
                         type="text"
                         value={profileForm.location}
                         onChange={(e) => setProfileForm({...profileForm, location: e.target.value})}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
+                        className="w-full px-3 sm:px-4 py-2 text-sm border rounded-lg"
                         placeholder="Accra, Ghana"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Occupation</label>
                       <input
                         type="text"
                         value={profileForm.occupation}
                         onChange={(e) => setProfileForm({...profileForm, occupation: e.target.value})}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
+                        className="w-full px-3 sm:px-4 py-2 text-sm border rounded-lg"
                         placeholder="Student"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-                      <input
-                        type="url"
-                        value={profileForm.website}
-                        onChange={(e) => setProfileForm({...profileForm, website: e.target.value})}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
-                        placeholder="https://"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                      <input
-                        type="tel"
-                        value={profileForm.phone}
-                        onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
-                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent"
-                        style={{ focusRing: colors.primary }}
-                        placeholder="+233..."
                       />
                     </div>
                   </div>
 
                   <div className="border-t pt-4">
-                    <h3 className="font-bold text-gray-900 mb-3">Social Links</h3>
-                    <div className="grid grid-cols-2 gap-4">
+                    <h3 className="font-bold text-gray-900 mb-3 text-sm">Social Links</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex items-center gap-2">
-                        <Github size={18} className="text-gray-500" />
+                        <Github size={16} className="text-gray-500" />
                         <input
                           type="text"
                           value={profileForm.github}
@@ -915,22 +1908,12 @@ export default function Dashboard() {
                         />
                       </div>
                       <div className="flex items-center gap-2">
-                        <Linkedin size={18} className="text-gray-500" />
+                        <Linkedin size={16} className="text-gray-500" />
                         <input
                           type="text"
                           value={profileForm.linkedin}
                           onChange={(e) => setProfileForm({...profileForm, linkedin: e.target.value})}
                           placeholder="LinkedIn username"
-                          className="flex-1 px-3 py-1 border rounded-lg text-sm"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Twitter size={18} className="text-gray-500" />
-                        <input
-                          type="text"
-                          value={profileForm.twitter}
-                          onChange={(e) => setProfileForm({...profileForm, twitter: e.target.value})}
-                          placeholder="Twitter handle"
                           className="flex-1 px-3 py-1 border rounded-lg text-sm"
                         />
                       </div>
@@ -940,95 +1923,95 @@ export default function Dashboard() {
                   <div className="flex gap-3 pt-4">
                     <button
                       onClick={handleProfileUpdate}
-                      className="flex-1 px-6 py-3 text-white rounded-xl font-medium hover:opacity-90 transition-all"
+                      className="flex-1 px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-white rounded-xl font-medium hover:opacity-90 transition-all"
                       style={{ background: colors.primary }}
                     >
                       Save Changes
                     </button>
                     <button
                       onClick={() => setEditingProfile(false)}
-                      className="px-6 py-3 border rounded-xl font-medium hover:bg-gray-50 transition-all"
+                      className="px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base border rounded-xl font-medium hover:bg-gray-50 transition-all"
                     >
                       Cancel
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-6">
-                  <div className="flex items-center gap-6 mb-6">
-                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                <div className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-4 sm:mb-6">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                       {profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
-                        <User size={48} className="text-gray-400" />
+                        <User size={32} className="sm:w-12 sm:h-12 text-gray-400" />
                       )}
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">{profile?.full_name || 'Learner'}</h3>
-                      <p className="text-gray-600">@{profile?.username || 'student'}</p>
-                      <p className="text-sm text-gray-500 mt-1">Member since {new Date(profile?.created_at || Date.now()).toLocaleDateString()}</p>
+                    <div className="text-center sm:text-left">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{profile?.full_name || 'Learner'}</h3>
+                      <p className="text-sm text-gray-600">@{profile?.username || 'student'}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">Member since {new Date(profile?.created_at || Date.now()).toLocaleDateString()}</p>
                     </div>
                   </div>
 
                   {profile?.bio && (
-                    <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                      <p className="text-gray-700">{profile.bio}</p>
+                    <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 rounded-xl">
+                      <p className="text-sm text-gray-700">{profile.bio}</p>
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-4 sm:mb-6">
                     {profile?.location && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <MapPin size={16} />
-                        <span className="text-sm">{profile.location}</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <MapPin size={14} />
+                        <span>{profile.location}</span>
                       </div>
                     )}
                     {profile?.occupation && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Briefcase size={16} />
-                        <span className="text-sm">{profile.occupation}</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Briefcase size={14} />
+                        <span>{profile.occupation}</span>
                       </div>
                     )}
                     {profile?.website && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Globe size={16} />
-                        <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-sm hover:underline" style={{ color: colors.primary }}>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Globe size={14} />
+                        <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: colors.primary }}>
                           Website
                         </a>
                       </div>
                     )}
                     {profile?.phone && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Phone size={16} />
-                        <span className="text-sm">{profile.phone}</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Phone size={14} />
+                        <span>{profile.phone}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex gap-2 mb-6">
+                  <div className="flex gap-2 mb-4 sm:mb-6">
                     {profile?.github && (
                       <a href={`https://github.com/${profile.github}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
-                        <Github size={18} />
+                        <Github size={16} />
                       </a>
                     )}
                     {profile?.linkedin && (
                       <a href={`https://linkedin.com/in/${profile.linkedin}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
-                        <Linkedin size={18} />
+                        <Linkedin size={16} />
                       </a>
                     )}
                     {profile?.twitter && (
                       <a href={`https://twitter.com/${profile.twitter}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
-                        <Twitter size={18} />
+                        <Twitter size={16} />
                       </a>
                     )}
                   </div>
 
                   <button
                     onClick={() => setEditingProfile(true)}
-                    className="w-full px-6 py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all hover:scale-105"
+                    className="w-full px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-all hover:scale-105 text-sm sm:text-base"
                     style={{ background: colors.primary + '10', color: colors.primary }}
                   >
-                    <Edit3 size={18} />
+                    <Edit3 size={16} />
                     Edit Profile
                   </button>
                 </div>
@@ -1037,1098 +2020,121 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Dashboard Tabs - Enhanced */}
-        <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2">
+        {/* Dashboard Tabs */}
+        <div className="flex gap-1 sm:gap-2 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-hide -mx-3 sm:mx-0 px-3 sm:px-0">
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
-            { id: 'insights', label: 'Learning Insights', icon: TrendingIcon }, // NEW
+            { id: 'insights', label: 'Insights', icon: TrendingIcon },
             { id: 'courses', label: 'My Courses', icon: BookOpen },
             { id: 'payments', label: 'Payments', icon: CreditCard },
-            { id: 'certificates', label: 'Certificates', icon: Award },
-            { id: 'quiz', label: 'Daily Quiz', icon: Brain },
+            { id: 'certificates', label: 'Certs', icon: Award },
+            { id: 'quiz', label: 'Quiz', icon: Brain },
             { id: 'activity', label: 'Activity', icon: Activity },
-            { id: 'growth', label: 'Growth Metrics', icon: LineChart }, // NEW
+            { id: 'growth', label: 'Growth', icon: LineChart },
             { id: 'community', label: 'Community', icon: Users }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                 activeTab === tab.id 
                   ? 'text-white' 
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
               style={{ background: activeTab === tab.id ? colors.primary : 'transparent' }}
             >
-              <tab.icon size={16} />
-              {tab.label}
+              <tab.icon size={12} className="sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline sm:hidden">{tab.label}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </button>
           ))}
         </div>
 
-        {/* Stats Cards - Enhanced */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.primary + '10' }}>
-                <BookOpen size={12} style={{ color: colors.primary }} />
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 xs:grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2 mb-4 sm:mb-8">
+          <button onClick={() => setActiveTab('courses')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.primary + '10' }}>
+                <BookOpen size={10} className="sm:w-3 sm:h-3" style={{ color: colors.primary }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.primary }}>{stats.totalCourses}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.primary }}>{stats.totalCourses}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Enrolled</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Enrolled</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.success + '10' }}>
-                <CheckCircle size={12} style={{ color: colors.success }} />
+          <button onClick={() => setActiveTab('courses')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.success + '10' }}>
+                <CheckCircle size={10} className="sm:w-3 sm:h-3" style={{ color: colors.success }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.success }}>{stats.completedCourses}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.success }}>{stats.completedCourses}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Completed</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Completed</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.secondary + '10' }}>
-                <Flame size={12} style={{ color: colors.secondary }} />
+          <button onClick={() => setActiveTab('insights')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.secondary + '10' }}>
+                <Flame size={10} className="sm:w-3 sm:h-3" style={{ color: colors.secondary }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.secondary }}>{stats.learningStreak}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.secondary }}>{stats.learningStreak}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Streak</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Streak</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.warning + '10' }}>
-                <Clock size={12} style={{ color: colors.warning }} />
+          <button onClick={() => setActiveTab('insights')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.warning + '10' }}>
+                <Clock size={10} className="sm:w-3 sm:h-3" style={{ color: colors.warning }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.warning }}>{formatTime(stats.totalLearningTime)}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.warning }}>{formatTime(stats.totalLearningTime)}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Time</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Time</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.purple + '10' }}>
-                <CreditCard size={12} style={{ color: colors.purple }} />
+          <button onClick={() => setActiveTab('payments')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.purple + '10' }}>
+                <CreditCard size={10} className="sm:w-3 sm:h-3" style={{ color: colors.purple }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.purple }}>GHS {totalSpent.toFixed(0)}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.purple }}>GHS {totalSpent.toFixed(0)}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Spent</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Spent</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.teal + '10' }}>
-                <Award size={12} style={{ color: colors.teal }} />
+          <button onClick={() => setActiveTab('certificates')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.teal + '10' }}>
+                <Award size={10} className="sm:w-3 sm:h-3" style={{ color: colors.teal }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.teal }}>{certificates.length}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.teal }}>{certificates.length}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Certs</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Certs</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.pink + '10' }}>
-                <Brain size={12} style={{ color: colors.pink }} />
+          <button onClick={() => setActiveTab('quiz')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.pink + '10' }}>
+                <Brain size={10} className="sm:w-3 sm:h-3" style={{ color: colors.pink }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.pink }}>{stats.quizzesTaken}</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.pink }}>{stats.quizzesTaken}</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Quizzes</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Quizzes</p>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-sm p-2 border border-gray-100 hover:shadow-md transition-all">
-            <div className="flex items-center justify-between mb-1">
-              <div className="p-1 rounded-lg" style={{ background: colors.indigo + '10' }}>
-                <TrendingIcon size={12} style={{ color: colors.indigo }} />
+          <button onClick={() => setActiveTab('growth')} className="bg-white rounded-lg sm:rounded-xl shadow-sm p-1.5 sm:p-2 border border-gray-100 hover:shadow-md transition-all hover:scale-105">
+            <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+              <div className="p-0.5 sm:p-1 rounded-lg" style={{ background: colors.indigo + '10' }}>
+                <TrendingIcon size={10} className="sm:w-3 sm:h-3" style={{ color: colors.indigo }} />
               </div>
-              <span className="text-sm font-bold" style={{ color: colors.indigo }}>{growthMetrics.consistencyScore}%</span>
+              <span className="text-xs sm:text-sm font-bold" style={{ color: colors.indigo }}>{growthMetrics.consistencyScore}%</span>
             </div>
-            <p className="text-xs text-gray-600 truncate">Consistency</p>
-          </div>
+            <p className="text-[10px] sm:text-xs text-gray-600 truncate">Consistency</p>
+          </button>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left Column - REMOVED VIDEOS, ADDED ADVANCED FEATURES */}
-            <div className="lg:col-span-2 space-y-8">
-              
-              {/* AI Learning Assistant - NEW */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4" style={{ borderLeftColor: colors.secondary }}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 rounded-xl" style={{ background: colors.secondary + '20' }}>
-                    <Bot size={24} style={{ color: colors.secondary }} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold" style={{ color: colors.primary }}>Your Learning Assistant</h3>
-                    <p className="text-sm text-gray-600">Personalized insights based on your progress</p>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div className="p-4 rounded-xl bg-gray-50">
-                    <p className="text-xs text-gray-500 mb-1">Daily Average</p>
-                    <p className="text-2xl font-bold" style={{ color: colors.primary }}>{learningInsights.dailyAverage} <span className="text-sm font-normal text-gray-500">min</span></p>
-                    <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                      <TrendingIcon size={10} /> {learningInsights.weeklyComparison}% vs last week
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-gray-50">
-                    <p className="text-xs text-gray-500 mb-1">Top Interest</p>
-                    <p className="text-lg font-bold" style={{ color: colors.secondary }}>{learningInsights.topCategory}</p>
-                    <p className="text-xs text-gray-500 mt-1">Keep exploring!</p>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl" style={{ background: colors.primary + '05' }}>
-                  <p className="text-sm text-gray-700 mb-2">
-                    🎯 <span className="font-bold">Next milestone:</span> Complete {nextMilestone?.target} courses to unlock {nextMilestone?.target === 5 ? 'Expert Badge' : nextMilestone?.target === 10 ? 'Master Achiever' : 'Level Up'}!
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    ⏱️ <span className="font-bold">At your current pace:</span> You'll complete your next course in approximately {Math.floor(Math.random() * 5) + 2} days
-                  </p>
-                </div>
-              </div>
-
-              {/* AI Quiz Challenge */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl" style={{ background: colors.secondary + '20' }}>
-                      <Brain size={24} style={{ color: colors.secondary }} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold" style={{ color: colors.primary }}>AI Daily Challenge</h3>
-                      <p className="text-sm text-gray-600">Test your knowledge and earn streak points</p>
-                    </div>
-                  </div>
-                  {!showQuiz && (
-                    <button
-                      onClick={handleStartQuiz}
-                      className="px-6 py-2 rounded-full text-white font-medium hover:scale-105 transition-all text-sm"
-                      style={{ background: colors.secondary }}
-                    >
-                      Start Quiz
-                    </button>
-                  )}
-                </div>
-
-                {showQuiz && !quizCompleted ? (
-                  <div className="space-y-6">
-                    {/* Quiz UI - same as before but compact */}
-                    <div className="flex items-center justify-between text-sm">
-                      <span style={{ color: colors.primary }}>Question {currentQuestion + 1}/{quizQuestions.length}</span>
-                      <span className="flex items-center gap-2">
-                        <Flame size={16} className={streak > 0 ? 'text-orange-500' : 'text-gray-400'} />
-                        <span>Streak: {streak}</span>
-                      </span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full transition-all duration-300"
-                        style={{ 
-                          width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%`,
-                          background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
-                        }}
-                      ></div>
-                    </div>
-
-                    {/* Timer */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock size={18} className="text-gray-500" />
-                        <span className={`font-bold ${timeLeft < 10 ? 'text-red-500' : 'text-gray-700'}`}>
-                          {timeLeft}s
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500">Score: {score}/{quizQuestions.length}</span>
-                    </div>
-
-                    {/* Question */}
-                    <div className="p-4 rounded-xl" style={{ background: colors.lightGray }}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: colors.primary + '20', color: colors.primary }}>
-                          {quizQuestions[currentQuestion].category}
-                        </span>
-                      </div>
-                      <h4 className="text-base font-bold text-gray-900 mb-3">
-                        {quizQuestions[currentQuestion].question}
-                      </h4>
-                      <div className="space-y-2">
-                        {quizQuestions[currentQuestion].options.map((option, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleAnswerSelect(index)}
-                            className={`w-full text-left p-3 rounded-lg text-sm transition-all ${
-                              selectedAnswer === index
-                                ? index === quizQuestions[currentQuestion].correct
-                                  ? 'bg-green-100 border border-green-500'
-                                  : 'bg-red-100 border border-red-500'
-                                : 'bg-white border border-gray-200 hover:border-orange-500'
-                            }`}
-                            disabled={selectedAnswer !== null}
-                          >
-                            <span className="flex items-center gap-3">
-                              <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                {String.fromCharCode(65 + index)}
-                              </span>
-                              <span className="text-sm">{option}</span>
-                              {selectedAnswer === index && (
-                                index === quizQuestions[currentQuestion].correct
-                                  ? <CheckCircle size={14} className="ml-auto text-green-500" />
-                                  : <XCircle size={14} className="ml-auto text-red-500" />
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Explanation */}
-                    {selectedAnswer !== null && (
-                      <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm">
-                        <div className="flex items-start gap-2">
-                          <Info size={14} className="text-blue-600 mt-0.5" />
-                          <p className="text-xs text-blue-700">{quizQuestions[currentQuestion].explanation}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Next Button */}
-                    <button
-                      onClick={handleNextQuestion}
-                      disabled={selectedAnswer === null}
-                      className="w-full py-2.5 rounded-lg text-white font-medium transition-all disabled:opacity-50 text-sm"
-                      style={{ background: colors.primary }}
-                    >
-                      {currentQuestion === quizQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                    </button>
-                  </div>
-                ) : showResult ? (
-                  <div className="text-center py-6">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: colors.secondary + '20' }}>
-                      <Award size={32} style={{ color: colors.secondary }} />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary }}>Quiz Completed!</h3>
-                    <p className="text-gray-600 mb-4">You scored {score} out of {quizQuestions.length}</p>
-                    
-                    <div className="flex gap-3 justify-center">
-                      <button
-                        onClick={handleRestartQuiz}
-                        className="px-4 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 flex items-center gap-2"
-                        style={{ background: colors.primary + '10', color: colors.primary }}
-                      >
-                        <RotateCcw size={14} />
-                        Try Again
-                      </button>
-                      <button
-                        onClick={() => setShowQuiz(false)}
-                        className="px-4 py-2 rounded-full text-white text-sm font-medium transition-all hover:scale-105"
-                        style={{ background: colors.secondary }}
-                      >
-                        Back
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
-              {/* My Courses Section */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: colors.primary }}>
-                    <BookOpen size={18} />
-                    Continue Learning
-                  </h3>
-                  <button onClick={() => setActiveTab('courses')} className="text-xs font-medium hover:underline flex items-center gap-1" style={{ color: colors.secondary }}>
-                    View All <ChevronRight size={12} />
-                  </button>
-                </div>
-
-                {enrollments.length === 0 ? (
-                  <div className="text-center py-6">
-                    <BookOpen size={40} className="mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600 mb-3">Start your learning journey today!</p>
-                    <Link
-                      to="/courses"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-medium hover:scale-105 transition-all"
-                      style={{ background: colors.primary }}
-                    >
-                      Browse Courses
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {enrollments.slice(0, 2).map((enrollment) => (
-                      <Link
-                        key={enrollment.id}
-                        to={`/learn/${enrollment.course_id}`}
-                        className="block p-3 rounded-lg hover:bg-gray-50 transition-all border border-gray-100"
-                      >
-                        <div className="flex gap-3">
-                          <img
-                            src={enrollment.courses?.thumbnail_url || 'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=100'}
-                            alt={enrollment.courses?.title}
-                            className="w-12 h-12 object-cover rounded-lg"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-bold text-gray-900 text-sm mb-1">{enrollment.courses?.title}</h4>
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                              <span>{enrollment.courses?.duration_weeks} weeks</span>
-                              <span>•</span>
-                              <span>{enrollment.courses?.level}</span>
-                            </div>
-                            <div className="mt-1">
-                              <div className="flex items-center justify-between text-xs mb-0.5">
-                                <span>Progress</span>
-                                <span className="font-bold" style={{ color: colors.primary }}>{Math.round(enrollment.progress_percentage || 0)}%</span>
-                              </div>
-                              <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full"
-                                  style={{ 
-                                    width: `${enrollment.progress_percentage || 0}%`,
-                                    background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Recent Activity - Compact */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: colors.primary }}>
-                  <Activity size={18} />
-                  Recent Activity
-                </h3>
-                {recentActivity.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-3">No recent activity</p>
-                ) : (
-                  <div className="space-y-2">
-                    {recentActivity.slice(0, 3).map((activity) => (
-                      <div key={activity.id} className="flex items-center gap-3 p-2 rounded-lg text-sm">
-                        <div className={`p-1.5 rounded-lg ${
-                          activity.activity_type === 'payment' ? 'bg-green-100' :
-                          activity.activity_type === 'quiz' ? 'bg-purple-100' :
-                          'bg-blue-100'
-                        }`}>
-                          {activity.activity_type === 'payment' && <CreditCard size={12} className="text-green-600" />}
-                          {activity.activity_type === 'quiz' && <Brain size={12} className="text-purple-600" />}
-                          {activity.activity_type === 'course' && <BookOpen size={12} className="text-blue-600" />}
-                        </div>
-                        <span className="text-xs text-gray-700">{activity.metadata?.description || 'Activity'}</span>
-                        <span className="text-xs text-gray-400 ml-auto">{new Date(activity.created_at).toLocaleDateString()}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Progress, Insights, Global Stats */}
-            <div className="space-y-6">
-              {/* Global Stats Card - NEW */}
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-t-4" style={{ borderTopColor: colors.secondary }}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg" style={{ background: colors.secondary + '10' }}>
-                    <Globe size={18} style={{ color: colors.secondary }} />
-                  </div>
-                  <h3 className="font-bold" style={{ color: colors.primary }}>iKPACE Global Stats</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="p-3 rounded-lg bg-gray-50">
-                    <p className="text-xs text-gray-500">Active Learners</p>
-                    <p className="text-lg font-bold" style={{ color: colors.primary }}>130+</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-gray-50">
-                    <p className="text-xs text-gray-500">Countries</p>
-                    <p className="text-lg font-bold" style={{ color: colors.secondary }}>15+</p>
-                  </div>
-                </div>
-                <div className="text-xs text-gray-600 mb-3">
-                  🎉 You're among <span className="font-bold text-green-600">130+ learners</span> worldwide!
-                </div>
-                <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="absolute top-0 left-0 h-full bg-green-500" style={{ width: '65%' }}></div>
-                  <div className="absolute top-0 h-full w-1 bg-white" style={{ left: `${(stats.completedCourses / 10) * 100}%` }}></div>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">You're ahead of 65% of learners</p>
-              </div>
-
-              {/* Weekly Goal Progress */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: colors.primary }}>
-                  <Target size={18} />
-                  Weekly Goal
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Learning Time</span>
-                    <span className="font-bold" style={{ color: colors.primary }}>{weeklyProgress} / {weeklyGoal} min</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full"
-                      style={{ 
-                        width: `${(weeklyProgress / weeklyGoal) * 100}%`,
-                        background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
-                      }}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-500">{weeklyGoal - weeklyProgress} minutes to go</p>
-                </div>
-              </div>
-
-              {/* Next Milestone */}
-              {nextMilestone && (
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h3 className="text-lg font-bold mb-3 flex items-center gap-2" style={{ color: colors.primary }}>
-                    <Medal size={18} />
-                    Next Milestone
-                  </h3>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold mb-1" style={{ color: colors.secondary }}>{nextMilestone.current}/{nextMilestone.target}</div>
-                    <p className="text-xs text-gray-600 mb-2">Courses Completed</p>
-                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full"
-                        style={{ 
-                          width: `${(nextMilestone.current / nextMilestone.target) * 100}%`,
-                          background: colors.secondary
-                        }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">{nextMilestone.target - nextMilestone.current} more to go</p>
-                  </div>
-                </div>
-              )}
-
-              {/* AI Recommendations - Carousel */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: colors.primary }}>
-                    <Sparkles size={18} />
-                    For You
-                  </h3>
-                  {recommendations.length > 3 && (
-                    <div className="flex gap-1">
-                      <button onClick={() => scrollRecommendations('left')} className="p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                        <ChevronLeft size={14} />
-                      </button>
-                      <button onClick={() => scrollRecommendations('right')} className="p-1 rounded-full bg-gray-100 hover:bg-gray-200">
-                        <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {recommendations.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-3">Complete courses to get recommendations</p>
-                ) : (
-                  <div ref={recommendationsRef} className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x">
-                    {recommendations.map((rec, index) => (
-                      <div key={index} className="flex-none w-36 snap-start bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all overflow-hidden">
-                        <img src={rec.image} alt={rec.course} className="w-full h-16 object-cover" />
-                        <div className="p-2">
-                          <h4 className="font-bold text-xs text-gray-900 mb-1 line-clamp-1">{rec.course}</h4>
-                          <p className="text-[10px] text-gray-500 mb-1 line-clamp-2">{rec.reason}</p>
-                          <Link to={`/course/${rec.id}`} className="text-[10px] font-medium flex items-center gap-1 hover:underline" style={{ color: colors.secondary }}>
-                            View <ChevronRight size={8} />
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h3 className="text-lg font-bold mb-3" style={{ color: colors.primary }}>Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <Link to="/courses" className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center">
-                    <BookOpen size={16} className="mx-auto mb-1" style={{ color: colors.primary }} />
-                    <span className="text-xs">Browse</span>
-                  </Link>
-                  <Link to="/community" className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center">
-                    <Users size={16} className="mx-auto mb-1" style={{ color: colors.secondary }} />
-                    <span className="text-xs">Community</span>
-                  </Link>
-                  <Link to="/certificates" className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center">
-                    <Award size={16} className="mx-auto mb-1" style={{ color: colors.success }} />
-                    <span className="text-xs">Certificates</span>
-                  </Link>
-                  <button onClick={() => setShowProfileCard(true)} className="p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-all text-center">
-                    <User size={16} className="mx-auto mb-1" style={{ color: colors.warning }} />
-                    <span className="text-xs">Profile</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Learning Insights Tab - NEW */}
-        {activeTab === 'insights' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>📊 Your Learning Insights</h3>
-            
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="p-6 rounded-xl" style={{ background: colors.primary + '05' }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-3 rounded-xl" style={{ background: colors.primary + '15' }}>
-                    <Clock size={24} style={{ color: colors.primary }} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Daily Average</p>
-                    <p className="text-2xl font-bold">{learningInsights.dailyAverage} <span className="text-sm font-normal">min</span></p>
-                  </div>
-                </div>
-                <p className="text-sm text-green-600 flex items-center gap-1">
-                  <TrendingIcon size={14} /> {learningInsights.weeklyComparison}% vs last week
-                </p>
-              </div>
-
-              <div className="p-6 rounded-xl" style={{ background: colors.secondary + '05' }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-3 rounded-xl" style={{ background: colors.secondary + '15' }}>
-                    <Target size={24} style={{ color: colors.secondary }} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Completion Rate</p>
-                    <p className="text-2xl font-bold">{learningInsights.completionRate}%</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">{stats.completedCourses} of {stats.totalCourses} courses</p>
-              </div>
-
-              <div className="p-6 rounded-xl" style={{ background: colors.success + '05' }}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-3 rounded-xl" style={{ background: colors.success + '15' }}>
-                    <Compass size={24} style={{ color: colors.success }} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Next Level</p>
-                    <p className="text-2xl font-bold">{growthMetrics.nextLevel}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">{growthMetrics.skillGap} skills to next level</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-gray-900 mb-3">Learning Patterns</h4>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 border rounded-xl">
-                  <p className="text-sm text-gray-600 mb-2">Most Productive Day</p>
-                  <p className="font-bold">Wednesday <span className="text-sm font-normal text-gray-500">(avg 45 min)</span></p>
-                </div>
-                <div className="p-4 border rounded-xl">
-                  <p className="text-sm text-gray-600 mb-2">Peak Learning Hour</p>
-                  <p className="font-bold">10:00 AM <span className="text-sm font-normal text-gray-500">GMT</span></p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Growth Metrics Tab - NEW */}
-        {activeTab === 'growth' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>📈 Your Growth Metrics</h3>
-            
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="p-6 rounded-xl border">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600">Learning Velocity</p>
-                  <span className="text-2xl font-bold" style={{ color: colors.secondary }}>{growthMetrics.learningVelocity}%</span>
-                </div>
-                <p className="text-xs text-gray-500">Faster than last week</p>
-              </div>
-              <div className="p-6 rounded-xl border">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600">Consistency Score</p>
-                  <span className="text-2xl font-bold" style={{ color: colors.primary }}>{growthMetrics.consistencyScore}</span>
-                </div>
-                <p className="text-xs text-gray-500">Out of 100</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-gray-900 mb-3">Growth Projection</h4>
-              <p className="text-sm text-gray-600">At your current pace, you'll reach <span className="font-bold">Advanced</span> level in approximately 3 months.</p>
-              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500" style={{ width: '45%' }}></div>
-              </div>
-              <p className="text-xs text-gray-500">45% to next level</p>
-            </div>
-          </div>
-        )}
-
-        {/* Courses Tab */}
-        {activeTab === 'courses' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>My Courses</h3>
-            {enrollments.length === 0 ? (
-              <div className="text-center py-12">
-                <BookOpen size={64} className="mx-auto mb-4 text-gray-300" />
-                <h4 className="text-lg font-bold text-gray-900 mb-2">No Courses Yet</h4>
-                <p className="text-gray-500 mb-4">Start your learning journey today</p>
-                <Link
-                  to="/courses"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-medium"
-                  style={{ background: colors.primary }}
-                >
-                  Browse Courses <ChevronRight size={16} />
-                </Link>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {enrollments.map((enrollment) => (
-                  <Link
-                    key={enrollment.id}
-                    to={`/learn/${enrollment.course_id}`}
-                    className="block p-4 rounded-xl border border-gray-200 hover:shadow-lg transition-all"
-                  >
-                    <div className="flex gap-3">
-                      <img
-                        src={enrollment.courses?.thumbnail_url || 'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=100'}
-                        alt={enrollment.courses?.title}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <h4 className="font-bold text-gray-900 text-sm mb-1">{enrollment.courses?.title}</h4>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                          <span>{enrollment.courses?.duration_weeks} weeks</span>
-                          <span>•</span>
-                          <span>{enrollment.courses?.level}</span>
-                        </div>
-                        <div className="mt-2">
-                          <div className="flex items-center justify-between text-xs mb-1">
-                            <span>Progress</span>
-                            <span className="font-bold" style={{ color: colors.primary }}>
-                              {Math.round(enrollment.progress_percentage || 0)}%
-                            </span>
-                          </div>
-                          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full"
-                              style={{ 
-                                width: `${enrollment.progress_percentage || 0}%`,
-                                background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Payments Tab */}
-        {activeTab === 'payments' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold" style={{ color: colors.primary }}>Payment History</h3>
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Total Spent</p>
-                <p className="text-2xl font-bold" style={{ color: colors.primary }}>GHS {totalSpent.toFixed(2)}</p>
-              </div>
-            </div>
-            {payments.length === 0 ? (
-              <div className="text-center py-12">
-                <Receipt size={64} className="mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500">No payment history yet</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-2 font-bold text-gray-700">Reference</th>
-                      <th className="text-left py-3 px-2 font-bold text-gray-700">Amount</th>
-                      <th className="text-left py-3 px-2 font-bold text-gray-700">Status</th>
-                      <th className="text-left py-3 px-2 font-bold text-gray-700">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((payment) => (
-                      <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-2 font-mono text-xs">{payment.reference || payment.id.slice(0, 8)}</td>
-                        <td className="py-3 px-2 font-bold">GHS {parseFloat(payment.amount).toFixed(2)}</td>
-                        <td className="py-3 px-2">
-                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(payment.status)}`}>
-                            {payment.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2 text-xs text-gray-600">
-                          {new Date(payment.created_at).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Certificates Tab */}
-        {activeTab === 'certificates' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>My Certificates</h3>
-            {certificates.length === 0 ? (
-              <div className="text-center py-12">
-                <Award size={64} className="mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500">No certificates yet</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {certificates.map((cert) => (
-                  <div key={cert.id} className="border rounded-xl p-4" style={{ borderColor: colors.primary + '20' }}>
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg" style={{ background: colors.primary + '10' }}>
-                        <Award size={24} style={{ color: colors.primary }} />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 text-sm mb-1">{cert.courses?.title}</h4>
-                        <p className="text-xs text-gray-600 mb-1">Issued: {new Date(cert.issued_at).toLocaleDateString()}</p>
-                        <p className="text-xs text-gray-500 mb-2">ID: {cert.certificate_id?.slice(0, 12)}</p>
-                        <div className="flex gap-2">
-                          <button className="text-xs px-2 py-1 rounded-full border flex items-center gap-1 hover:bg-gray-50">
-                            <Download size={10} /> PDF
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Quiz Tab */}
-        {activeTab === 'quiz' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>Daily Quiz Challenge</h3>
-            {!showQuiz ? (
-              <div className="text-center py-12">
-                <Brain size={64} className="mx-auto mb-4" style={{ color: colors.secondary }} />
-                <h4 className="text-2xl font-bold text-gray-900 mb-2">Test Your Knowledge</h4>
-                <p className="text-gray-500 mb-6">Answer 10 questions and earn streak points</p>
-                <button
-                  onClick={handleStartQuiz}
-                  className="px-8 py-3 rounded-full text-white font-bold hover:scale-105 transition-all"
-                  style={{ background: colors.primary }}
-                >
-                  Start Quiz
-                </button>
-              </div>
-            ) : (
-              <div className="max-w-2xl mx-auto">
-                {/* Quiz UI - same as before */}
-                {!quizCompleted ? (
-                  <div className="space-y-4">
-                    {/* Progress */}
-                    <div className="flex items-center justify-between text-sm">
-                      <span style={{ color: colors.primary }}>Question {currentQuestion + 1}/{quizQuestions.length}</span>
-                      <span className="flex items-center gap-2">
-                        <Flame size={16} className={streak > 0 ? 'text-orange-500' : 'text-gray-400'} />
-                        <span>Streak: {streak}</span>
-                      </span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full"
-                        style={{ 
-                          width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%`,
-                          background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
-                        }}
-                      ></div>
-                    </div>
-
-                    {/* Timer */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Clock size={18} className="text-gray-500" />
-                        <span className={`font-bold ${timeLeft < 10 ? 'text-red-500' : 'text-gray-700'}`}>
-                          {timeLeft}s
-                        </span>
-                      </div>
-                      <span className="text-sm text-gray-500">Score: {score}/{quizQuestions.length}</span>
-                    </div>
-
-                    {/* Question */}
-                    <div className="p-4 rounded-xl" style={{ background: colors.lightGray }}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: colors.primary + '20', color: colors.primary }}>
-                          {quizQuestions[currentQuestion].category}
-                        </span>
-                      </div>
-                      <h4 className="text-base font-bold text-gray-900 mb-3">
-                        {quizQuestions[currentQuestion].question}
-                      </h4>
-                      <div className="space-y-2">
-                        {quizQuestions[currentQuestion].options.map((option, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleAnswerSelect(index)}
-                            className={`w-full text-left p-3 rounded-lg text-sm transition-all ${
-                              selectedAnswer === index
-                                ? index === quizQuestions[currentQuestion].correct
-                                  ? 'bg-green-100 border border-green-500'
-                                  : 'bg-red-100 border border-red-500'
-                                : 'bg-white border border-gray-200 hover:border-orange-500'
-                            }`}
-                            disabled={selectedAnswer !== null}
-                          >
-                            <span className="flex items-center gap-3">
-                              <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                {String.fromCharCode(65 + index)}
-                              </span>
-                              <span className="text-sm">{option}</span>
-                              {selectedAnswer === index && (
-                                index === quizQuestions[currentQuestion].correct
-                                  ? <CheckCircle size={14} className="ml-auto text-green-500" />
-                                  : <XCircle size={14} className="ml-auto text-red-500" />
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Explanation */}
-                    {selectedAnswer !== null && (
-                      <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm">
-                        <div className="flex items-start gap-2">
-                          <Info size={14} className="text-blue-600 mt-0.5" />
-                          <p className="text-xs text-blue-700">{quizQuestions[currentQuestion].explanation}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Next Button */}
-                    <button
-                      onClick={handleNextQuestion}
-                      disabled={selectedAnswer === null}
-                      className="w-full py-2.5 rounded-lg text-white font-medium transition-all disabled:opacity-50 text-sm"
-                      style={{ background: colors.primary }}
-                    >
-                      {currentQuestion === quizQuestions.length - 1 ? 'Finish Quiz' : 'Next Question'}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ background: colors.secondary + '20' }}>
-                      <Award size={40} style={{ color: colors.secondary }} />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2" style={{ color: colors.primary }}>Quiz Completed!</h3>
-                    <p className="text-gray-600 mb-4">You scored {score} out of {quizQuestions.length}</p>
-                    
-                    <div className="flex gap-3 justify-center">
-                      <button
-                        onClick={handleRestartQuiz}
-                        className="px-4 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 flex items-center gap-2"
-                        style={{ background: colors.primary + '10', color: colors.primary }}
-                      >
-                        <RotateCcw size={14} />
-                        Try Again
-                      </button>
-                      <button
-                        onClick={() => setShowQuiz(false)}
-                        className="px-4 py-2 rounded-full text-white text-sm font-medium transition-all hover:scale-105"
-                        style={{ background: colors.secondary }}
-                      >
-                        Back
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Activity Tab */}
-        {activeTab === 'activity' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>Recent Activity</h3>
-            {recentActivity.length === 0 ? (
-              <div className="text-center py-12">
-                <Activity size={64} className="mx-auto mb-4 text-gray-300" />
-                <p className="text-gray-500">No recent activity</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-100">
-                    <div className={`p-2 rounded-lg ${
-                      activity.activity_type === 'payment' ? 'bg-green-100' :
-                      activity.activity_type === 'quiz' ? 'bg-purple-100' :
-                      'bg-blue-100'
-                    }`}>
-                      {activity.activity_type === 'payment' && <CreditCard size={16} className="text-green-600" />}
-                      {activity.activity_type === 'quiz' && <Brain size={16} className="text-purple-600" />}
-                      {activity.activity_type === 'course' && <BookOpen size={16} className="text-blue-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900 text-sm">{activity.metadata?.description || 'Activity'}</p>
-                      <p className="text-xs text-gray-500">{new Date(activity.created_at).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Community Tab */}
-        {activeTab === 'community' && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold mb-6" style={{ color: colors.primary }}>Community</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-6 rounded-xl border border-gray-200 text-center">
-                <Users2 size={40} className="mx-auto mb-3" style={{ color: colors.primary }} />
-                <h4 className="font-bold text-gray-900 mb-2">Student Community</h4>
-                <p className="text-sm text-gray-600 mb-4">Connect with 130+ learners</p>
-                <button className="px-4 py-2 rounded-full text-white text-sm font-medium" style={{ background: colors.primary }}>
-                  Join Discussion
-                </button>
-              </div>
-              <div className="p-6 rounded-xl border border-gray-200 text-center">
-                <MessageSquare size={40} className="mx-auto mb-3" style={{ color: colors.secondary }} />
-                <h4 className="font-bold text-gray-900 mb-2">WhatsApp Group</h4>
-                <p className="text-sm text-gray-600 mb-4">Active daily discussions</p>
-                <a 
-                  href="https://chat.whatsapp.com/example" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-block px-4 py-2 rounded-full text-white text-sm font-medium" 
-                  style={{ background: colors.secondary }}
-                >
-                  Join Now
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Live Chat Support - Enhanced */}
-        {showChat && (
-          <div className={`fixed bottom-24 right-6 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-50 transition-all ${chatMinimized ? 'h-14' : 'h-[500px]'}`}>
-            {/* Chat Header */}
-            <div className="p-4 text-white flex items-center justify-between cursor-pointer" style={{ background: colors.primary }} onClick={() => setChatMinimized(!chatMinimized)}>
-              <div className="flex items-center gap-2">
-                <Bot size={20} />
-                <h4 className="font-bold text-sm">AI Learning Assistant</h4>
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              </div>
-              <div className="flex items-center gap-2">
-                {chatNotifications > 0 && (
-                  <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full">
-                    {chatNotifications}
-                  </span>
-                )}
-                <button className="text-white/80 hover:text-white" onClick={(e) => { e.stopPropagation(); setChatMinimized(!chatMinimized); }}>
-                  {chatMinimized ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
-                </button>
-                <button className="text-white/80 hover:text-white" onClick={(e) => { e.stopPropagation(); setShowChat(false); }}>
-                  <X size={14} />
-                </button>
-              </div>
-            </div>
-
-            {!chatMinimized && (
-              <>
-                {/* Chat Messages */}
-                <div className="h-96 overflow-y-auto p-4 space-y-3 bg-gray-50">
-                  {chatMessages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-3 rounded-xl text-sm ${
-                        msg.sender === 'user' 
-                          ? 'text-white' 
-                          : 'bg-white text-gray-800 border border-gray-200'
-                      }`} style={msg.sender === 'user' ? { background: colors.primary } : {}}>
-                        <p>{msg.text}</p>
-                        <p className="text-xs mt-1 opacity-70">{msg.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {/* Quick Reply Buttons */}
-                <div className="px-3 py-2 border-t bg-gray-50 flex flex-wrap gap-2">
-                  <button onClick={() => setNewMessage('How am I doing?')} className="text-xs px-2 py-1 bg-gray-200 rounded-full hover:bg-gray-300 transition-all">
-                    📊 My progress
-                  </button>
-                  <button onClick={() => setNewMessage('What should I learn next?')} className="text-xs px-2 py-1 bg-gray-200 rounded-full hover:bg-gray-300 transition-all">
-                    🎯 Recommendations
-                  </button>
-                  <button onClick={() => setNewMessage('Weekly goal?')} className="text-xs px-2 py-1 bg-gray-200 rounded-full hover:bg-gray-300 transition-all">
-                    ⏱️ Weekly goal
-                  </button>
-                </div>
-
-                {/* Chat Input */}
-                <div className="p-3 border-t bg-white flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                    placeholder="Ask me anything..."
-                    className="flex-1 px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2"
-                    style={{ focusRing: colors.secondary }}
-                  />
-                  <button
-                    onClick={sendChatMessage}
-                    className="px-3 py-2 rounded-xl text-white text-sm font-medium flex items-center gap-2 hover:scale-105 transition-all"
-                    style={{ background: colors.secondary }}
-                  >
-                    <Send size={14} />
-                  </button>
-                </div>
-
-                {/* Chat Footer */}
-                <div className="px-3 pb-2 text-center">
-                  <p className="text-[10px] text-gray-400">Powered by iKPACE AI • Ask me about your progress, courses, or goals!</p>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Chat Toggle Button */}
-        <button
-          onClick={() => {
-            setShowChat(!showChat)
-            setChatNotifications(0)
-          }}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full text-white shadow-lg hover:scale-110 transition-all flex items-center justify-center z-50 relative"
-          style={{ background: colors.secondary }}
-        >
-          <Bot size={24} />
-          {chatNotifications > 0 && !showChat && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-              {chatNotifications}
-            </span>
-          )}
-        </button>
+        {/* Render current tab content */}
+        {renderTabContent()}
       </div>
     </div>
   )
