@@ -19,7 +19,8 @@ import {
   ChevronLeft, TrendingUp as TrendingIcon, LineChart,
   Activity as ActivityIcon, Map, Compass,
   Copy, Check, QrCode, Share, AlertCircle,
-  DollarSign, CalendarDays, BookMarked
+  DollarSign, CalendarDays, BookMarked, Mail,
+  BellRing, BellOff, Volume2, VolumeX
 } from 'lucide-react'
 
 export default function Dashboard() {
@@ -28,6 +29,8 @@ export default function Dashboard() {
   const [payments, setPayments] = useState([])
   const [certificates, setCertificates] = useState([])
   const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showNotifications, setShowNotifications] = useState(false)
   const [recommendations, setRecommendations] = useState([])
   const [recentActivity, setRecentActivity] = useState([])
   const [loading, setLoading] = useState(true)
@@ -67,6 +70,7 @@ export default function Dashboard() {
   })
   const [copied, setCopied] = useState(false)
   const [showQR, setShowQR] = useState(false)
+  const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [profileForm, setProfileForm] = useState({
     full_name: profile?.full_name || '',
     username: profile?.username || '',
@@ -156,6 +160,21 @@ export default function Dashboard() {
     }
   ]
 
+  // Generate QR Code URL
+  useEffect(() => {
+    if (user) {
+      const studentId = profile?.student_id || user?.id?.slice(0, 8) || 'IKP-001'
+      // Using a free QR code API
+      setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+        JSON.stringify({
+          id: studentId,
+          name: profile?.full_name || 'Learner',
+          email: user?.email
+        })
+      )}`)
+    }
+  }, [user, profile])
+
   // Fetch live stats
   useEffect(() => {
     const fetchLiveStats = async () => {
@@ -206,10 +225,32 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      if (error) throw error
+
+      setNotifications(data || [])
+      setUnreadCount(data?.filter(n => !n.read).length || 0)
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    }
+  }
+
   useEffect(() => {
     if (user) {
       fetchDashboardData()
       fetchRealTimeData()
+      fetchNotifications()
       calculateWeeklyProgress()
       calculateLearningInsights()
       
@@ -230,8 +271,22 @@ export default function Dashboard() {
           filter: `user_id=eq.${user.id}`
         }, payload => {
           setNotifications(prev => [payload.new, ...prev])
+          setUnreadCount(prev => prev + 1)
+          
+          // Show browser notification if permitted
+          if (Notification.permission === 'granted') {
+            new Notification('iKPACE Notification', {
+              body: payload.new.title,
+              icon: '/icon.png'
+            })
+          }
         })
         .subscribe()
+
+      // Request notification permission
+      if (Notification.permission === 'default') {
+        Notification.requestPermission()
+      }
 
       return () => {
         notificationSubscription.unsubscribe()
@@ -360,7 +415,7 @@ export default function Dashboard() {
             title,
             thumbnail_url,
             duration_weeks,
-            instructor,
+            
             level,
             price,
             category
@@ -415,18 +470,6 @@ export default function Dashboard() {
       if (certificatesData) {
         setCertificates(certificatesData)
         setStats(prev => ({ ...prev, certificatesCount: certificatesData.length }))
-      }
-
-      // Fetch notifications
-      const { data: notificationsData } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      if (notificationsData) {
-        setNotifications(notificationsData)
       }
 
       // Fetch recommendations
@@ -523,13 +566,6 @@ export default function Dashboard() {
 
     const totalMinutes = weeklyActivity?.reduce((sum, act) => sum + (act.metadata?.duration || 0), 0) || 0
     setWeeklyProgress(Math.min(totalMinutes, weeklyGoal))
-  }
-
-  const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Good Morning'
-    if (hour < 18) return 'Good Afternoon'
-    return 'Good Evening'
   }
 
   const getDisplayName = () => {
@@ -675,8 +711,26 @@ export default function Dashboard() {
       setNotifications(prev => 
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       )
+      setUnreadCount(prev => Math.max(0, prev - 1))
     } catch (error) {
       console.error('Error marking notification as read:', error)
+    }
+  }
+
+  const markAllAsRead = async () => {
+    try {
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+      
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, read: true }))
+      )
+      setUnreadCount(0)
+    } catch (error) {
+      console.error('Error marking all as read:', error)
     }
   }
 
@@ -1668,17 +1722,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Welcome Banner */}
+        {/* Welcome Banner - Updated to show HELLO, username! */}
         <div className="mb-4 sm:mb-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl text-white relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})` }}>
           <div className="absolute top-0 right-0 opacity-10">
             <Sparkles size={100} className="sm:w-[150px] sm:h-[150px]" />
           </div>
           <div className="relative z-10">
-            {/* Top Row */}
+            {/* Top Row with Notifications */}
             <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold break-words">
-                  {getGreeting()}, <span className="text-yellow-300">{getDisplayName()}</span>!
+                  HELLO, <span className="text-yellow-300">{getDisplayName().toUpperCase()}</span>!
                 </h1>
                 {streak > 0 && (
                   <span className="px-2 sm:px-3 py-1 bg-yellow-500 text-gray-900 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 animate-pulse">
@@ -1687,16 +1741,110 @@ export default function Dashboard() {
                   </span>
                 )}
               </div>
-              <button
-                onClick={() => setShowProfileCard(!showProfileCard)}
-                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all text-xs sm:text-sm"
-              >
-                <User size={12} />
-                <span className="hidden sm:inline">Profile</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Notification Bell */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all relative"
+                  >
+                    <Bell size={16} className="sm:w-5 sm:h-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center animate-pulse">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Notifications Dropdown */}
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                      <div className="p-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-gray-200 flex items-center justify-between">
+                        <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: colors.primary }}>
+                          <BellRing size={14} />
+                          Notifications
+                        </h3>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllAsRead}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Mark all as read
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-96 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="p-8 text-center text-gray-500">
+                            <BellOff size={32} className="mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">No notifications yet</p>
+                          </div>
+                        ) : (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-3 border-b border-gray-100 hover:bg-gray-50 transition-all cursor-pointer ${
+                                !notification.read ? 'bg-primary/5' : ''
+                              }`}
+                              onClick={() => {
+                                markNotificationAsRead(notification.id)
+                                if (notification.link) {
+                                  window.location.href = notification.link
+                                }
+                                setShowNotifications(false)
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className={`p-2 rounded-lg ${!notification.read ? 'bg-primary/20' : 'bg-gray-100'}`}>
+                                  {notification.type === 'achievement' && <Award size={14} style={{ color: colors.primary }} />}
+                                  {notification.type === 'course' && <BookOpen size={14} style={{ color: colors.secondary }} />}
+                                  {notification.type === 'payment' && <CreditCard size={14} style={{ color: colors.success }} />}
+                                  {notification.type === 'quiz' && <Brain size={14} style={{ color: colors.purple }} />}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-gray-900">{notification.title}</p>
+                                  <p className="text-xs text-gray-500">{notification.message}</p>
+                                  <p className="text-[10px] text-gray-400 mt-1">
+                                    {new Date(notification.created_at).toLocaleDateString()} • {new Date(notification.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                                {!notification.read && (
+                                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      {notifications.length > 0 && (
+                        <div className="p-2 text-center border-t border-gray-200">
+                          <button
+                            onClick={() => {
+                              setActiveTab('notifications')
+                              setShowNotifications(false)
+                            }}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            View all notifications
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Button */}
+                <button
+                  onClick={() => setShowProfileCard(!showProfileCard)}
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-all text-xs sm:text-sm"
+                >
+                  <User size={12} />
+                  <span className="hidden sm:inline">Profile</span>
+                </button>
+              </div>
             </div>
 
-            {/* ID Section */}
+            {/* ID Section with Visible QR Code */}
             <div className="mb-4 sm:mb-6">
               <div className="inline-flex items-center gap-2 sm:gap-3 bg-white/10 backdrop-blur-md rounded-2xl p-2 sm:p-3 border border-white/20 shadow-xl">
                 <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 sm:p-3 rounded-xl shadow-lg">
@@ -1720,28 +1868,70 @@ export default function Dashboard() {
                           <Copy size={12} className="sm:w-4 sm:h-4 text-white/70 group-hover:text-white" />
                         )}
                       </button>
-                      <button 
-                        onClick={() => setShowQR(!showQR)}
-                        className="p-1 hover:bg-white/20 rounded-lg transition-all group relative"
-                        title="Show QR Code"
-                      >
-                        <QrCode size={12} className="sm:w-4 sm:h-4 text-white/70 group-hover:text-white" />
-                      </button>
                     </div>
                   </div>
                 </div>
-                <div className="ml-auto flex items-center gap-1 bg-white/10 px-2 sm:px-3 py-1 rounded-full">
+                
+                {/* QR Code - Always Visible and Clickable */}
+                <button
+                  onClick={() => setShowQR(!showQR)}
+                  className="ml-2 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all relative group"
+                  title="View QR Code"
+                >
+                  <QrCode size={20} className="sm:w-6 sm:h-6 text-white" />
+                  <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    Scan QR Code
+                  </span>
+                </button>
+                
+                <div className="flex items-center gap-1 bg-white/10 px-2 sm:px-3 py-1 rounded-full">
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-[8px] sm:text-xs text-white/80">Active</span>
                 </div>
               </div>
               
+              {/* QR Code Modal */}
               {showQR && (
-                <div className="absolute mt-2 p-3 bg-white rounded-xl shadow-2xl border border-gray-200 z-20">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                    <QrCode size={48} className="sm:w-16 sm:h-16 text-gray-700" />
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowQR(false)}>
+                  <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold" style={{ color: colors.primary }}>Your Student QR Code</h3>
+                      <button onClick={() => setShowQR(false)} className="p-1 hover:bg-gray-100 rounded-full">
+                        <X size={20} />
+                      </button>
+                    </div>
+                    <div className="flex justify-center mb-4">
+                      <img 
+                        src={qrCodeUrl} 
+                        alt="Student QR Code" 
+                        className="w-48 h-48 sm:w-64 sm:h-64 border-2 border-gray-200 rounded-xl p-2"
+                      />
+                    </div>
+                    <p className="text-sm text-gray-600 text-center mb-4">
+                      Scan this code to view your student profile
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          const link = document.createElement('a')
+                          link.href = qrCodeUrl
+                          link.download = `student-qr-${profile?.student_id || 'id'}.png`
+                          link.click()
+                        }}
+                        className="flex-1 px-4 py-2 rounded-lg text-white font-medium flex items-center justify-center gap-2"
+                        style={{ background: colors.primary }}
+                      >
+                        <Download size={16} />
+                        Download
+                      </button>
+                      <button
+                        onClick={() => setShowQR(false)}
+                        className="px-4 py-2 rounded-lg border font-medium hover:bg-gray-50"
+                      >
+                        Close
+                      </button>
+                    </div>
                   </div>
-                  <p className="text-[8px] sm:text-xs text-center mt-1 text-gray-600">Scan to view profile</p>
                 </div>
               )}
             </div>
@@ -1767,54 +1957,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        {/* Notifications Bar */}
-        {notifications.length > 0 && (
-          <div className="mb-4 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="p-3 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-gray-100">
-              <h3 className="text-sm font-bold flex items-center gap-2" style={{ color: colors.primary }}>
-                <Bell size={16} />
-                Notifications ({notifications.filter(n => !n.read).length} new)
-              </h3>
-            </div>
-            <div className="divide-y divide-gray-100">
-              {notifications.slice(0, 3).map(notification => (
-                <div 
-                  key={notification.id}
-                  className={`flex items-start gap-3 p-3 hover:bg-gray-50 transition-all cursor-pointer ${!notification.read ? 'bg-primary/5' : ''}`}
-                  onClick={() => {
-                    markNotificationAsRead(notification.id)
-                    if (notification.link) {
-                      window.location.href = notification.link
-                    }
-                  }}
-                >
-                  <div className={`p-2 rounded-lg ${!notification.read ? 'bg-primary/20' : 'bg-gray-100'}`}>
-                    {notification.type === 'achievement' && <Award size={16} style={{ color: colors.primary }} />}
-                    {notification.type === 'course' && <BookOpen size={16} style={{ color: colors.secondary }} />}
-                    {notification.type === 'payment' && <CreditCard size={16} style={{ color: colors.success }} />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{notification.title}</p>
-                    <p className="text-xs text-gray-500">{notification.message}</p>
-                    <p className="text-[10px] text-gray-400 mt-1">{new Date(notification.created_at).toLocaleDateString()}</p>
-                  </div>
-                  {!notification.read && (
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                  )}
-                </div>
-              ))}
-              {notifications.length > 3 && (
-                <button 
-                  onClick={() => setActiveTab('notifications')}
-                  className="block w-full p-2 text-center text-xs text-primary hover:bg-gray-50 transition-all"
-                >
-                  View all notifications
-                </button>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Profile Card Popup */}
         {showProfileCard && (

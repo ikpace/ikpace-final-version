@@ -124,7 +124,7 @@ export default function Checkout() {
     const sampleCourses = {
       'virtual-assistant-pro': {
         title: 'Virtual Assistant Professional',
-        price: 7,
+        price: 70,
         duration: '6 weeks',
         description: 'Master administrative skills and become a successful virtual assistant',
         image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -136,7 +136,7 @@ export default function Checkout() {
       },
       'social-media-marketing': {
         title: 'Social Media Marketing',
-        price: 7,
+        price: 70,
         duration: '6 weeks',
         description: 'Master social media strategy, ads & analytics',
         image: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -148,7 +148,7 @@ export default function Checkout() {
       },
       'canva-graphic-design': {
         title: 'Canva & Graphic Design',
-        price: 7,
+        price: 70,
         duration: '4 weeks',
         description: 'Create stunning visuals & build your design portfolio',
         image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -160,7 +160,7 @@ export default function Checkout() {
       },
       'smart-kids-coding': {
         title: 'Smart Kids Coding',
-        price: 7,
+        price: 70,
         duration: '4 weeks',
         description: 'Fun coding adventures for ages 6-12 using Scratch',
         image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -172,7 +172,7 @@ export default function Checkout() {
       },
       'freelancing-online-income': {
         title: 'Freelancing & Online Income',
-        price: 7,
+        price: 70,
         duration: '4 weeks',
         description: 'Start earning online with freelancing skills',
         image: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -184,7 +184,7 @@ export default function Checkout() {
       },
       'ai-prompt-engineering': {
         title: 'AI Prompt Engineering',
-        price: 7,
+        price: 70,
         duration: '6 weeks',
         description: 'Master AI tools for content creation',
         image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
