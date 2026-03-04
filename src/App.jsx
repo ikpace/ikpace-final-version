@@ -16,7 +16,8 @@ import Pricing from "./pages/Pricing";
 import Dashboard from "./pages/Dashboard";
 import CareerReady from "./pages/CareerReady";
 import Community from "./pages/Community";
-import AdminDashboard from "./pages/AdminDashboard";
+// Remove duplicate AdminDashboard import - keep only one
+// import AdminDashboard from "./pages/AdminDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard"; // ✅ ADDED: Teacher Dashboard
 import Checkout from "./pages/Checkout";
 import Profile from './pages/Profile';
@@ -28,6 +29,8 @@ import About from './pages/About'; // ✅ ADDED: Main About page
 import Programs from './pages/Programs'; // ✅ ADDED: Programs page
 import WomenInTech from './pages/WomenInTech'; // ✅ ADDED: Women in Tech main page
 import TeacherAccess from './pages/TeacherAccess';
+// Keep this single import
+import AdminDashboard from './pages/AdminDashboard'
 
 // ========== LEARNING PAGE IMPORT ==========
 import CoursePlayer from './pages/CoursePlayer';  // Import the course player/learning page
@@ -117,7 +120,14 @@ function App() {
           <Route path="/certificates" element={<Layout><Certificates /></Layout>} />
           <Route path="/career-ready" element={<Layout><CareerReady /></Layout>} />
           <Route path="/community" element={<Layout><Community /></Layout>} />
+          
+          {/* ========== ADMIN ROUTES - FIXED AND ADDED ========== */}
+          {/* Admin Dashboard - Main route */}
           <Route path="/admin" element={<Layout><AdminDashboard /></Layout>} />
+          {/* Catch all admin sub-routes */}
+          <Route path="/admin/*" element={<Layout><AdminDashboard /></Layout>} />
+          {/* Admin Chat Dashboard */}
+          <Route path="/admin/chats" element={<Layout><AdminChatDashboard /></Layout>} />  {/* Admin chat management */}
           
           {/* ========== DIRECT TEACHER ACCESS ROUTES ========== */}
           <Route path="/direct-teacher" element={<DirectTeacher />} />  {/* No Layout wrapper - bypasses navbar */}
@@ -125,9 +135,6 @@ function App() {
           
           {/* ========== NEW COMPLETE TEACHER DASHBOARD ROUTE ========== */}
           <Route path="/complete-teacher" element={<CompleteTeacherDashboard />} />  {/* Full featured teacher dashboard */}
-          
-          {/* ========== ADMIN CHAT DASHBOARD ROUTE ========== */}
-          <Route path="/admin/chats" element={<Layout><AdminChatDashboard /></Layout>} />  {/* Admin chat management */}
           
           {/* ========== PAYMENT ROUTES ========== */}
           <Route path="/checkout/:courseId" element={<Layout><Checkout /></Layout>} />

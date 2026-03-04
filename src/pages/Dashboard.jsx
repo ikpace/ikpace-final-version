@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../supabaseClient'
+import { api } from '../services/api'
 import { 
   BookOpen, Award, Clock, Flame, Target, Sparkles, Bell, 
   Brain, Zap, CheckCircle, XCircle, Info, ChevronRight, 
@@ -41,9 +42,8 @@ export default function Dashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list' for mobile
+  const [viewMode, setViewMode] = useState('grid')
   
-  // New state for additional features
   const [showNotifications, setShowNotifications] = useState(false)
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'New course available', message: 'Check out our new AI course', read: false, time: '5 min ago' },
@@ -80,12 +80,12 @@ export default function Dashboard() {
 
   // Brand Colors
   const colors = {
-    primary: "#1A3D7C",    // Ikpace Deep Blue
-    secondary: "#FF7A00",   // Ikpace Vibrant Orange
-    accent: "#2F5EA8",      // Stronger blue accent
-    success: "#008F4C",     // Brand green
-    warning: "#E6B800",     // Brand yellow
-    danger: "#DC2626",      // Red for errors
+    primary: "#1A3D7C",
+    secondary: "#FF7A00",
+    accent: "#2F5EA8",
+    success: "#008F4C",
+    warning: "#E6B800",
+    danger: "#DC2626",
     lightGray: "#F3F4F6",
     white: "#FFFFFF",
     purple: "#6B46C1",
@@ -160,39 +160,24 @@ export default function Dashboard() {
     }
   }, [enrollments])
 
+  // UPDATED: Using the live backend API
   const fetchDashboardData = async () => {
     try {
-      const { data: enrollmentsData } = await supabase
-        .from('enrollments')
-        .select(`
-          *,
-          courses (
-            id,
-            title,
-            slug,
-            thumbnail_url,
-            duration_weeks,
-            level,
-            price,
-            category
-          )
-        `)
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('enrolled_at', { ascending: false })
-
-      if (enrollmentsData) {
-        setEnrollments(enrollmentsData)
-        const completed = enrollmentsData.filter(e => e.progress === 100).length
+      // Fetch enrollments from your live backend API
+      const enrollmentsData = await api.getUserEnrollments(user.id);
+      
+      if (enrollmentsData && Array.isArray(enrollmentsData)) {
+        setEnrollments(enrollmentsData);
+        const completed = enrollmentsData.filter(e => e.progress === 100).length;
         setStats(prev => ({ 
           ...prev, 
           totalCourses: enrollmentsData.length,
           completedCourses: completed,
           coursesInProgress: enrollmentsData.length - completed
-        }))
+        }));
       }
 
-      // Fix: Handle case where certificates table might not exist
+      // Fetch certificates from Supabase directly (or add to API later)
       try {
         const { data: certificatesData } = await supabase
           .from('certificates')
@@ -208,34 +193,29 @@ export default function Dashboard() {
         setCertificates([])
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error fetching dashboard data:', error)
     } finally {
       setLoading(false)
     }
   }
 
+  // UPDATED: Using the live backend API
   const fetchPayments = async () => {
     try {
-      const { data } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'success')
-        .order('created_at', { ascending: false })
-
-      if (data) {
-        setPayments(data)
-        const spent = data.reduce((sum, p) => sum + (p.amount || 0), 0)
-        setTotalSpent(spent)
+      const paymentsData = await api.getUserPayments(user.id);
+      
+      if (paymentsData && Array.isArray(paymentsData)) {
+        setPayments(paymentsData);
+        const spent = paymentsData.reduce((sum, p) => sum + (p.amount || 0), 0);
+        setTotalSpent(spent);
       }
     } catch (error) {
-      console.error('Error fetching payments:', error)
+      console.error('Error fetching payments:', error);
     }
   }
 
   const fetchRecentActivity = async () => {
     try {
-      // Fix: Handle case where activity_logs table might not exist
       try {
         const { data } = await supabase
           .from('activity_logs')
@@ -256,7 +236,6 @@ export default function Dashboard() {
     }
   }
 
-  // New fetch functions
   const fetchRecommendedCourses = async () => {
     setRecommendedCourses([
       {
@@ -395,7 +374,6 @@ export default function Dashboard() {
 
   const unreadNotifications = notifications.filter(n => !n.read).length
 
-  // Study timer functions
   const startStudyTimer = (courseId) => {
     setStudyTimerActive(true)
     setSelectedCourseForTimer(courseId)
@@ -867,7 +845,6 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* Other Tabs remain the same but with responsive improvements */}
         {/* Community Tab */}
         {activeTab === 'community' && (
           <div className="space-y-4">
