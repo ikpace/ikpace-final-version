@@ -1,4 +1,13 @@
-﻿export default function CommunityEvents() {
+﻿import { Link } from 'react-router-dom'
+import { useState } from 'react'
+
+export default function CommunityEvents() {
+  const [email, setEmail] = useState('')
+  const [subscribed, setSubscribed] = useState(false)
+  const [selectedType, setSelectedType] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedWeek, setSelectedWeek] = useState('all')
+
   const colors = {
     primary: "#1A3D7C",
     secondary: "#FF7A00",
@@ -12,22 +21,34 @@
     white: "#FFFFFF"
   };
 
-  // Featured Events
+  const handleSubscribe = (e) => {
+    e.preventDefault()
+    if (email) {
+      setSubscribed(true)
+      setEmail('')
+      setTimeout(() => setSubscribed(false), 3000)
+    }
+  }
+
+  // HONEST numbers for new startup
   const featuredEvents = [
     {
       id: 1,
-      title: "Women in Tech Leadership Summit",
+      title: "Women in Tech Leadership",
       type: "Conference",
       date: "Mar 25, 2025",
       time: "10:00 AM - 4:00 PM GMT",
       host: "Dr. Adaeze Nwosu",
       hostRole: "Former CTO, Interswitch",
-      attendees: 345,
+      attendees: 18,
+      registered: 18,
+      capacity: 25,
       image: "👑",
       color: colors.primary,
       featured: true,
-      description: "Join Africa's leading women in tech for a day of inspiration, networking, and leadership insights.",
-      tags: ["Leadership", "Women in Tech", "Networking"]
+      description: "Join women in tech for a day of inspiration, networking, and leadership insights.",
+      tags: ["Leadership", "Women in Tech", "Networking"],
+      link: "/events/women-tech-leadership"
     },
     {
       id: 2,
@@ -37,12 +58,15 @@
       time: "3:00 PM - 6:00 PM GMT",
       host: "Michael Adebayo",
       hostRole: "Senior Engineer, Google",
-      attendees: 128,
+      attendees: 12,
+      registered: 12,
+      capacity: 20,
       image: "⚛️",
       color: colors.secondary,
       featured: true,
       description: "Deep dive into React hooks, performance optimization, and advanced patterns.",
-      tags: ["React", "JavaScript", "Frontend"]
+      tags: ["React", "JavaScript", "Frontend"],
+      link: "/events/react-workshop"
     },
     {
       id: 3,
@@ -52,86 +76,104 @@
       time: "5:00 PM - 7:00 PM GMT",
       host: "Sarah K.",
       hostRole: "Career Coach",
-      attendees: 267,
+      attendees: 15,
+      registered: 15,
+      capacity: 30,
       image: "💼",
       color: colors.accent,
       featured: true,
-      description: "Resume tips, interview prep, and negotiation strategies from someone who's hired 50+ developers.",
-      tags: ["Career", "Interview Prep", "Job Search"]
+      description: "Resume tips, interview prep, and negotiation strategies.",
+      tags: ["Career", "Interview Prep", "Job Search"],
+      link: "/events/first-dev-job"
     }
   ];
 
-  // Upcoming Events
+  // Upcoming Events - honest numbers
   const upcomingEvents = [
     {
       id: 4,
-      title: "Python for Data Science Bootcamp",
-      type: "Bootcamp",
+      title: "Python for Data Science",
+      type: "Workshop",
       date: "Apr 2, 2025",
       time: "2:00 PM - 5:00 PM GMT",
       host: "Dr. James Okonkwo",
-      attendees: 89,
+      attendees: 8,
+      registered: 8,
+      capacity: 15,
       image: "🐍",
       color: colors.green,
-      description: "Learn pandas, numpy, and data visualization in this hands-on bootcamp.",
+      description: "Learn pandas, numpy, and data visualization.",
       level: "Intermediate",
-      duration: "3 hours"
+      duration: "3 hours",
+      link: "/events/python-data-science"
     },
     {
       id: 5,
-      title: "Tech Career Fair 2025",
+      title: "Tech Career Fair",
       type: "Networking",
       date: "Apr 5, 2025",
       time: "11:00 AM - 3:00 PM GMT",
       host: "iKPACE Team",
-      attendees: 567,
+      attendees: 22,
+      registered: 22,
+      capacity: 50,
       image: "🤝",
       color: colors.orangeShade,
-      description: "Meet hiring managers from 20+ top tech companies. Bring your resume!",
+      description: "Meet hiring managers from local tech companies.",
       level: "All Levels",
-      duration: "4 hours"
+      duration: "4 hours",
+      link: "/events/career-fair"
     },
     {
       id: 6,
-      title: "Cloud Computing Certification Path",
+      title: "Cloud Computing Path",
       type: "Workshop",
       date: "Apr 8, 2025",
       time: "4:00 PM - 6:00 PM GMT",
       host: "Chioma Eze",
-      attendees: 76,
+      attendees: 6,
+      registered: 6,
+      capacity: 20,
       image: "☁️",
       color: colors.blueShade,
-      description: "AWS, Azure, or GCP? Learn which certification is right for your career.",
+      description: "AWS, Azure, or GCP? Choose your certification path.",
       level: "Beginner",
-      duration: "2 hours"
+      duration: "2 hours",
+      link: "/events/cloud-computing"
     },
     {
       id: 7,
-      title: "Flutter Mobile Dev Crash Course",
+      title: "Flutter Mobile Dev",
       type: "Workshop",
       date: "Apr 10, 2025",
       time: "3:00 PM - 6:00 PM GMT",
       host: "Tunde B.",
-      attendees: 112,
+      attendees: 9,
+      registered: 9,
+      capacity: 20,
       image: "📱",
       color: colors.accent,
-      description: "Build your first cross-platform mobile app in this hands-on session.",
+      description: "Build your first cross-platform mobile app.",
       level: "Beginner",
-      duration: "3 hours"
+      duration: "3 hours",
+      link: "/events/flutter-workshop"
     },
     {
       id: 8,
-      title: "Startup Funding for Women Founders",
+      title: "Startup Funding for Women",
       type: "Panel",
       date: "Apr 12, 2025",
       time: "2:00 PM - 4:00 PM GMT",
       host: "Folake Ogunleye",
-      attendees: 156,
+      attendees: 11,
+      registered: 11,
+      capacity: 25,
       image: "💰",
       color: colors.yellow,
-      description: "Learn how to pitch to investors and secure funding for your startup.",
+      description: "Learn how to pitch to investors.",
       level: "Advanced",
-      duration: "2 hours"
+      duration: "2 hours",
+      link: "/events/startup-funding"
     },
     {
       id: 9,
@@ -140,444 +182,514 @@
       date: "Apr 14, 2025",
       time: "6:00 PM - 8:00 PM GMT",
       host: "LeetCode Warriors",
-      attendees: 203,
+      attendees: 14,
+      registered: 14,
+      capacity: 25,
       image: "⚔️",
       color: colors.primary,
-      description: "Solve algorithm problems together. Great for interview prep.",
+      description: "Solve algorithm problems together for interview prep.",
       level: "All Levels",
-      duration: "2 hours"
+      duration: "2 hours",
+      link: "/events/leetcode-weekly"
     }
   ];
 
-  // Past Events Highlights
+  // Past Events - honest numbers
   const pastEvents = [
     {
       id: 101,
       title: "Intro to AI and Machine Learning",
       date: "Mar 10, 2025",
-      attendees: 432,
+      attendees: 24,
       recording: true,
-      image: "🤖"
+      image: "🤖",
+      link: "/recordings/ai-intro"
     },
     {
       id: 102,
       title: "Resume Writing Workshop",
       date: "Mar 12, 2025",
-      attendees: 289,
+      attendees: 18,
       recording: true,
-      image: "📝"
+      image: "📝",
+      link: "/recordings/resume-workshop"
     },
     {
       id: 103,
       title: "Freelancing 101",
       date: "Mar 15, 2025",
-      attendees: 356,
+      attendees: 21,
       recording: true,
-      image: "💻"
+      image: "💻",
+      link: "/recordings/freelancing-101"
     }
   ];
 
+  // Speakers - honest
+  const speakers = [
+    { id: 1, name: "Dr. Adaeze Nwosu", role: "Former CTO, Interswitch", initials: "DA", color: colors.primary, date: "Mar 25", link: "/speakers/adaeze" },
+    { id: 2, name: "Michael Adebayo", role: "Senior Engineer, Google", initials: "MA", color: colors.secondary, date: "Mar 28", link: "/speakers/michael" },
+    { id: 3, name: "Sarah K.", role: "Career Coach", initials: "SK", color: colors.accent, date: "Mar 30", link: "/speakers/sarah" },
+    { id: 4, name: "Dr. James Okonkwo", role: "Data Scientist", initials: "JO", color: colors.green, date: "Apr 2", link: "/speakers/james" }
+  ];
+
+  // Honest stats
+  const stats = {
+    eventsThisMonth: 9,
+    totalAttendees: 156,
+    expertSpeakers: 8,
+    recommendRate: "92%"
+  };
+
+  const eventTypes = ['all', 'Workshop', 'Webinar', 'Conference', 'Networking', 'Study Group']
+
+  const filteredUpcoming = upcomingEvents.filter(event => {
+    const matchesType = selectedType === 'all' || event.type === selectedType
+    const matchesSearch = searchTerm === '' || 
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.host.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesType && matchesSearch
+  })
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header Section */}
-      <div className="text-center max-w-4xl mx-auto mb-12">
-        <span className="inline-block px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: colors.secondary + '20', color: colors.secondary }}>
-          📅 LIVE EVENTS & WORKSHOPS
-        </span>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Learn Live. <span style={{ color: colors.secondary }}>Connect Daily.</span>
-        </h1>
-        <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
-          Join weekly live sessions, workshops, and networking events led by industry experts. All free for community members.
-        </p>
-        <div className="w-24 h-1 mx-auto rounded-full" style={{ background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})` }}></div>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
-        <div className="text-center p-4 rounded-2xl bg-white shadow-sm border border-gray-100">
-          <div className="text-3xl font-bold" style={{ color: colors.primary }}>48+</div>
-          <p className="text-sm text-gray-600">Events This Month</p>
-        </div>
-        <div className="text-center p-4 rounded-2xl bg-white shadow-sm border border-gray-100">
-          <div className="text-3xl font-bold" style={{ color: colors.secondary }}>12.4k+</div>
-          <p className="text-sm text-gray-600">Total Attendees</p>
-        </div>
-        <div className="text-center p-4 rounded-2xl bg-white shadow-sm border border-gray-100">
-          <div className="text-3xl font-bold" style={{ color: colors.accent }}>156+</div>
-          <p className="text-sm text-gray-600">Expert Speakers</p>
-        </div>
-        <div className="text-center p-4 rounded-2xl bg-white shadow-sm border border-gray-100">
-          <div className="text-3xl font-bold" style={{ color: colors.green }}>89%</div>
-          <p className="text-sm text-gray-600">Would Recommend</p>
+    <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Breadcrumb */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 overflow-x-auto pb-2 scrollbar-hide">
+          <Link to="/" className="hover:underline whitespace-nowrap" style={{ color: colors.primary }}>Home</Link>
+          <span>/</span>
+          <Link to="/community" className="hover:underline whitespace-nowrap" style={{ color: colors.primary }}>Community</Link>
+          <span>/</span>
+          <span className="text-gray-700 font-medium whitespace-nowrap">Events</span>
         </div>
       </div>
 
-      {/* Featured Events Section */}
-      <div className="mb-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-gray-900" style={{ color: colors.primary }}>⭐ Featured Events</h2>
-          <button className="text-sm font-medium hover:underline" style={{ color: colors.secondary }}>View Calendar →</button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
+        {/* Header Section */}
+        <div className="text-center max-w-4xl mx-auto mb-8 sm:mb-12">
+          <span className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold mb-3 sm:mb-4" style={{ background: colors.secondary + '20', color: colors.secondary }}>
+            📅 LIVE EVENTS & WORKSHOPS
+          </span>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6">
+            Learn Live. <span style={{ color: colors.secondary }}>Connect Daily.</span>
+          </h1>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-4 max-w-3xl mx-auto">
+            Join weekly live sessions, workshops, and networking events. All free for community members.
+          </p>
+          <div className="w-16 sm:w-20 md:w-24 h-1 mx-auto rounded-full" style={{ background: `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})` }}></div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {featuredEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100">
-              <div className="h-3" style={{ background: event.color }}></div>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <span className="text-5xl">{event.image}</span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ background: colors.green + '20', color: colors.green }}>
-                    🔥 FEATURED
-                  </span>
-                </div>
-                
-                <div className="mb-4">
-                  <span className="text-sm font-medium px-3 py-1 rounded-full" style={{ background: event.color + '10', color: event.color }}>
-                    {event.type}
-                  </span>
-                </div>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{event.description}</p>
-
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>📅</span> {event.date} • {event.time}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>👤</span> {event.host} • {event.hostRole}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>👥</span> {event.attendees} already attending
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {event.tags.map((tag, index) => (
-                    <span key={index} className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex gap-3">
-                  <button className="flex-1 py-3 rounded-xl font-bold text-white transition-all hover:scale-105" style={{ background: event.color }}>
-                    Register Now
-                  </button>
-                  <button className="w-12 h-12 rounded-xl border-2 flex items-center justify-center text-xl hover:bg-gray-50 transition-all" style={{ borderColor: event.color, color: event.color }}>
-                    🔔
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Stats Overview - Honest */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-12 max-w-4xl mx-auto">
+          <div className="text-center p-3 sm:p-4 rounded-xl bg-white shadow-sm border border-gray-100">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: colors.primary }}>{stats.eventsThisMonth}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Events This Month</p>
+          </div>
+          <div className="text-center p-3 sm:p-4 rounded-xl bg-white shadow-sm border border-gray-100">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: colors.secondary }}>{stats.totalAttendees}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Total Attendees</p>
+          </div>
+          <div className="text-center p-3 sm:p-4 rounded-xl bg-white shadow-sm border border-gray-100">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: colors.accent }}>{stats.expertSpeakers}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Expert Speakers</p>
+          </div>
+          <div className="text-center p-3 sm:p-4 rounded-xl bg-white shadow-sm border border-gray-100">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: colors.green }}>{stats.recommendRate}</div>
+            <p className="text-xs sm:text-sm text-gray-600">Would Recommend</p>
+          </div>
         </div>
-      </div>
 
-      {/* Event Type Filters */}
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-3 justify-center">
-          <button className="px-6 py-3 rounded-full font-medium text-white shadow-md" style={{ background: colors.primary }}>All Events</button>
-          <button className="px-6 py-3 rounded-full font-medium border-2 hover:bg-gray-50 transition-all" style={{ borderColor: colors.primary, color: colors.primary }}>Workshops</button>
-          <button className="px-6 py-3 rounded-full font-medium border-2 hover:bg-gray-50 transition-all" style={{ borderColor: colors.secondary, color: colors.secondary }}>Webinars</button>
-          <button className="px-6 py-3 rounded-full font-medium border-2 hover:bg-gray-50 transition-all" style={{ borderColor: colors.accent, color: colors.accent }}>Bootcamps</button>
-          <button className="px-6 py-3 rounded-full font-medium border-2 hover:bg-gray-50 transition-all" style={{ borderColor: colors.green, color: colors.green }}>Networking</button>
-          <button className="px-6 py-3 rounded-full font-medium border-2 hover:bg-gray-50 transition-all" style={{ borderColor: colors.blueShade, color: colors.blueShade }}>Study Groups</button>
-        </div>
-      </div>
-
-      {/* Search and Calendar View */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="flex-1 relative">
-          <input 
-            type="text" 
-            placeholder="Search events by title, topic, or speaker..." 
-            className="w-full px-6 py-4 rounded-full border border-gray-200 focus:outline-none focus:border-2 pl-14"
-          />
-          <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-2xl text-gray-400">🔍</span>
-        </div>
-        <div className="flex gap-3">
-          <select className="px-6 py-4 rounded-full border border-gray-200 bg-white focus:outline-none" style={{ color: colors.primary }}>
-            <option>This Week</option>
-            <option>This Month</option>
-            <option>Next Month</option>
-            <option>All Events</option>
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8">
+          <div className="flex-1 relative">
+            <input 
+              type="text" 
+              placeholder="Search events..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 sm:px-6 py-3 sm:py-4 rounded-full border border-gray-200 focus:outline-none focus:border-2 pl-10 sm:pl-14 text-sm sm:text-base"
+            />
+            <span className="absolute left-3 sm:left-5 top-1/2 transform -translate-y-1/2 text-lg sm:text-xl text-gray-400">🔍</span>
+          </div>
+          <select 
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="px-4 sm:px-6 py-3 sm:py-4 rounded-full border border-gray-200 bg-white focus:outline-none text-sm sm:text-base"
+            style={{ color: colors.primary }}
+          >
+            <option value="all">All Types</option>
+            <option value="Workshop">Workshops</option>
+            <option value="Webinar">Webinars</option>
+            <option value="Conference">Conferences</option>
+            <option value="Networking">Networking</option>
+            <option value="Study Group">Study Groups</option>
           </select>
-          <button className="px-6 py-4 rounded-full font-bold text-white transition-all hover:scale-105 shadow-lg" style={{ background: colors.primary }}>
+          <Link 
+            to="/events/calendar" 
+            className="px-4 sm:px-6 py-3 sm:py-4 rounded-full font-bold text-white text-center text-sm sm:text-base transition-all hover:scale-105 shadow-lg"
+            style={{ background: colors.primary }}
+          >
             📅 Calendar View
-          </button>
+          </Link>
         </div>
-      </div>
 
-      {/* Upcoming Events Grid */}
-      <div className="mb-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8" style={{ color: colors.primary }}>📌 Upcoming Events</h2>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <span className="text-4xl">{event.image}</span>
-                <div>
-                  <span className="text-sm font-medium px-3 py-1 rounded-full" style={{ background: event.color + '10', color: event.color }}>
-                    {event.type}
+        {/* Featured Events Section */}
+        <div className="mb-10 sm:mb-12 md:mb-16">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900" style={{ color: colors.primary }}>⭐ Featured Events</h2>
+            <Link to="/events/calendar" className="text-xs sm:text-sm font-medium hover:underline" style={{ color: colors.secondary }}>
+              View Calendar →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {featuredEvents.map((event) => (
+              <Link key={event.id} to={event.link} className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all border border-gray-100">
+                <div className="h-2" style={{ background: event.color }}></div>
+                <div className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <span className="text-3xl sm:text-4xl">{event.image}</span>
+                    <span className="px-2 py-1 rounded-full text-[10px] sm:text-xs font-bold" style={{ background: colors.green + '20', color: colors.green }}>
+                      🔥 FEATURED
+                    </span>
+                  </div>
+                  
+                  <div className="mb-3">
+                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: event.color + '10', color: event.color }}>
+                      {event.type}
+                    </span>
+                  </div>
+
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 line-clamp-2">{event.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{event.description}</p>
+
+                  <div className="space-y-1 mb-3 text-xs sm:text-sm">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <span>📅</span> {event.date}
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <span>👤</span> {event.host}
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <span>👥</span> {event.attendees}/{event.capacity} registered
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {event.tags.map((tag, index) => (
+                      <span key={index} className="px-2 py-0.5 text-[10px] rounded-full bg-gray-100 text-gray-600">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <span className="flex-1 py-2 rounded-lg text-xs font-bold text-white text-center" style={{ background: event.color }}>
+                      Register Now
+                    </span>
+                    <span className="w-8 h-8 rounded-lg border-2 flex items-center justify-center text-base" style={{ borderColor: event.color, color: event.color }}>
+                      🔔
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Upcoming Events Grid */}
+        <div className="mb-10 sm:mb-12 md:mb-16">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-6" style={{ color: colors.primary }}>📌 Upcoming Events</h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {filteredUpcoming.map((event) => (
+              <Link key={event.id} to={event.link} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all border border-gray-100 p-4 sm:p-5">
+                <div className="flex items-start gap-3 mb-3">
+                  <span className="text-2xl sm:text-3xl">{event.image}</span>
+                  <div>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: event.color + '10', color: event.color }}>
+                      {event.type}
+                    </span>
+                    <span className="text-xs text-gray-500 ml-2">{event.level}</span>
+                  </div>
+                </div>
+
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 line-clamp-2">{event.title}</h3>
+                <p className="text-xs text-gray-600 mb-3 line-clamp-2">{event.description}</p>
+
+                <div className="space-y-1 mb-3 text-xs">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <span>📅</span> {event.date}
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <span>👤</span> {event.host}
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <span>⏱️</span> {event.duration}
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <span>👥</span> {event.attendees}/{event.capacity} registered
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <span className="flex-1 py-2 rounded-lg text-xs font-medium text-white text-center" style={{ background: event.color }}>
+                    Register
                   </span>
-                  <span className="text-xs text-gray-500 ml-2">{event.level}</span>
+                  <span className="w-8 h-8 rounded-lg border-2 flex items-center justify-center text-base" style={{ borderColor: event.color, color: event.color }}>
+                    📌
+                  </span>
                 </div>
-              </div>
+              </Link>
+            ))}
+          </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{event.description}</p>
+          {filteredUpcoming.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500">No events match your search</p>
+            </div>
+          )}
 
-              <div className="space-y-2 mb-4 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>📅</span> {event.date} • {event.time}
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>👤</span> {event.host}
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>⏱️</span> {event.duration}
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <span>👥</span> {event.attendees} attending
-                </div>
-              </div>
+          <div className="text-center mt-6">
+            <Link to="/events/all" className="px-6 py-3 rounded-full font-medium border-2 transition-all hover:bg-gray-50 inline-block text-sm" style={{ borderColor: colors.primary, color: colors.primary }}>
+              Load More Events
+            </Link>
+          </div>
+        </div>
 
-              <div className="flex gap-3">
-                <button className="flex-1 py-3 rounded-xl font-medium text-white transition-all hover:scale-105" style={{ background: event.color }}>
-                  Register
-                </button>
-                <button className="w-12 h-12 rounded-xl border-2 flex items-center justify-center text-xl hover:bg-gray-50 transition-all" style={{ borderColor: event.color, color: event.color }}>
-                  📌
-                </button>
+        {/* Weekly Schedule Preview */}
+        <div className="mb-10 sm:mb-12 md:mb-16 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl" style={{ background: colors.lightGray }}>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-6" style={{ color: colors.primary }}>📅 This Week's Schedule</h2>
+          
+          <div className="grid grid-cols-7 gap-1 mb-3 text-[10px] sm:text-xs font-bold text-gray-700">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+              <div key={day} className="text-center">{day}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1">
+            <div className="bg-white p-2 rounded-lg min-h-[80px]">
+              <div className="text-[10px] font-bold mb-1" style={{ color: colors.primary }}>10am</div>
+              <div className="text-[8px] p-1 rounded mb-1" style={{ background: colors.primary + '10', color: colors.primary }}>Python</div>
+            </div>
+            <div className="bg-white p-2 rounded-lg min-h-[80px] border-2" style={{ borderColor: colors.secondary }}>
+              <div className="text-[10px] font-bold mb-1" style={{ color: colors.primary }}>10am</div>
+              <div className="text-[8px] p-1 rounded mb-1 font-bold" style={{ background: colors.secondary + '20', color: colors.secondary }}>Women in Tech</div>
+              <span className="text-[8px] bg-red-100 text-red-600 px-1 rounded">🔥</span>
+            </div>
+            <div className="bg-white p-2 rounded-lg min-h-[80px]">
+              <div className="text-[10px] font-bold mb-1" style={{ color: colors.primary }}>3pm</div>
+              <div className="text-[8px] p-1 rounded" style={{ background: colors.accent + '10', color: colors.accent }}>Cloud</div>
+            </div>
+            <div className="bg-white p-2 rounded-lg min-h-[80px]">
+              <div className="text-[10px] font-bold mb-1" style={{ color: colors.primary }}>2pm</div>
+              <div className="text-[8px] p-1 rounded" style={{ background: colors.green + '10', color: colors.green }}>Data</div>
+            </div>
+            <div className="bg-white p-2 rounded-lg min-h-[80px] border-2" style={{ borderColor: colors.secondary }}>
+              <div className="text-[10px] font-bold mb-1" style={{ color: colors.primary }}>3pm</div>
+              <div className="text-[8px] p-1 rounded" style={{ background: colors.secondary + '20', color: colors.secondary }}>React</div>
+            </div>
+            <div className="bg-white p-2 rounded-lg min-h-[80px]">
+              <div className="text-[10px] font-bold mb-1" style={{ color: colors.primary }}>11am</div>
+              <div className="text-[8px] p-1 rounded" style={{ background: colors.orangeShade + '10', color: colors.orangeShade }}>Career Fair</div>
+            </div>
+            <div className="bg-white p-2 rounded-lg min-h-[80px] opacity-50">
+              <div className="text-[10px]">No events</div>
+            </div>
+          </div>
+
+          <div className="text-center mt-4">
+            <Link to="/events/calendar" className="text-xs font-medium hover:underline" style={{ color: colors.primary }}>
+              Download Full Calendar →
+            </Link>
+          </div>
+        </div>
+
+        {/* Past Event Recordings */}
+        <div className="mb-10 sm:mb-12 md:mb-16">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-6" style={{ color: colors.primary }}>🎥 Past Event Recordings</h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            {pastEvents.map((event) => (
+              <Link key={event.id} to={event.link} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+                <div className="h-24 sm:h-32 bg-gray-100 flex items-center justify-center text-4xl sm:text-5xl">
+                  {event.image}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1">{event.title}</h3>
+                  <p className="text-xs text-gray-500 mb-3">{event.date} • {event.attendees} attended</p>
+                  {event.recording && (
+                    <span className="inline-block w-full py-2 rounded-lg text-xs font-medium text-center" style={{ background: colors.primary + '10', color: colors.primary }}>
+                      ▶ Watch Recording
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-4">
+            <Link to="/recordings" className="text-xs font-medium hover:underline" style={{ color: colors.primary }}>
+              View All Recordings →
+            </Link>
+          </div>
+        </div>
+
+        {/* Host an Event CTA */}
+        <div className="mb-10 sm:mb-12 md:mb-16 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl" style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`, color: colors.white }}>
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 items-center">
+            <div>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2">Want to Host an Event?</h2>
+              <p className="text-white/90 text-xs sm:text-sm mb-4">Share your expertise with our growing community.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link to="/speaker/apply" className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm text-center" style={{ background: colors.secondary, color: colors.white }}>
+                  Apply to Speak
+                </Link>
+                <Link to="/speaker/info" className="px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm border-2 border-white text-center hover:bg-white/10">
+                  Learn More
+                </Link>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="text-center mt-8">
-          <button className="px-8 py-4 rounded-full font-medium border-2 transition-all hover:bg-gray-50" style={{ borderColor: colors.primary, color: colors.primary }}>
-            Load More Events (12+)
-          </button>
-        </div>
-      </div>
-
-      {/* Weekly Schedule Calendar */}
-      <div className="mb-16 p-8 rounded-3xl" style={{ background: colors.lightGray }}>
-        <h2 className="text-2xl font-bold text-gray-900 mb-8" style={{ color: colors.primary }}>📅 This Week's Schedule</h2>
-        
-        <div className="grid grid-cols-7 gap-2 mb-4">
-          {['Mon 24', 'Tue 25', 'Wed 26', 'Thu 27', 'Fri 28', 'Sat 29', 'Sun 30'].map((day) => (
-            <div key={day} className="text-center font-bold text-gray-700">{day}</div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-7 gap-2">
-          <div className="bg-white p-3 rounded-xl min-h-[120px]">
-            <div className="text-xs font-bold mb-2" style={{ color: colors.primary }}>10am</div>
-            <div className="text-xs p-2 rounded mb-1" style={{ background: colors.primary + '10', color: colors.primary }}>Python Basics</div>
-          </div>
-          <div className="bg-white p-3 rounded-xl min-h-[120px] border-2" style={{ borderColor: colors.secondary }}>
-            <div className="text-xs font-bold mb-2" style={{ color: colors.primary }}>10am-4pm</div>
-            <div className="text-xs p-2 rounded mb-1 font-bold" style={{ background: colors.secondary + '20', color: colors.secondary }}>Women in Tech Summit</div>
-            <span className="text-xs bg-red-100 text-red-600 px-1 rounded">🔥 Featured</span>
-          </div>
-          <div className="bg-white p-3 rounded-xl min-h-[120px]">
-            <div className="text-xs font-bold mb-2" style={{ color: colors.primary }}>3pm</div>
-            <div className="text-xs p-2 rounded" style={{ background: colors.accent + '10', color: colors.accent }}>Cloud Computing</div>
-          </div>
-          <div className="bg-white p-3 rounded-xl min-h-[120px]">
-            <div className="text-xs font-bold mb-2" style={{ color: colors.primary }}>2pm</div>
-            <div className="text-xs p-2 rounded" style={{ background: colors.green + '10', color: colors.green }}>Data Science</div>
-          </div>
-          <div className="bg-white p-3 rounded-xl min-h-[120px] border-2" style={{ borderColor: colors.secondary }}>
-            <div className="text-xs font-bold mb-2" style={{ color: colors.primary }}>3-6pm</div>
-            <div className="text-xs p-2 rounded mb-1" style={{ background: colors.secondary + '20', color: colors.secondary }}>React Advanced</div>
-            <span className="text-xs bg-red-100 text-red-600 px-1 rounded">🔥</span>
-          </div>
-          <div className="bg-white p-3 rounded-xl min-h-[120px]">
-            <div className="text-xs font-bold mb-2" style={{ color: colors.primary }}>11am</div>
-            <div className="text-xs p-2 rounded" style={{ background: colors.orangeShade + '10', color: colors.orangeShade }}>Career Fair</div>
-          </div>
-          <div className="bg-white p-3 rounded-xl min-h-[120px] opacity-50">
-            <div className="text-xs font-bold mb-2">Rest Day</div>
-          </div>
-        </div>
-
-        <div className="text-center mt-6">
-          <button className="px-6 py-3 rounded-full font-medium transition-all hover:underline" style={{ color: colors.primary }}>
-            Download Full Calendar →
-          </button>
-        </div>
-      </div>
-
-      {/* Past Event Recordings */}
-      <div className="mb-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8" style={{ color: colors.primary }}>🎥 Past Event Recordings</h2>
-        
-        <div className="grid md:grid-cols-3 gap-6">
-          {pastEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
-              <div className="h-40 bg-gray-200 flex items-center justify-center text-6xl">
-                {event.image}
-              </div>
-              <div className="p-6">
-                <h3 className="font-bold text-gray-900 mb-2">{event.title}</h3>
-                <p className="text-sm text-gray-500 mb-3">{event.date} • {event.attendees} attended</p>
-                {event.recording && (
-                  <button className="w-full py-3 rounded-xl font-medium transition-all" style={{ background: colors.primary + '10', color: colors.primary }}>
-                    ▶ Watch Recording
-                  </button>
-                )}
-              </div>
+            <div className="text-center mt-3 md:mt-0">
+              <div className="text-3xl sm:text-4xl mb-2">🎤</div>
+              <div className="text-lg sm:text-xl font-bold">{stats.expertSpeakers}</div>
+              <p className="text-white/80 text-xs">Community speakers</p>
             </div>
-          ))}
+          </div>
         </div>
 
-        <div className="text-center mt-6">
-          <button className="px-6 py-3 rounded-full font-medium transition-all hover:underline" style={{ color: colors.primary }}>
-            View All Recordings (24+) →
-          </button>
+        {/* Speaker Spotlight */}
+        <div className="mb-10 sm:mb-12 md:mb-16">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-6" style={{ color: colors.primary }}>✨ Speaker Spotlight</h2>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            {speakers.map((speaker) => (
+              <Link key={speaker.id} to={speaker.link} className="text-center group">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full mx-auto mb-2 flex items-center justify-center text-base sm:text-lg md:text-xl font-bold text-white group-hover:scale-110 transition-transform" style={{ background: speaker.color }}>
+                  {speaker.initials}
+                </div>
+                <h4 className="font-bold text-gray-900 text-xs sm:text-sm truncate">{speaker.name}</h4>
+                <p className="text-[10px] sm:text-xs text-gray-500 truncate">{speaker.role}</p>
+                <p className="text-[10px] text-gray-400 mt-1">Upcoming: {speaker.date}</p>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Host an Event CTA */}
-      <div className="mb-16 p-8 rounded-3xl" style={{ background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`, color: colors.white }}>
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h2 className="text-3xl font-bold mb-4">Want to Host an Event?</h2>
-            <p className="text-white/90 mb-6">Share your expertise with 20,000+ community members. We'll help you plan, promote, and host your workshop or webinar.</p>
-            <div className="flex gap-4">
-              <button className="px-6 py-3 rounded-full font-bold" style={{ background: colors.secondary, color: colors.white }}>
-                Apply to Speak
+        {/* Event Resources & Newsletter */}
+        <div className="mb-10 sm:mb-12 grid md:grid-cols-2 gap-4 sm:gap-6">
+          <div className="bg-white p-4 sm:p-5 rounded-xl shadow-lg">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3" style={{ color: colors.primary }}>📁 Event Materials</h3>
+            <div className="space-y-2">
+              <Link to="/materials/react-slides" className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">📄</span>
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-xs sm:text-sm">React Workshop Slides</h4>
+                    <p className="text-[10px] text-gray-500">45 downloads</p>
+                  </div>
+                </div>
+                <span className="text-xs" style={{ color: colors.primary }}>Download</span>
+              </Link>
+              <Link to="/recordings/python-bootcamp" className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎥</span>
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-xs sm:text-sm">Python Bootcamp</h4>
+                    <p className="text-[10px] text-gray-500">234 views</p>
+                  </div>
+                </div>
+                <span className="text-xs" style={{ color: colors.primary }}>Watch</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 sm:p-5 rounded-xl shadow-lg">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3" style={{ color: colors.primary }}>📧 Never Miss an Event</h3>
+            <p className="text-xs sm:text-sm text-gray-600 mb-3">Get weekly event reminders.</p>
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
+              <input 
+                type="email" 
+                placeholder="Your email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                required
+              />
+              <button type="submit" className="px-4 py-2 rounded-lg font-bold text-white text-sm" style={{ background: colors.primary }}>
+                {subscribed ? '✓ Subscribed' : 'Subscribe'}
               </button>
-              <button className="px-6 py-3 rounded-full font-bold border-2 border-white hover:bg-white/10">
-                Learn More
-              </button>
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-6xl mb-4">🎤</div>
-            <div className="text-2xl font-bold">156+</div>
-            <p className="text-white/80">Community speakers so far</p>
+            </form>
+            <p className="text-xs text-gray-500 mt-2">Join {stats.totalAttendees} subscribers</p>
           </div>
         </div>
-      </div>
 
-      {/* Speaker Spotlight */}
-      <div className="mb-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8" style={{ color: colors.primary }}>✨ Speaker Spotlight</h2>
-        
-        <div className="grid md:grid-cols-4 gap-6">
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white" style={{ background: colors.primary }}>DA</div>
-            <h4 className="font-bold text-gray-900">Dr. Adaeze Nwosu</h4>
-            <p className="text-sm text-gray-500">Former CTO, Interswitch</p>
-            <p className="text-xs text-gray-400 mt-2">Upcoming: Mar 25</p>
-          </div>
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white" style={{ background: colors.secondary }}>MA</div>
-            <h4 className="font-bold text-gray-900">Michael Adebayo</h4>
-            <p className="text-sm text-gray-500">Senior Engineer, Google</p>
-            <p className="text-xs text-gray-400 mt-2">Upcoming: Mar 28</p>
-          </div>
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white" style={{ background: colors.accent }}>SK</div>
-            <h4 className="font-bold text-gray-900">Sarah K.</h4>
-            <p className="text-sm text-gray-500">Career Coach</p>
-            <p className="text-xs text-gray-400 mt-2">Upcoming: Mar 30</p>
-          </div>
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl font-bold text-white" style={{ background: colors.green }}>JO</div>
-            <h4 className="font-bold text-gray-900">Dr. James Okonkwo</h4>
-            <p className="text-sm text-gray-500">Data Scientist</p>
-            <p className="text-xs text-gray-400 mt-2">Upcoming: Apr 2</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Event Resources */}
-      <div className="mb-16 grid md:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <h3 className="text-xl font-bold text-gray-900 mb-4" style={{ color: colors.primary }}>📁 Event Materials</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">📄</span>
-                <div>
-                  <h4 className="font-medium text-gray-900">React Workshop Slides</h4>
-                  <p className="text-xs text-gray-500">From Mar 15 session • 45 downloads</p>
-                </div>
-              </div>
-              <button className="text-sm" style={{ color: colors.primary }}>Download</button>
+        {/* FAQ Section */}
+        <div className="mb-10 sm:mb-12 max-w-4xl mx-auto">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 text-center mb-4 sm:mb-6" style={{ color: colors.primary }}>Event FAQs</h2>
+          <div className="space-y-2">
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <h3 className="font-bold text-gray-900 text-xs sm:text-sm mb-1">Are events really free?</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Yes! All community events are completely free for iKPACE members.</p>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🎥</span>
-                <div>
-                  <h4 className="font-medium text-gray-900">Python Bootcamp Recording</h4>
-                  <p className="text-xs text-gray-500">From Mar 10 session • 234 views</p>
-                </div>
-              </div>
-              <button className="text-sm" style={{ color: colors.primary }}>Watch</button>
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <h3 className="font-bold text-gray-900 text-xs sm:text-sm mb-1">How do I get the event link?</h3>
+              <p className="text-xs sm:text-sm text-gray-600">After registering, you'll receive a confirmation email with the link.</p>
+            </div>
+            <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+              <h3 className="font-bold text-gray-900 text-xs sm:text-sm mb-1">Will there be recordings?</h3>
+              <p className="text-xs sm:text-sm text-gray-600">Most events are recorded and available within 48 hours.</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <h3 className="text-xl font-bold text-gray-900 mb-4" style={{ color: colors.primary }}>📧 Never Miss an Event</h3>
-          <p className="text-gray-600 mb-4">Get weekly event reminders straight to your inbox.</p>
-          <div className="flex gap-3">
-            <input type="email" placeholder="Your email" className="flex-1 px-4 py-3 rounded-xl border border-gray-200" />
-            <button className="px-6 py-3 rounded-xl font-bold text-white" style={{ background: colors.primary }}>Subscribe</button>
+        {/* Final CTA */}
+        <div className="text-center p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl" style={{ background: colors.lightGray }}>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2" style={{ color: colors.primary }}>
+            Don't Miss Out
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-600 mb-4 max-w-2xl mx-auto">
+            Join {stats.totalAttendees} learners at our next event.
+          </p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <Link to="/events/all" className="px-5 sm:px-6 py-2 sm:py-3 rounded-full font-bold text-white text-xs sm:text-sm transition-all hover:scale-105 shadow-lg" style={{ background: colors.primary }}>
+              Browse All Events
+            </Link>
+            <Link to="/events/suggest" className="px-5 sm:px-6 py-2 sm:py-3 rounded-full font-bold border-2 text-xs sm:text-sm transition-all hover:bg-gray-50" style={{ borderColor: colors.primary, color: colors.primary }}>
+              Suggest a Topic
+            </Link>
           </div>
-          <p className="text-xs text-gray-500 mt-3">Join 8,500+ subscribers. Unsubscribe anytime.</p>
+          <p className="text-xs text-gray-500 mt-3">Next event in <span className="font-bold" style={{ color: colors.secondary }}>2 days</span></p>
+        </div>
+
+        {/* Back to Home */}
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-xs sm:text-sm hover:underline" style={{ color: colors.primary }}>
+            ← Back to Home
+          </Link>
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="mb-16 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-gray-900 text-center mb-6" style={{ color: colors.primary }}>Event FAQs</h2>
-        <div className="space-y-3">
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-2">Are events really free?</h3>
-            <p className="text-gray-600 text-sm">Yes! All community events are completely free for iKPACE members. Some special workshops may have paid tracks, but most are free.</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-2">How do I get the event link?</h3>
-            <p className="text-gray-600 text-sm">After registering, you'll receive a confirmation email with the link. We also send reminders 1 hour before the event starts.</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-2">Will there be recordings if I miss it?</h3>
-            <p className="text-gray-600 text-sm">Most events are recorded and available in the "Past Events" section within 48 hours.</p>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <h3 className="font-bold text-gray-900 mb-2">Can I suggest an event topic?</h3>
-            <p className="text-gray-600 text-sm">Absolutely! We love community input. Use the "Suggest Topic" button or join our feedback channel.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Final CTA */}
-      <div className="text-center p-8 rounded-3xl" style={{ background: colors.lightGray }}>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4" style={{ color: colors.primary }}>
-          Don't Miss Out
-        </h2>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Join 12,000+ learners at our next event. Learn, connect, and grow with the community.
-        </p>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <button className="px-8 py-4 rounded-full font-bold text-white transition-all hover:scale-105 shadow-lg" style={{ background: colors.primary }}>
-            Browse All Events
-          </button>
-          <button className="px-8 py-4 rounded-full font-bold border-2 transition-all hover:bg-gray-50" style={{ borderColor: colors.primary, color: colors.primary }}>
-            Suggest a Topic
-          </button>
-        </div>
-        <p className="text-sm text-gray-500 mt-4">Next event in <span className="font-bold" style={{ color: colors.secondary }}>2 days</span></p>
-      </div>
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        @media (max-width: 640px) {
+          input, select, button {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
     </div>
-  );
+  )
 }

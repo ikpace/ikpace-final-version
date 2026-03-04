@@ -14,7 +14,7 @@ import {
   Settings, Database, Server, Cloud, Terminal,
   Mail as EmailIcon, CreditCard, ShoppingBag, BarChart,
   PieChart, Lock, Bitcoin, Megaphone, ThumbsUp, Medal,
-  Plus, Minus
+  Plus, Minus, Menu, X, ChevronDown
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
@@ -25,6 +25,7 @@ export default function CourseDetail() {
   const [loading, setLoading] = useState(true)
   const [enrolled, setEnrolled] = useState(false)
   const [bookmarked, setBookmarked] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
   // Dropdown states
   const [openSections, setOpenSections] = useState({
@@ -34,19 +35,22 @@ export default function CourseDetail() {
     reviews: false
   })
 
-  // Brand colors
+  // Brand colors - iKPACE brand colors
   const colors = {
-    primary: "#1A3D7C",
-    secondary: "#FF7A00",
-    accent: "#2F5EA8",
-    success: "#008F4C",
-    warning: "#E6B800",
-    dark: "#1F2937",
-    lightGray: "#F3F4F6",
-    blueShade: "#4A6FA5",
-    orangeShade: "#FF9A3C",
+    primary: "#1E3A8A", // Deep blue - main brand color
+    secondary: "#F59E0B", // Amber orange - accent color
+    accent: "#3B82F6", // Bright blue - secondary accent
+    success: "#10B981", // Emerald green - success states
+    warning: "#F59E0B", // Amber - warnings
+    dark: "#1F2937", // Dark gray - text
+    lightGray: "#F9FAFB", // Light gray - backgrounds
+    blueShade: "#60A5FA", // Light blue - highlights
+    orangeShade: "#FBBF24", // Light orange - highlights
     white: "#FFFFFF"
   }
+
+  // Fixed price for all courses
+  const FIXED_PRICE = "$7"
 
   // Toggle section function
   const toggleSection = (section) => {
@@ -65,16 +69,13 @@ export default function CourseDetail() {
       subtitle: 'Launch your remote VA career in 6 weeks',
       description: 'Master administrative skills, communication, and client acquisition to become a successful virtual assistant.',
       fullDescription: 'This 6-week program covers everything you need to become a professional virtual assistant. Learn to manage emails, calendars, documents, and social media for clients. Graduate with a professional portfolio and certification.',
-      price: 7,
+      price: FIXED_PRICE,
       duration: '6 Weeks',
       students: 32,
       rating: 4.9,
       reviews: 18,
       category: 'Career',
       level: 'Beginner',
-      instructor: 'Amara Osei',
-      instructorTitle: 'VA Business Coach',
-      instructorImage: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400',
       image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
       featured: true,
       badge: 'POPULAR',
@@ -85,7 +86,7 @@ export default function CourseDetail() {
         'Portfolio creation',
         'Client acquisition guide',
         'Lifetime access',
-        '30-day money-back'
+        '7 days money back'
       ],
       color: `from-[${colors.primary}] to-[${colors.secondary}]`,
       learningOutcomes: [
@@ -168,16 +169,13 @@ export default function CourseDetail() {
       subtitle: 'Master content creation, ads, and growth strategies',
       description: 'Learn to create engaging content, run ads, and grow your audience.',
       fullDescription: 'This 6-week course teaches you social media marketing fundamentals. Master content creation, scheduling, analytics, and paid advertising strategies across major platforms.',
-      price: 7,
+      price: FIXED_PRICE,
       duration: '6 Weeks',
       students: 28,
       rating: 4.8,
       reviews: 15,
       category: 'Marketing',
       level: 'Beginner',
-      instructor: 'Kofi Asante',
-      instructorTitle: 'Digital Marketing Expert',
-      instructorImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
       image: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=800',
       featured: true,
       badge: 'NEW',
@@ -188,7 +186,7 @@ export default function CourseDetail() {
         'Analytics guide',
         'Certificate',
         'Lifetime access',
-        '30-day money-back'
+        '7 days money back'
       ],
       color: `from-[${colors.secondary}] to-[${colors.orangeShade}]`,
       learningOutcomes: [
@@ -271,16 +269,13 @@ export default function CourseDetail() {
       subtitle: 'Create stunning visuals & build your design portfolio',
       description: 'Learn to create professional designs, logos, and branding materials.',
       fullDescription: 'This 4-week course teaches you color theory, typography, and design principles. Create logos, flyers, posters, and complete social media branding kits using Canva. Graduate with a professional portfolio.',
-      price: 7,
+      price: FIXED_PRICE,
       duration: '4 Weeks',
       students: 19,
       rating: 4.7,
       reviews: 12,
       category: 'Design',
       level: 'Beginner',
-      instructor: 'Esi Darkwah',
-      instructorTitle: 'Canva & Design Expert',
-      instructorImage: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400',
       image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800',
       featured: true,
       badge: 'DESIGN',
@@ -291,7 +286,7 @@ export default function CourseDetail() {
         'Portfolio project',
         'Certificate',
         'Lifetime access',
-        '30-day money-back'
+        '7 days money back'
       ],
       color: `from-[${colors.success}] to-[#00C853]`,
       learningOutcomes: [
@@ -361,16 +356,13 @@ export default function CourseDetail() {
       subtitle: 'Fun coding adventures for ages 6–12',
       description: 'Introduce kids to coding through Scratch! Build animations, stories, and games.',
       fullDescription: 'This 4-week coding program is designed for children ages 6–12. Using Scratch, kids learn coding fundamentals through fun projects — building animations, stories, and their own games.',
-      price: 7,
+      price: FIXED_PRICE,
       duration: '4 Weeks',
       students: 12,
       rating: 4.9,
       reviews: 8,
       category: 'Kids',
       level: 'Beginner',
-      instructor: 'Ms. Akosua',
-      instructorTitle: 'Kids Coding Instructor',
-      instructorImage: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400',
       image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=800',
       featured: true,
       badge: 'KIDS',
@@ -381,7 +373,7 @@ export default function CourseDetail() {
         'Certificate',
         'Game creation',
         'Parent updates',
-        '30-day money-back'
+        '7 days money back'
       ],
       color: 'from-[#FF6D00] to-[#FFD600]',
       learningOutcomes: [
@@ -452,16 +444,13 @@ export default function CourseDetail() {
       subtitle: 'Start earning online with freelancing skills',
       description: 'Learn to find clients, set rates, and build sustainable online income.',
       fullDescription: 'This 4-week course teaches you how to start freelancing, find clients, set your rates, and build sustainable online income through platforms like Upwork and Fiverr.',
-      price: 7,
+      price: FIXED_PRICE,
       duration: '4 Weeks',
       students: 21,
       rating: 4.8,
       reviews: 14,
       category: 'Business',
       level: 'Beginner',
-      instructor: 'Yaa Asantewaa',
-      instructorTitle: 'Freelance Business Coach',
-      instructorImage: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400',
       image: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=800',
       featured: true,
       badge: 'FREELANCE',
@@ -472,7 +461,7 @@ export default function CourseDetail() {
         'Proposal guide',
         'Pricing calculator',
         'Certificate',
-        '30-day money-back'
+        '7 days money back'
       ],
       color: `from-[${colors.success}] to-[#B2FF59]`,
       learningOutcomes: [
@@ -543,16 +532,13 @@ export default function CourseDetail() {
       subtitle: 'Master AI tools for content creation',
       description: 'Learn to use ChatGPT, Midjourney, and other AI tools effectively.',
       fullDescription: 'This 6-week course teaches you to master AI prompt engineering. Learn techniques for content creation, automation, and problem-solving using ChatGPT, Claude, and other AI tools.',
-      price: 7,
+      price: FIXED_PRICE,
       duration: '6 Weeks',
       students: 18,
       rating: 4.9,
       reviews: 11,
       category: 'Tech',
       level: 'Intermediate',
-      instructor: 'Nana Addo',
-      instructorTitle: 'AI Prompt Expert',
-      instructorImage: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
       image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
       featured: true,
       badge: 'AI PRO',
@@ -563,7 +549,7 @@ export default function CourseDetail() {
         'Real projects',
         'Certification',
         'AI tools guide',
-        '30-day money-back'
+        '7 days money back'
       ],
       color: `from-[${colors.blueShade}] to-[${colors.accent}]`,
       learningOutcomes: [
@@ -651,23 +637,20 @@ export default function CourseDetail() {
                 subtitle: data.subtitle || 'Learn valuable skills for your career',
                 description: data.description || 'Master practical skills that will help you grow.',
                 fullDescription: data.full_description || data.description || 'This course covers everything you need to get started. Learn at your own pace with practical projects.',
-                price: 7,
+                price: FIXED_PRICE,
                 duration: data.duration || 'Self-paced',
                 students: data.enrollment_count || 5,
                 rating: data.rating || 4.5,
                 reviews: data.review_count || 3,
                 category: data.category || 'General',
                 level: data.level || 'Beginner',
-                instructor: data.instructor || 'iKPACE Expert',
-                instructorTitle: data.instructor_title || 'Industry Professional',
-                instructorImage: data.instructor_image || 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400',
                 image: data.image_url || 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
                 featured: data.featured || false,
                 badge: data.badge || 'NEW',
                 badgeColor: `bg-gradient-to-r from-[${colors.primary}] to-[${colors.secondary}]`,
                 tags: data.tags || ['Learning', 'Skills', 'Career'],
                 features: [
-                  '30-day money-back guarantee',
+                  '7 days money back guarantee',
                   'Certificate of completion',
                   'Lifetime access',
                   'Community access'
@@ -742,12 +725,93 @@ export default function CourseDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pt-16">
-        <div className="max-w-7xl mx-auto px-4 py-20">
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 mx-auto mb-6" style={{ borderColor: colors.primary }}></div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Loading Course Details</h3>
-            <p className="text-gray-600">Getting everything ready for you...</p>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        {/* Mobile Header */}
+        <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
+              iKPACE
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 z-40 animate-slideDown">
+              <div className="space-y-2">
+                <Link 
+                  to="/" 
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/courses" 
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Courses
+                </Link>
+                <Link 
+                  to="/support" 
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Support
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link 
+                  to="/courses" 
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Courses</span>
+                </Link>
+                <div className="w-px h-4 bg-gray-300"></div>
+                <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
+                  iKPACE
+                </Link>
+              </div>
+              <div className="flex items-center gap-6">
+                <Link to="/support" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                  Help
+                </Link>
+                <Link to="/contact" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                  Contact
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-20">
+          <div className="text-center py-12 sm:py-20">
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 mx-auto mb-4 sm:mb-6" style={{ borderColor: colors.primary }}></div>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2">Loading Course Details</h3>
+            <p className="text-sm sm:text-base text-gray-600">Getting everything ready for you...</p>
           </div>
         </div>
       </div>
@@ -756,15 +820,31 @@ export default function CourseDetail() {
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pt-16">
-        <div className="max-w-7xl mx-auto px-4 py-20">
-          <div className="text-center py-20">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-gray-900 mb-2">Course Not Found</h3>
-            <p className="text-gray-600 mb-6">The course you're looking for doesn't exist.</p>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        {/* Mobile Header */}
+        <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
+              iKPACE
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-20">
+          <div className="text-center py-12 sm:py-20">
+            <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4 sm:mb-6" />
+            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2">Course Not Found</h3>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">The course you're looking for doesn't exist.</p>
             <Link
               to="/courses"
-              className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-lg font-medium hover:opacity-90 transition-all"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 text-white rounded-lg text-sm sm:text-base font-medium hover:opacity-90 transition-all"
               style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
             >
               <ArrowLeft className="w-4 h-4" />
@@ -778,7 +858,7 @@ export default function CourseDetail() {
 
   // Ensure features is always an array
   const courseFeatures = Array.isArray(course.features) ? course.features : [
-    '30-day money-back guarantee',
+    '7 days money back guarantee',
     'Certificate of completion',
     'Lifetime access',
     'Community access'
@@ -788,100 +868,174 @@ export default function CourseDetail() {
   const totalStudents = course.students || 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 pt-16">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-8">
-            {/* Left Content */}
-            <div className="md:w-2/3">
-              <Link
-                to="/courses"
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      {/* Mobile Header */}
+      <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
+            iKPACE
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 z-40 animate-slideDown">
+            <div className="space-y-2">
+              <Link 
+                to="/" 
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                to="/courses" 
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Courses
+              </Link>
+              <Link 
+                to="/support" 
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Support
+              </Link>
+              <Link 
+                to="/contact" 
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Header */}
+      <div className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link 
+                to="/courses" 
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back to Courses
+                <span>Back to Courses</span>
               </Link>
+              <div className="w-px h-4 bg-gray-300"></div>
+              <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
+                iKPACE
+              </Link>
+            </div>
+            <div className="flex items-center gap-6">
+              <Link to="/support" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Help
+              </Link>
+              <Link to="/contact" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Contact
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-bold">
+      {/* Hero Section - Mobile Optimized */}
+      <div className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 py-6 sm:py-8 md:py-12">
+          {/* Mobile Breadcrumb */}
+          <div className="lg:hidden flex items-center gap-1 text-xs text-white/80 mb-3 overflow-x-auto pb-1 whitespace-nowrap">
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <ChevronRight className="w-3 h-3 flex-shrink-0" />
+            <Link to="/courses" className="hover:text-white transition-colors">Courses</Link>
+            <ChevronRight className="w-3 h-3 flex-shrink-0" />
+            <span className="text-white font-medium truncate max-w-[150px]">{course.title}</span>
+          </div>
+
+          <div className="flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-8">
+            {/* Left Content */}
+            <div className="lg:w-2/3">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                <span className="bg-white/20 backdrop-blur-sm text-white px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold">
                   {course.badge || 'COURSE'}
                 </span>
-                <span className="text-white/80 text-sm">{course.category?.toUpperCase()}</span>
-                <span className="text-white/80 text-sm">•</span>
-                <span className="text-white/80 text-sm capitalize">{course.level}</span>
+                <span className="text-white/80 text-xs sm:text-sm">{course.category?.toUpperCase()}</span>
+                <span className="text-white/80 text-xs sm:text-sm">•</span>
+                <span className="text-white/80 text-xs sm:text-sm capitalize">{course.level}</span>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{course.title}</h1>
-              <p className="text-xl text-white/90 mb-8 max-w-3xl">{course.subtitle}</p>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4">{course.title}</h1>
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 mb-4 sm:mb-6 md:mb-8 max-w-3xl">{course.subtitle}</p>
 
-              <div className="flex flex-wrap items-center gap-6 mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-white font-bold text-lg">{course.rating}</span>
+              {/* Stats Grid - Mobile Friendly */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-white font-bold text-sm sm:text-base">{course.rating}</span>
                   </div>
-                  <span className="text-white/80">({course.reviews} reviews)</span>
+                  <span className="text-white/80 text-xs">({course.reviews})</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-white/80" />
-                  <span className="text-white">{totalStudents} students</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center">
+                  <Users className="w-4 h-4 mx-auto text-white/80 mb-1" />
+                  <span className="text-white font-bold text-sm sm:text-base">{totalStudents}</span>
+                  <span className="text-white/80 text-xs block">students</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-white/80" />
-                  <span className="text-white">{course.duration}</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center">
+                  <Clock className="w-4 h-4 mx-auto text-white/80 mb-1" />
+                  <span className="text-white font-bold text-sm sm:text-base">{course.duration}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-white/80" />
-                  <span className="text-white capitalize">{course.level}</span>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center">
+                  <Target className="w-4 h-4 mx-auto text-white/80 mb-1" />
+                  <span className="text-white font-bold text-sm sm:text-base capitalize">{course.level}</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={course.instructorImage}
-                    alt={course.instructor}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-white"
-                  />
-                  <div>
-                    <div className="text-white font-bold">{course.instructor}</div>
-                    <div className="text-white/80 text-sm">{course.instructorTitle}</div>
-                  </div>
-                </div>
+              {/* Mobile Action Buttons - WITHOUT SHOPPING CART ICON */}
+              <div className="lg:hidden flex items-center gap-3">
+                <button
+                  onClick={handleEnrollNow}
+                  className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 px-4 rounded-lg text-sm transition-all"
+                >
+                  Enroll - {FIXED_PRICE}
+                </button>
                 <button
                   onClick={handleBookmark}
-                  className="ml-auto text-white hover:text-yellow-300 transition-colors"
+                  className="p-3 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition-colors"
                 >
                   {bookmarked ? (
-                    <BookmarkCheck className="w-6 h-6" />
+                    <BookmarkCheck className="w-5 h-5 text-yellow-400" />
                   ) : (
-                    <Bookmark className="w-6 h-6" />
+                    <Bookmark className="w-5 h-5 text-white" />
                   )}
-                </button>
-                <button className="text-white hover:text-gray-200 transition-colors">
-                  <Share2 className="w-6 h-6" />
                 </button>
               </div>
             </div>
 
-            {/* Course Card - Right Side */}
-            <div className="md:w-1/3 mt-8 md:mt-0">
+            {/* Desktop Course Card - Hidden on Mobile - WITHOUT SHOPPING CART ICON */}
+            <div className="hidden lg:block lg:w-1/3">
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
                 <div className="mb-6">
-                  <div className="flex flex-col mb-4">
-                    <div className="text-4xl font-bold text-white">${course.price}</div>
-                    <div className="text-sm text-white/80 mt-1">One-time payment • Lifetime access</div>
-                  </div>
+                  <div className="text-4xl font-bold text-white">{FIXED_PRICE}</div>
+                  <div className="text-sm text-white/80 mt-1">One-time payment • Lifetime access</div>
                 </div>
 
                 <button
                   onClick={handleEnrollNow}
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-6 rounded-xl text-lg mb-4 flex items-center justify-center gap-3 transition-all hover:scale-105"
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-6 rounded-xl text-lg mb-4 transition-all hover:scale-105"
                 >
-                  <ShoppingCart size={24} />
-                  Enroll Now - ${course.price}
+                  Enroll Now - {FIXED_PRICE}
                 </button>
 
                 <div className="space-y-3">
@@ -898,77 +1052,94 @@ export default function CourseDetail() {
         </div>
       </div>
 
+      {/* Mobile Sticky Enroll Bar - WITHOUT SHOPPING CART ICON */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-3 z-40">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs text-gray-600">Total price</div>
+            <div className="text-xl font-bold" style={{ color: colors.primary }}>{FIXED_PRICE}</div>
+          </div>
+          <button
+            onClick={handleEnrollNow}
+            className="flex-1 py-3 px-4 rounded-lg text-white font-bold text-sm"
+            style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
+          >
+            Enroll Now
+          </button>
+        </div>
+      </div>
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="md:flex gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 md:py-12 pb-20 lg:pb-12">
+        <div className="lg:flex gap-8">
           {/* Left Content */}
-          <div className="md:w-2/3">
+          <div className="lg:w-2/3 space-y-3 sm:space-y-4">
             {/* Dropdown Sections - Overview */}
-            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
               <button
                 onClick={() => toggleSection('overview')}
-                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h3 className="text-xl font-bold text-gray-900">Overview</h3>
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Overview</h3>
                 {openSections.overview ? (
-                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 ) : (
-                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 )}
               </button>
               
               {openSections.overview && (
-                <div className="p-4 bg-white border-t border-gray-200 space-y-6">
+                <div className="p-3 sm:p-4 bg-white border-t border-gray-200 space-y-4 sm:space-y-6">
                   <div>
-                    <p className="text-gray-700 text-lg leading-relaxed">{course.fullDescription}</p>
+                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{course.fullDescription}</p>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">What You'll Learn</h4>
-                    <div className="grid md:grid-cols-2 gap-3">
+                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">What You'll Learn</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                       {course.learningOutcomes?.map((outcome, index) => (
-                        <div key={index} className="flex items-start bg-gray-50 p-3 rounded-lg">
-                          <CheckCircle className="mr-2 flex-shrink-0 mt-0.5" size={18} style={{ color: colors.success }} />
-                          <span className="text-gray-700">{outcome}</span>
+                        <div key={index} className="flex items-start bg-gray-50 p-2 sm:p-3 rounded-lg">
+                          <CheckCircle className="mr-2 flex-shrink-0 mt-0.5" size={16} style={{ color: colors.success }} />
+                          <span className="text-xs sm:text-sm text-gray-700">{outcome}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">Course Details</h4>
-                    <div className="bg-gray-50 rounded-xl p-6">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Course Details</h4>
+                    <div className="bg-gray-50 rounded-xl p-3 sm:p-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                         <div className="text-center">
-                          <div className="text-2xl font-bold" style={{ color: colors.primary }}>{course.lessons}</div>
-                          <div className="text-sm text-gray-600">Lessons</div>
+                          <div className="text-xl sm:text-2xl font-bold" style={{ color: colors.primary }}>{course.lessons}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">Lessons</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold" style={{ color: colors.secondary }}>{course.projects}</div>
-                          <div className="text-sm text-gray-600">Projects</div>
+                          <div className="text-xl sm:text-2xl font-bold" style={{ color: colors.secondary }}>{course.projects}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">Projects</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold" style={{ color: colors.success }}>{course.weeksToComplete}</div>
-                          <div className="text-sm text-gray-600">Duration</div>
+                          <div className="text-sm sm:text-xl font-bold" style={{ color: colors.success }}>{course.weeksToComplete}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">Duration</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold" style={{ color: colors.accent }}>{course.timeCommitment}</div>
-                          <div className="text-sm text-gray-600">Weekly effort</div>
+                          <div className="text-sm sm:text-xl font-bold" style={{ color: colors.accent }}>{course.timeCommitment}</div>
+                          <div className="text-xs sm:text-sm text-gray-600">Weekly effort</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">Tools You'll Need</h4>
-                    <div className="bg-gray-50 rounded-xl p-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Tools You'll Need</h4>
+                    <div className="bg-gray-50 rounded-xl p-3 sm:p-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                         {course.toolsNeeded?.map((tool, index) => (
-                          <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: colors.primary + '15' }}>
-                              <Settings className="w-4 h-4" style={{ color: colors.primary }} />
+                          <div key={index} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: colors.primary + '15' }}>
+                              <Settings className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: colors.primary }} />
                             </div>
-                            <span className="text-gray-700">{tool}</span>
+                            <span className="text-xs sm:text-sm text-gray-700">{tool}</span>
                           </div>
                         ))}
                       </div>
@@ -979,41 +1150,41 @@ export default function CourseDetail() {
             </div>
 
             {/* Dropdown Sections - Curriculum */}
-            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
               <button
                 onClick={() => toggleSection('curriculum')}
-                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h3 className="text-xl font-bold text-gray-900">Curriculum</h3>
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Curriculum</h3>
                 {openSections.curriculum ? (
-                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 ) : (
-                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 )}
               </button>
               
               {openSections.curriculum && (
-                <div className="p-4 bg-white border-t border-gray-200 space-y-4">
+                <div className="p-3 sm:p-4 bg-white border-t border-gray-200 space-y-3 sm:space-y-4">
                   <div className="flex justify-between items-center mb-2">
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       {course.lessons} lessons • {course.projects} projects
                     </p>
                   </div>
                   {course.modules?.map((module, moduleIndex) => (
-                    <div key={moduleIndex} className="border border-gray-200 rounded-xl overflow-hidden">
-                      <div className="bg-gray-50 p-4">
-                        <h4 className="font-bold text-gray-900">{module.title}</h4>
-                        <div className="flex items-center mt-1 text-gray-600 text-sm">
-                          <Clock size={14} className="mr-1" />
+                    <div key={moduleIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 p-3 sm:p-4">
+                        <h4 className="text-sm sm:text-base font-bold text-gray-900">{module.title}</h4>
+                        <div className="flex items-center mt-1 text-gray-600 text-xs sm:text-sm">
+                          <Clock size={12} className="mr-1" />
                           {module.duration} • {module.lessons} lessons
                         </div>
                       </div>
-                      <div className="p-4 bg-white">
-                        <ul className="space-y-2">
+                      <div className="p-3 sm:p-4 bg-white">
+                        <ul className="space-y-1 sm:space-y-2">
                           {module.topics?.map((topic, topicIndex) => (
-                            <li key={topicIndex} className="flex items-center py-2 border-b border-gray-100 last:border-0">
-                              <Video size={16} className="text-gray-400 mr-3" />
-                              <span className="text-gray-700">{topic}</span>
+                            <li key={topicIndex} className="flex items-center py-1 sm:py-2 border-b border-gray-100 last:border-0">
+                              <Video size={14} className="text-gray-400 mr-2 sm:mr-3 flex-shrink-0" />
+                              <span className="text-xs sm:text-sm text-gray-700">{topic}</span>
                             </li>
                           ))}
                         </ul>
@@ -1025,38 +1196,38 @@ export default function CourseDetail() {
             </div>
 
             {/* Dropdown Sections - Requirements */}
-            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
               <button
                 onClick={() => toggleSection('requirements')}
-                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h3 className="text-xl font-bold text-gray-900">Requirements</h3>
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Requirements</h3>
                 {openSections.requirements ? (
-                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 ) : (
-                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 )}
               </button>
               
               {openSections.requirements && (
-                <div className="p-4 bg-white border-t border-gray-200 space-y-6">
+                <div className="p-3 sm:p-4 bg-white border-t border-gray-200 space-y-4 sm:space-y-6">
                   <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">Prerequisites</h4>
-                    <ul className="space-y-3">
+                    <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">Prerequisites</h4>
+                    <ul className="space-y-2 sm:space-y-3">
                       {course.requirements?.map((req, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: colors.primary + '20' }}>
-                            <CheckCircle size={12} style={{ color: colors.primary }} />
+                        <li key={index} className="flex items-start gap-2 sm:gap-3">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: colors.primary + '20' }}>
+                            <CheckCircle size={10} style={{ color: colors.primary }} />
                           </div>
-                          <span className="text-gray-700">{req}</span>
+                          <span className="text-xs sm:text-sm text-gray-700">{req}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">Who This Course Is For</h4>
-                    <div className="grid md:grid-cols-2 gap-3">
+                    <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">Who This Course Is For</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                       {[
                         'Beginners starting a new career',
                         'Professionals upgrading skills',
@@ -1065,9 +1236,9 @@ export default function CourseDetail() {
                         'Self-learners',
                         'Anyone interested in personal growth'
                       ].map((item, index) => (
-                        <div key={index} className="flex items-center bg-gray-50 p-3 rounded-lg">
-                          <div className="w-1.5 h-1.5 rounded-full mr-2" style={{ background: colors.secondary }}></div>
-                          <span className="text-gray-700">{item}</span>
+                        <div key={index} className="flex items-center bg-gray-50 p-2 sm:p-3 rounded-lg">
+                          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full mr-1 sm:mr-2" style={{ background: colors.secondary }}></div>
+                          <span className="text-xs sm:text-sm text-gray-700">{item}</span>
                         </div>
                       ))}
                     </div>
@@ -1077,55 +1248,55 @@ export default function CourseDetail() {
             </div>
 
             {/* Dropdown Sections - Reviews */}
-            <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
               <button
                 onClick={() => toggleSection('reviews')}
-                className="w-full flex items-center justify-between p-4 bg-white hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between p-3 sm:p-4 bg-white hover:bg-gray-50 transition-colors"
               >
-                <h3 className="text-xl font-bold text-gray-900">Reviews</h3>
+                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">Reviews</h3>
                 {openSections.reviews ? (
-                  <Minus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 ) : (
-                  <Plus className="w-5 h-5" style={{ color: colors.primary }} />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 )}
               </button>
               
               {openSections.reviews && (
-                <div className="p-4 bg-white border-t border-gray-200 space-y-6">
+                <div className="p-3 sm:p-4 bg-white border-t border-gray-200 space-y-4 sm:space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <div className="text-3xl font-bold mr-3" style={{ color: colors.primary }}>{course.rating}</div>
+                      <div className="text-xl sm:text-2xl md:text-3xl font-bold mr-2 sm:mr-3" style={{ color: colors.primary }}>{course.rating}</div>
                       <div>
                         <div className="flex">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={16} className={`${i < Math.floor(course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                            <Star key={i} size={12} className={`${i < Math.floor(course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
                           ))}
                         </div>
-                        <div className="text-gray-600 text-sm">{course.reviews} reviews</div>
+                        <div className="text-gray-600 text-xs sm:text-sm">{course.reviews} reviews</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {course.testimonials?.map((testimonial, index) => (
-                      <div key={index} className="bg-gray-50 rounded-xl p-6">
-                        <div className="flex items-center mb-3">
+                      <div key={index} className="bg-gray-50 rounded-xl p-3 sm:p-4 md:p-6">
+                        <div className="flex items-center mb-2 sm:mb-3">
                           <div className="flex">
                             {[...Array(testimonial.rating)].map((_, i) => (
-                              <Star key={i} size={14} className="text-yellow-400 fill-current mr-1" />
+                              <Star key={i} size={12} className="text-yellow-400 fill-current mr-0.5 sm:mr-1" />
                             ))}
                           </div>
                         </div>
-                        <p className="text-gray-700 mb-4">"{testimonial.text}"</p>
+                        <p className="text-xs sm:text-sm text-gray-700 mb-2 sm:mb-3 md:mb-4">"{testimonial.text}"</p>
                         <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3" style={{ background: colors.primary + '15' }}>
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center mr-2 sm:mr-3" style={{ background: colors.primary + '15' }}>
                             <span className="text-xs font-bold" style={{ color: colors.primary }}>
                               {testimonial.name.charAt(0)}
                             </span>
                           </div>
                           <div>
-                            <div className="font-medium text-gray-900">{testimonial.name}</div>
-                            <div className="text-gray-600 text-sm">{testimonial.role}</div>
+                            <div className="font-medium text-gray-900 text-xs sm:text-sm">{testimonial.name}</div>
+                            <div className="text-gray-600 text-xs">{testimonial.role}</div>
                           </div>
                         </div>
                       </div>
@@ -1136,53 +1307,53 @@ export default function CourseDetail() {
             </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="md:w-1/3 mt-12 md:mt-0">
-            <div className="sticky top-24 space-y-6">
+          {/* Right Sidebar - Desktop Only */}
+          <div className="hidden lg:block lg:w-1/3 mt-8 lg:mt-0">
+            <div className="sticky top-24 space-y-4 sm:space-y-6">
               {/* Course Details Card */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <h4 className="font-bold text-gray-900 mb-4">Course Details</h4>
-                <div className="space-y-3">
+              <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
+                <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4">Course Details</h4>
+                <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Duration:</span>
-                    <span className="font-bold text-gray-900">{course.duration}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Duration:</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">{course.duration}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Lessons:</span>
-                    <span className="font-bold text-gray-900">{course.lessons}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Lessons:</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">{course.lessons}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Projects:</span>
-                    <span className="font-bold text-gray-900">{course.projects}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Projects:</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">{course.projects}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Level:</span>
-                    <span className="font-bold text-gray-900 capitalize">{course.level}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Level:</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900 capitalize">{course.level}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Access:</span>
-                    <span className="font-bold text-gray-900">Lifetime</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Access:</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">Lifetime</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Students:</span>
-                    <span className="font-bold text-gray-900">{totalStudents}</span>
+                    <span className="text-xs sm:text-sm text-gray-600">Students:</span>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900">{totalStudents}</span>
                   </div>
                 </div>
               </div>
 
               {/* Quick Enroll Card */}
-              <div className="rounded-2xl p-6 text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
-                <h4 className="font-bold text-xl mb-4">Start Learning Today!</h4>
-                <div className="text-3xl font-bold mb-2">${course.price}</div>
-                <div className="text-white/80 mb-6">One-time payment • Lifetime access</div>
+              <div className="rounded-2xl p-4 sm:p-6 text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
+                <h4 className="text-base sm:text-xl font-bold mb-2 sm:mb-4">Start Learning Today!</h4>
+                <div className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{FIXED_PRICE}</div>
+                <div className="text-white/80 text-xs sm:text-sm mb-3 sm:mb-6">One-time payment • Lifetime access</div>
                 <button
                   onClick={handleEnrollNow}
-                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-4 px-6 rounded-xl text-lg mb-4 transition-all hover:scale-105"
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-lg transition-all hover:scale-105"
                 >
-                  Enroll Now - ${course.price}
+                  Enroll Now - {FIXED_PRICE}
                 </button>
-                <div className="text-center text-sm text-white/80">
-                  <div className="mb-2">30-day money-back guarantee</div>
+                <div className="text-center text-xs sm:text-sm text-white/80 mt-3 sm:mt-4">
+                  <div className="mb-1">7 days money back guarantee</div>
                   <div>Certificate included</div>
                 </div>
               </div>
@@ -1190,6 +1361,39 @@ export default function CourseDetail() {
           </div>
         </div>
       </div>
+
+      {/* Animation Styles */}
+      <style>{`
+        @keyframes slideDown {
+          from { transform: translateY(-10px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.2s ease-out;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+          input, select, button {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+          }
+          
+          .min-h-screen {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+        }
+        
+        /* Smooth transitions */
+        * {
+          -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Focus styles */
+        input:focus, select:focus, button:focus {
+          outline: none;
+          ring: 2px solid ${colors.primary};
+        }
+      `}</style>
     </div>
   )
 }

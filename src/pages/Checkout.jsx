@@ -33,21 +33,22 @@ export default function Checkout() {
     paymentMethod: 'mobile_money'
   });
 
-  // HONEST NUMBERS for new startup
+  // HONEST NUMBERS for new startup - ALL PRICES SET TO 70 GHS
   const studentCount = 32;
   const reviewCount = 18;
+  const FIXED_PRICE = 70; // All courses priced at 70 GHS
 
-  // Brand colors
+  // Brand colors - iKPACE brand colors
   const colors = {
-    primary: "#1A3D7C",
-    secondary: "#FF7A00",
-    accent: "#2F5EA8",
-    success: "#008F4C",
-    warning: "#E6B800",
-    dark: "#1F2937",
-    lightGray: "#F3F4F6",
-    blueShade: "#4A6FA5",
-    orangeShade: "#FF9A3C",
+    primary: "#1E3A8A", // Deep blue - main brand color
+    secondary: "#F59E0B", // Amber orange - accent color
+    accent: "#3B82F6", // Bright blue - secondary accent
+    success: "#10B981", // Emerald green - success states
+    warning: "#F59E0B", // Amber - warnings
+    dark: "#1F2937", // Dark gray - text
+    lightGray: "#F9FAFB", // Light gray - backgrounds
+    blueShade: "#60A5FA", // Light blue - highlights
+    orangeShade: "#FBBF24", // Light orange - highlights
     white: "#FFFFFF"
   };
 
@@ -66,24 +67,25 @@ export default function Checkout() {
 
           if (error) {
             console.log('Course not found in Supabase:', error);
-            // Fall back to sample data with HONEST numbers
+            // Fall back to sample data with FIXED PRICE of 70 GHS
             const sampleCourse = getSampleCourse(courseId);
             if (sampleCourse) {
               setCourse({
                 ...sampleCourse,
                 id: courseId,
+                price: FIXED_PRICE, // Force price to 70 GHS
                 isSample: true
               });
             } else {
               navigate('/courses');
             }
           } else if (data) {
-            // Map Supabase data - use HONEST numbers from database or defaults
+            // Map Supabase data - FORCE PRICE TO 70 GHS
             const formattedCourse = {
               id: data.id,
               slug: data.slug,
               title: data.title || 'Course',
-              price: parseFloat(data.price) || 7,
+              price: FIXED_PRICE, // Always 70 GHS - CLEARLY VISIBLE
               duration: data.duration || '4-6 weeks',
               description: data.description || 'Master practical skills that will help you grow.',
               image: data.image_url || 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -106,6 +108,7 @@ export default function Checkout() {
           setCourse({
             ...sampleCourse,
             id: courseId,
+            price: FIXED_PRICE, // Force price to 70 GHS
             isSample: true
           });
         } else {
@@ -119,12 +122,12 @@ export default function Checkout() {
     loadCourse();
   }, [courseId, navigate]);
 
-  // Sample courses with HONEST numbers for new startup
+  // Sample courses with ALL PRICES SET TO 70 GHS - CLEARLY VISIBLE
   const getSampleCourse = (id) => {
     const sampleCourses = {
       'virtual-assistant-pro': {
         title: 'Virtual Assistant Professional',
-        price: 70,
+        price: FIXED_PRICE, // 70 GHS
         duration: '6 weeks',
         description: 'Master administrative skills and become a successful virtual assistant',
         image: 'https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -136,7 +139,7 @@ export default function Checkout() {
       },
       'social-media-marketing': {
         title: 'Social Media Marketing',
-        price: 70,
+        price: FIXED_PRICE, // 70 GHS
         duration: '6 weeks',
         description: 'Master social media strategy, ads & analytics',
         image: 'https://images.pexels.com/photos/267350/pexels-photo-267350.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -148,7 +151,7 @@ export default function Checkout() {
       },
       'canva-graphic-design': {
         title: 'Canva & Graphic Design',
-        price: 70,
+        price: FIXED_PRICE, // 70 GHS
         duration: '4 weeks',
         description: 'Create stunning visuals & build your design portfolio',
         image: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -160,7 +163,7 @@ export default function Checkout() {
       },
       'smart-kids-coding': {
         title: 'Smart Kids Coding',
-        price: 70,
+        price: FIXED_PRICE, // 70 GHS
         duration: '4 weeks',
         description: 'Fun coding adventures for ages 6-12 using Scratch',
         image: 'https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -172,7 +175,7 @@ export default function Checkout() {
       },
       'freelancing-online-income': {
         title: 'Freelancing & Online Income',
-        price: 70,
+        price: FIXED_PRICE, // 70 GHS
         duration: '4 weeks',
         description: 'Start earning online with freelancing skills',
         image: 'https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -184,7 +187,7 @@ export default function Checkout() {
       },
       'ai-prompt-engineering': {
         title: 'AI Prompt Engineering',
-        price: 70,
+        price: FIXED_PRICE, // 70 GHS
         duration: '6 weeks',
         description: 'Master AI tools for content creation',
         image: 'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -227,7 +230,7 @@ export default function Checkout() {
 
   const calculateTotal = () => {
     if (!course) return 0;
-    const subtotal = course.price;
+    const subtotal = FIXED_PRICE; // Always use fixed price
     const discountAmount = subtotal * discount;
     return subtotal - discountAmount;
   };
@@ -376,7 +379,7 @@ export default function Checkout() {
           course: course,
           userDetails: formData,
           amount: calculateTotal(),
-          originalAmount: course.price,
+          originalAmount: FIXED_PRICE,
           discount: discount * 100,
           enrollmentId: response.reference,
         },
@@ -391,10 +394,10 @@ export default function Checkout() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-20">
           <div className="text-center py-12 sm:py-20">
             <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 mx-auto mb-4 sm:mb-6" style={{ borderColor: colors.primary }}></div>
-            <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-2">Loading Checkout</h3>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2">Loading Checkout</h3>
             <p className="text-sm sm:text-base text-gray-600">Preparing your enrollment...</p>
           </div>
         </div>
@@ -405,10 +408,10 @@ export default function Checkout() {
   if (!course) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-12 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-20">
           <div className="text-center py-12 sm:py-20">
             <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4 sm:mb-6" />
-            <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-2">Course Not Found</h3>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-2">Course Not Found</h3>
             <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Unable to load course details.</p>
             <Link
               to="/courses"
@@ -427,14 +430,15 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Mobile Header */}
-      <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30">
+      <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
         <div className="px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="font-bold text-lg" style={{ color: colors.primary }}>
+          <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
             iKPACE
           </Link>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -443,31 +447,31 @@ export default function Checkout() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 z-40 animate-slideDown">
-            <div className="space-y-3">
+            <div className="space-y-2">
               <Link 
                 to="/" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/courses" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Courses
               </Link>
               <Link 
                 to="/support" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Support
               </Link>
               <Link 
                 to="/contact" 
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Contact
@@ -478,7 +482,7 @@ export default function Checkout() {
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-30">
+      <div className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -495,14 +499,14 @@ export default function Checkout() {
               </Link>
             </div>
             <div className="flex items-center gap-6">
-              <Link to="/support" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/support" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 Help
               </Link>
-              <Link to="/contact" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/contact" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 Contact
               </Link>
               <Link to="/cart" className="relative">
-                <ShoppingBag className="w-5 h-5 text-gray-600 hover:text-gray-900" />
+                <ShoppingBag className="w-5 h-5 text-gray-600 hover:text-gray-900 transition-colors" />
                 <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">1</span>
               </Link>
             </div>
@@ -512,44 +516,51 @@ export default function Checkout() {
 
       <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6 md:py-8">
         {/* Mobile Breadcrumb */}
-        <div className="lg:hidden flex items-center gap-1 text-xs text-gray-600 mb-4 overflow-x-auto pb-1">
-          <Link to="/" className="whitespace-nowrap hover:text-gray-900">Home</Link>
+        <div className="lg:hidden flex items-center gap-1 text-xs text-gray-600 mb-4 overflow-x-auto pb-1 whitespace-nowrap">
+          <Link to="/" className="hover:text-gray-900 transition-colors">Home</Link>
           <ChevronRight className="w-3 h-3 flex-shrink-0" />
-          <Link to="/courses" className="whitespace-nowrap hover:text-gray-900">Courses</Link>
+          <Link to="/courses" className="hover:text-gray-900 transition-colors">Courses</Link>
           <ChevronRight className="w-3 h-3 flex-shrink-0" />
-          <Link to={`/course/${course.slug || course.id}`} className="whitespace-nowrap hover:text-gray-900 truncate max-w-[100px]">{course.title}</Link>
+          <Link to={`/course/${course.slug || course.id}`} className="hover:text-gray-900 transition-colors truncate max-w-[120px]">{course.title}</Link>
           <ChevronRight className="w-3 h-3 flex-shrink-0" />
-          <span className="text-gray-900 font-medium whitespace-nowrap">Checkout</span>
+          <span className="text-gray-900 font-medium">Checkout</span>
         </div>
 
         {/* Desktop Breadcrumb */}
         <div className="hidden lg:flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <Link to="/" className="hover:text-gray-900">Home</Link>
+          <Link to="/" className="hover:text-gray-900 transition-colors">Home</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to="/courses" className="hover:text-gray-900">Courses</Link>
+          <Link to="/courses" className="hover:text-gray-900 transition-colors">Courses</Link>
           <ChevronRight className="w-4 h-4" />
-          <Link to={`/course/${course.slug || course.id}`} className="hover:text-gray-900 line-clamp-1 max-w-[200px]">{course.title}</Link>
+          <Link to={`/course/${course.slug || course.id}`} className="hover:text-gray-900 transition-colors line-clamp-1 max-w-[200px]">{course.title}</Link>
           <ChevronRight className="w-4 h-4" />
           <span className="text-gray-900 font-medium">Checkout</span>
         </div>
 
-        {/* Header */}
+        {/* Header with price emphasis */}
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 sm:mb-3">
             Complete Your Enrollment
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600">
-            You're enrolling in: <span className="font-bold" style={{ color: colors.primary }}>{course.title}</span>
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600">
+              You're enrolling in: <span className="font-semibold" style={{ color: colors.primary }}>{course.title}</span>
+            </p>
+            {/* Price highlight - clearly visible */}
+            <div className="inline-flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-200">
+              <span className="text-xs sm:text-sm font-medium text-green-700">Special Price:</span>
+              <span className="text-base sm:text-lg font-bold" style={{ color: colors.primary }}>{formatPrice(FIXED_PRICE)}</span>
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Column - Course Info & Form */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            {/* Course Info Card - Mobile Friendly */}
-            <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+            {/* Course Info Card - Mobile Friendly with price emphasis */}
+            <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 border-t-4" style={{ borderTopColor: colors.primary }}>
               <div className="flex flex-col sm:flex-row items-start gap-4">
-                <div className="w-full sm:w-24 h-32 sm:h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                <div className="w-full sm:w-28 h-40 sm:h-28 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                   <img
                     src={course.image}
                     alt={course.title}
@@ -560,8 +571,15 @@ export default function Checkout() {
                     }}
                   />
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
+                <div className="flex-1 w-full">
+                  <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">{course.title}</h3>
+                    {/* Price badge - clearly visible */}
+                    <div className="bg-gradient-to-r px-3 py-1.5 rounded-full text-white text-sm font-bold shadow-sm" 
+                         style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
+                      {formatPrice(FIXED_PRICE)}
+                    </div>
+                  </div>
                   <p className="text-sm sm:text-base text-gray-600 mb-3">{course.description}</p>
                   <div className="grid grid-cols-2 sm:flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-500">
                     <div className="flex items-center gap-1">
@@ -599,8 +617,8 @@ export default function Checkout() {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent"
-                    style={{ focusRing: colors.primary }}
+                    className="w-full px-3 sm:px-4 py-3 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent transition-all"
+                    style={{ focusRing: colors.primary, borderColor: formData.fullName ? colors.primary : '#D1D5DB' }}
                     placeholder="Enter your full name"
                     required
                   />
@@ -615,8 +633,8 @@ export default function Checkout() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent"
-                    style={{ focusRing: colors.primary }}
+                    className="w-full px-3 sm:px-4 py-3 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent transition-all"
+                    style={{ focusRing: colors.primary, borderColor: formData.email ? colors.primary : '#D1D5DB' }}
                     placeholder="your@email.com"
                     required
                   />
@@ -635,8 +653,8 @@ export default function Checkout() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-r-lg text-sm focus:ring-2 focus:border-transparent"
-                      style={{ focusRing: colors.primary }}
+                      className="flex-1 px-3 sm:px-4 py-3 sm:py-3 border border-gray-300 rounded-r-lg text-sm focus:ring-2 focus:border-transparent transition-all"
+                      style={{ focusRing: colors.primary, borderColor: formData.phone ? colors.primary : '#D1D5DB' }}
                       placeholder="123456789"
                       required
                     />
@@ -651,7 +669,7 @@ export default function Checkout() {
                     name="country"
                     value={formData.country}
                     onChange={handleInputChange}
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-3 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent transition-all"
                     style={{ focusRing: colors.primary }}
                   >
                     <option value="Ghana">Ghana</option>
@@ -672,14 +690,14 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'mobile_money' }))}
-                    className={`p-3 sm:p-4 border rounded-lg flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
+                    className={`p-4 sm:p-4 border-2 rounded-lg flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
                       formData.paymentMethod === 'mobile_money' 
                         ? 'border-2' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    style={formData.paymentMethod === 'mobile_money' ? { borderColor: colors.primary, background: colors.primary + '05' } : {}}
+                    style={formData.paymentMethod === 'mobile_money' ? { borderColor: colors.primary, backgroundColor: colors.primary + '08' } : {}}
                   >
-                    <Smartphone className={`w-5 h-5 sm:w-6 sm:h-6 ${formData.paymentMethod === 'mobile_money' ? '' : 'text-gray-400'}`} style={formData.paymentMethod === 'mobile_money' ? { color: colors.primary } : {}} />
+                    <Smartphone className={`w-6 h-6 sm:w-7 sm:h-7 ${formData.paymentMethod === 'mobile_money' ? '' : 'text-gray-400'}`} style={formData.paymentMethod === 'mobile_money' ? { color: colors.primary } : {}} />
                     <span className={`text-xs sm:text-sm font-medium ${formData.paymentMethod === 'mobile_money' ? '' : 'text-gray-700'}`} style={formData.paymentMethod === 'mobile_money' ? { color: colors.primary } : {}}>
                       Mobile Money
                     </span>
@@ -689,14 +707,14 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'card' }))}
-                    className={`p-3 sm:p-4 border rounded-lg flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
+                    className={`p-4 sm:p-4 border-2 rounded-lg flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
                       formData.paymentMethod === 'card' 
                         ? 'border-2' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    style={formData.paymentMethod === 'card' ? { borderColor: colors.primary, background: colors.primary + '05' } : {}}
+                    style={formData.paymentMethod === 'card' ? { borderColor: colors.primary, backgroundColor: colors.primary + '08' } : {}}
                   >
-                    <CreditCard className={`w-5 h-5 sm:w-6 sm:h-6 ${formData.paymentMethod === 'card' ? '' : 'text-gray-400'}`} style={formData.paymentMethod === 'card' ? { color: colors.primary } : {}} />
+                    <CreditCard className={`w-6 h-6 sm:w-7 sm:h-7 ${formData.paymentMethod === 'card' ? '' : 'text-gray-400'}`} style={formData.paymentMethod === 'card' ? { color: colors.primary } : {}} />
                     <span className={`text-xs sm:text-sm font-medium ${formData.paymentMethod === 'card' ? '' : 'text-gray-700'}`} style={formData.paymentMethod === 'card' ? { color: colors.primary } : {}}>
                       Card Payment
                     </span>
@@ -706,14 +724,14 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, paymentMethod: 'bank' }))}
-                    className={`p-3 sm:p-4 border rounded-lg flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
+                    className={`p-4 sm:p-4 border-2 rounded-lg flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
                       formData.paymentMethod === 'bank' 
                         ? 'border-2' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    style={formData.paymentMethod === 'bank' ? { borderColor: colors.primary, background: colors.primary + '05' } : {}}
+                    style={formData.paymentMethod === 'bank' ? { borderColor: colors.primary, backgroundColor: colors.primary + '08' } : {}}
                   >
-                    <Building className={`w-5 h-5 sm:w-6 sm:h-6 ${formData.paymentMethod === 'bank' ? '' : 'text-gray-400'}`} style={formData.paymentMethod === 'bank' ? { color: colors.primary } : {}} />
+                    <Building className={`w-6 h-6 sm:w-7 sm:h-7 ${formData.paymentMethod === 'bank' ? '' : 'text-gray-400'}`} style={formData.paymentMethod === 'bank' ? { color: colors.primary } : {}} />
                     <span className={`text-xs sm:text-sm font-medium ${formData.paymentMethod === 'bank' ? '' : 'text-gray-700'}`} style={formData.paymentMethod === 'bank' ? { color: colors.primary } : {}}>
                       Bank Transfer
                     </span>
@@ -732,14 +750,14 @@ export default function Checkout() {
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
                   placeholder="Enter code"
-                  className="w-full sm:flex-1 px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent"
+                  className="w-full sm:flex-1 px-3 sm:px-4 py-3 sm:py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-transparent transition-all"
                   style={{ focusRing: colors.primary }}
                   disabled={promoApplied}
                 />
                 <button 
                   onClick={handleApplyPromo}
                   disabled={promoApplied}
-                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 border-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto px-6 sm:px-6 py-3 sm:py-3 border-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderColor: colors.primary, color: colors.primary }}
                 >
                   Apply
@@ -749,14 +767,15 @@ export default function Checkout() {
                 <span className="text-xs sm:text-sm text-gray-600">Try: WELCOME10 for 10% off</span>
                 <button 
                   onClick={handleCopyCode}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-2 hover:bg-gray-100 rounded transition-colors"
                   disabled={promoApplied}
+                  aria-label="Copy promo code"
                 >
                   {copied ? <Check className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" /> : <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />}
                 </button>
               </div>
               {promoApplied && (
-                <div className="mt-3 p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+                <div className="mt-3 p-3 sm:p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                   <span className="text-xs sm:text-sm text-green-700">10% discount applied!</span>
                 </div>
@@ -764,134 +783,139 @@ export default function Checkout() {
             </div>
 
             {/* Money-back Guarantee Banner - Mobile Friendly */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-4 flex items-center gap-3">
-              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0" />
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-4 flex items-center gap-3">
+              <Shield className="w-8 h-8 sm:w-8 sm:h-8 text-blue-500 flex-shrink-0" />
               <div>
-                <h4 className="text-sm sm:text-base font-bold text-gray-900">30-Day Money-Back Guarantee</h4>
-                <p className="text-xs sm:text-sm text-gray-600">Not satisfied? Get a full refund within 30 days.</p>
+                <h4 className="text-sm sm:text-base font-bold text-gray-900">7-Day Money-Back Guarantee</h4>
+                <p className="text-xs sm:text-sm text-gray-600">Not satisfied? Get a full refund within 7 days.</p>
               </div>
             </div>
           </div>
 
           {/* Right Column - Order Summary */}
           <div className="space-y-4 sm:space-y-6">
-            {/* Order Summary Card - Mobile Friendly */}
-            <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:sticky lg:top-24">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Order Summary</h3>
+            {/* Order Summary Card - Mobile Friendly with price emphasis */}
+            <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 lg:sticky lg:top-24 border-t-4" style={{ borderTopColor: colors.secondary }}>
+              <h3 className="text-lg sm:text-lg font-bold text-gray-900 mb-4 sm:mb-4">Order Summary</h3>
 
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4 sm:space-y-4">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 pr-2">
                     <p className="text-sm sm:text-base font-medium text-gray-900">{course.title}</p>
                     <p className="text-xs sm:text-sm text-gray-500">{course.duration}</p>
                   </div>
-                  <span className="text-sm sm:text-base font-bold whitespace-nowrap" style={{ color: colors.primary }}>{formatPrice(course.price)}</span>
+                  <span className="text-base sm:text-base font-bold whitespace-nowrap bg-green-50 px-2 py-1 rounded" style={{ color: colors.primary }}>
+                    {formatPrice(FIXED_PRICE)}
+                  </span>
                 </div>
 
                 {discount > 0 && (
                   <div className="flex justify-between items-center text-xs sm:text-sm text-green-600">
                     <span>Discount (10%):</span>
-                    <span>- {formatPrice(course.price * discount)}</span>
+                    <span>- {formatPrice(FIXED_PRICE * discount)}</span>
                   </div>
                 )}
 
-                <div className="border-t border-gray-200 pt-3 sm:pt-4">
-                  <div className="flex justify-between items-center text-base sm:text-lg font-bold text-gray-900">
+                <div className="border-t border-gray-200 pt-4 sm:pt-4">
+                  <div className="flex justify-between items-center text-lg sm:text-xl font-bold text-gray-900">
                     <span>Total:</span>
-                    <span style={{ color: colors.primary }}>{formatPrice(calculateTotal())}</span>
+                    <span className="text-2xl sm:text-2xl" style={{ color: colors.primary }}>{formatPrice(calculateTotal())}</span>
                   </div>
-                  <p className="text-[10px] sm:text-xs text-gray-500 mt-1">Including all taxes</p>
+                  <p className="text-xs sm:text-xs text-gray-500 mt-1">Including all taxes</p>
+                </div>
+
+                {/* Price highlight banner */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-100">
+                  <p className="text-xs sm:text-sm text-center font-medium" style={{ color: colors.primary }}>
+                    ✨ Special Launch Price: <span className="font-bold text-lg">70 GHS</span> only!
+                  </p>
                 </div>
               </div>
 
               {/* Continue to Payment Button */}
               <button
                 onClick={handleContinueToPayment}
-                className="w-full mt-4 sm:mt-6 py-3 sm:py-4 text-white rounded-lg text-sm sm:text-base font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                className="w-full mt-5 sm:mt-6 py-4 sm:py-4 text-white rounded-lg text-base sm:text-base font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg"
                 style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}
               >
-                <Lock className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Lock className="w-5 h-5 sm:w-5 sm:h-5" />
                 Continue to Payment
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ChevronRight className="w-5 h-5 sm:w-5 sm:h-5" />
               </button>
 
               {/* Security Badges */}
-              <div className="flex items-center justify-between gap-2 mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between gap-2 mt-5 sm:mt-6 pt-4 sm:pt-4 border-t border-gray-200">
                 <div className="text-center flex-1">
-                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-1" style={{ color: colors.success }} />
-                  <p className="text-[10px] sm:text-xs text-gray-600">Secure</p>
+                  <Shield className="w-6 h-6 sm:w-6 sm:h-6 mx-auto mb-1" style={{ color: colors.success }} />
+                  <p className="text-xs sm:text-xs text-gray-600">Secure</p>
                 </div>
                 <div className="text-center flex-1">
-                  <Lock className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-1" style={{ color: colors.primary }} />
-                  <p className="text-[10px] sm:text-xs text-gray-600">Encrypted</p>
+                  <Lock className="w-6 h-6 sm:w-6 sm:h-6 mx-auto mb-1" style={{ color: colors.primary }} />
+                  <p className="text-xs sm:text-xs text-gray-600">Encrypted</p>
                 </div>
                 <div className="text-center flex-1">
-                  <BadgeCheck className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-1" style={{ color: colors.secondary }} />
-                  <p className="text-[10px] sm:text-xs text-gray-600">Guaranteed</p>
+                  <BadgeCheck className="w-6 h-6 sm:w-6 sm:h-6 mx-auto mb-1" style={{ color: colors.secondary }} />
+                  <p className="text-xs sm:text-xs text-gray-600">Guaranteed</p>
                 </div>
               </div>
             </div>
 
             {/* What You'll Get Card - Mobile Friendly */}
-            <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
-              <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                <Award className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.secondary }} />
+            <div className="bg-white rounded-xl shadow-md p-5 sm:p-6">
+              <h3 className="text-base sm:text-base font-bold text-gray-900 mb-4 sm:mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 sm:w-5 sm:h-5" style={{ color: colors.secondary }} />
                 What You'll Get
               </h3>
-              <ul className="space-y-2 sm:space-y-3">
-                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
+              <ul className="space-y-3 sm:space-y-3">
+                <li className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm text-gray-700">
+                  <CheckCircle className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
                   <span>Full lifetime access</span>
                 </li>
-                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
+                <li className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm text-gray-700">
+                  <CheckCircle className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
                   <span>Professional certificate</span>
                 </li>
-                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
+                <li className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm text-gray-700">
+                  <CheckCircle className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
                   <span>24/7 student support</span>
                 </li>
-                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
+                <li className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm text-gray-700">
+                  <CheckCircle className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
                   <span>Downloadable resources</span>
                 </li>
-                <li className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-700">
-                  <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
+                <li className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm text-gray-700">
+                  <CheckCircle className="w-5 h-5 sm:w-5 sm:h-5 flex-shrink-0" style={{ color: colors.success }} />
                   <span>Mobile and TV access</span>
                 </li>
               </ul>
             </div>
 
             {/* Need Help Card - Mobile Friendly */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 sm:p-6">
-              <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
+            <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-5 sm:p-6">
+              <h4 className="text-base sm:text-base font-bold text-gray-900 mb-3 sm:mb-3 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 sm:w-5 sm:h-5" style={{ color: colors.primary }} />
                 Need Help?
               </h4>
-              <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+              <p className="text-sm sm:text-sm text-gray-600 mb-4 sm:mb-4">
                 Our support team is ready to assist you.
               </p>
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-3 sm:space-y-3">
                 <Link 
                   to="/support" 
-                  className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm hover:underline"
+                  className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm hover:underline transition-all"
                   style={{ color: colors.primary }}
                 >
-                  <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <HelpCircle className="w-4 h-4 sm:w-4 sm:h-4" />
                   Help Center
                 </Link>
                 <Link 
                   to="/contact" 
-                  className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm hover:underline"
+                  className="flex items-center gap-3 sm:gap-3 text-sm sm:text-sm hover:underline transition-all"
                   style={{ color: colors.primary }}
                 >
-                  <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <Mail className="w-4 h-4 sm:w-4 sm:h-4" />
                   Contact Support
                 </Link>
-                <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600">
-                  <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-                  +233 123 456 789
-                </div>
               </div>
             </div>
           </div>
@@ -899,22 +923,9 @@ export default function Checkout() {
 
         {/* Simple Footer */}
         <div className="mt-8 sm:mt-12 border-t border-gray-200 pt-6 sm:pt-8">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
-              © 2025 iKPACE. All rights reserved.
-            </p>
-            <div className="flex gap-4">
-              <Link to="/terms" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
-                Terms
-              </Link>
-              <Link to="/privacy" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
-                Privacy
-              </Link>
-              <Link to="/refund" className="text-xs sm:text-sm text-gray-500 hover:text-gray-700">
-                Refund Policy
-              </Link>
-            </div>
-          </div>
+          <p className="text-xs sm:text-sm text-center text-gray-500">
+            © 2024 iKPACE. All rights reserved. All courses priced at 70 GHS.
+          </p>
         </div>
       </div>
 
@@ -926,6 +937,28 @@ export default function Checkout() {
         }
         .animate-slideDown {
           animation: slideDown 0.2s ease-out;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+          input, select, button {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+          }
+          
+          .min-h-screen {
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+        }
+        
+        /* Smooth transitions */
+        * {
+          -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Focus styles */
+        input:focus, select:focus, button:focus {
+          outline: none;
+          ring: 2px solid ${colors.primary};
         }
       `}</style>
     </div>
