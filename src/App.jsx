@@ -1,9 +1,14 @@
 import React from "react";
+<<<<<<< HEAD
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext.jsx"; // ✅ FIXED: Added .jsx extension
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LiveChatSupport from './components/LiveChatSupport';
+=======
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -23,6 +28,7 @@ import Checkout from "./pages/Checkout";
 import Profile from './pages/Profile';
 import MyCourses from './pages/MyCourses';
 import Certificates from './pages/Certificates';
+<<<<<<< HEAD
 import PaymentSuccess from './pages/PaymentSuccess';  // Payment success page after checkout
 import CourseCurriculum from './pages/CourseCurriculum'; // Course curriculum page
 import About from './pages/About'; // ✅ ADDED: Main About page
@@ -35,6 +41,15 @@ import AdminDashboard from './pages/AdminDashboard'
 // ========== LEARNING PAGE IMPORT ==========
 import CoursePlayer from './pages/CoursePlayer';  // Import the course player/learning page
 // import EnhancedCoursePlayer from './pages/EnhancedCoursePlayer'; // Alternative if you prefer the enhanced version
+=======
+import PaymentSuccess from './pages/PaymentSuccess';
+import CourseCurriculum from './pages/CourseCurriculum';
+import CoursePlayer from './pages/CoursePlayer';
+import Enrollment from "./pages/Enrollment";
+import DemoCourseDetail from "./pages/DemoCourseDetail";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
 
 // ========== NEW IMPORT FOR TOPIC VIEW ==========
 import TopicView from './pages/TopicView'; // Add this import for individual topic viewing
@@ -70,28 +85,34 @@ import TechLeadership from './pages/TechLeadership';
 import CodingBeginners from './pages/CodingBeginners';
 import WomenEntrepreneurs from './pages/WomenEntrepreneurs';
 
+<<<<<<< HEAD
 // ========== NEW IMPORT FOR CHECK TABLES ==========
 import CheckTables from './pages/CheckTables';
 
 // Layout component to wrap all pages with Navbar and Footer
 function Layout({ children }) {
+=======
+function Layout({ children, showNavbar = true }) {
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-grow">
+    <div className="min-h-screen bg-gray-50">
+      {showNavbar && <Navbar />}
+      <main className={showNavbar ? "pt-1" : ""}>
         {children}
       </main>
-      <Footer />
-      <LiveChatSupport />
+      <div className="mt-12">
+        <Footer />
+      </div>
     </div>
   );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
+<<<<<<< HEAD
           {/* Main Routes */}
           <Route path="/" element={<Layout><Landing /></Layout>} />
           <Route path="/login" element={<Layout><Login /></Layout>} />
@@ -140,19 +161,166 @@ function App() {
           
           {/* ========== NEW COMPLETE TEACHER DASHBOARD ROUTE ========== */}
           <Route path="/complete-teacher" element={<CompleteTeacherDashboard />} />  {/* Full featured teacher dashboard */}
+=======
+          {/* Auth Routes - No Navbar */}
+          <Route path="/login" element={
+            <Layout showNavbar={false}>
+              <Login />
+            </Layout>
+          } />
+          <Route path="/register" element={
+            <Layout showNavbar={false}>
+              <Register />
+            </Layout>
+          } />
+
+          {/* Public Routes with Navbar */}
+          <Route path="/" element={
+            <Layout>
+              <Landing />
+            </Layout>
+          } />
           
-          {/* ========== PAYMENT ROUTES ========== */}
-          <Route path="/checkout/:courseId" element={<Layout><Checkout /></Layout>} />
-          <Route path="/payment-success" element={<Layout><PaymentSuccess /></Layout>} />         {/* Payment success page after checkout */}
+          <Route path="/courses" element={
+            <Layout>
+              <Courses />
+            </Layout>
+          } />
+          
+          <Route path="/course/:id" element={
+            <Layout>
+              <DemoCourseDetail />
+            </Layout>
+          } />
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
+          
+          <Route path="/course/:id/view-more" element={
+            <Layout>
+              <CourseViewMore />
+            </Layout>
+          } />
+          
+          <Route path="/pricing" element={
+            <Layout>
+              <Pricing />
+            </Layout>
+          } />
+
+          {/* Course Curriculum & Learning Routes */}
+          <Route path="/course-curriculum/:slug" element={
+            <Layout>
+              <CourseCurriculum />
+            </Layout>
+          } />
+          
+          <Route path="/learn/:courseId" element={
+            <Layout>
+              <CoursePlayer />
+            </Layout>
+          } />
+
+          {/* User Dashboard Routes */}
+          <Route path="/dashboard" element={
+            <Layout>
+              <Dashboard />
+            </Layout>
+          } />
+          
+          <Route path="/profile" element={
+            <Layout>
+              <Profile />
+            </Layout>
+          } />
+          
+          <Route path="/my-courses" element={
+            <Layout>
+              <MyCourses />
+            </Layout>
+          } />
+          
+          <Route path="/certificates" element={
+            <Layout>
+              <Certificates />
+            </Layout>
+          } />
+          
+          <Route path="/career-ready" element={
+            <Layout>
+              <CareerReady />
+            </Layout>
+          } />
+          
+          <Route path="/community" element={
+            <Layout>
+              <Community />
+            </Layout>
+          } />
+
+          {/* Payment & Enrollment Routes */}
+          <Route path="/checkout/:courseId" element={
+            <Layout>
+              <Checkout />
+            </Layout>
+          } />
+          
+          <Route path="/payment-success" element={
+            <Layout>
+              <PaymentSuccess />
+            </Layout>
+          } />
+          
+          <Route path="/enrollment-success" element={
+            <Layout>
+              <Enrollment />
+            </Layout>
+          } />
+          
+          <Route path="/confirm-enrollment/:id" element={
+            <Layout>
+              <Enrollment />
+            </Layout>
+          } />
+
+          {/* Admin Route */}
+          <Route path="/admin" element={
+            <Layout showNavbar={false}>
+              <AdminDashboard />
+            </Layout>
+          } />
 
           {/* ========== COMMUNITY DROPDOWN ROUTES ========== */}
-          <Route path="/community/forums" element={<Layout><CommunityForums /></Layout>} />
-          <Route path="/community/study-groups" element={<Layout><CommunityStudyGroups /></Layout>} />
-          <Route path="/community/events" element={<Layout><CommunityEvents /></Layout>} />
-          <Route path="/community/alumni" element={<Layout><CommunityAlumni /></Layout>} />
-          <Route path="/community/ambassador" element={<Layout><CommunityAmbassador /></Layout>} />
+          <Route path="/community/forums" element={
+            <Layout>
+              <CommunityForums />
+            </Layout>
+          } />
+          
+          <Route path="/community/study-groups" element={
+            <Layout>
+              <CommunityStudyGroups />
+            </Layout>
+          } />
+          
+          <Route path="/community/events" element={
+            <Layout>
+              <CommunityEvents />
+            </Layout>
+          } />
+          
+          <Route path="/community/alumni" element={
+            <Layout>
+              <CommunityAlumni />
+            </Layout>
+          } />
+          
+          <Route path="/community/ambassador" element={
+            <Layout>
+              <CommunityAmbassador />
+            </Layout>
+          } />
 
           {/* ========== ABOUT DROPDOWN ROUTES ========== */}
+<<<<<<< HEAD
           <Route path="/about" element={<Layout><About /></Layout>} />                             {/* ✅ Main About page */}
           <Route path="/about/mission" element={<Layout><AboutMission /></Layout>} />
           <Route path="/about/team" element={<Layout><AboutTeam /></Layout>} />
@@ -169,9 +337,74 @@ function App() {
 
           {/* ========== CHECK TABLES ROUTE (TEMPORARY) ========== */}
           <Route path="/check-tables" element={<CheckTables />} />
+=======
+          <Route path="/about/mission" element={
+            <Layout>
+              <AboutMission />
+            </Layout>
+          } />
+          
+          <Route path="/about/team" element={
+            <Layout>
+              <AboutTeam />
+            </Layout>
+          } />
+          
+          <Route path="/about/success-stories" element={
+            <Layout>
+              <AboutSuccessStories />
+            </Layout>
+          } />
+          
+          <Route path="/about/careers" element={
+            <Layout>
+              <AboutCareers />
+            </Layout>
+          } />
+          
+          <Route path="/contact" element={
+            <Layout>
+              <Contact />
+            </Layout>
+          } />
+
+          {/* ========== WOMEN & TECH DROPDOWN ROUTES ========== */}
+          <Route path="/course/women-tech-scholarship" element={
+            <Layout>
+              <WomenTechScholarship />
+            </Layout>
+          } />
+          
+          <Route path="/course/return-to-work" element={
+            <Layout>
+              <ReturnToWork />
+            </Layout>
+          } />
+          
+          <Route path="/course/tech-leadership" element={
+            <Layout>
+              <TechLeadership />
+            </Layout>
+          } />
+          
+          <Route path="/course/coding-beginners" element={
+            <Layout>
+              <CodingBeginners />
+            </Layout>
+          } />
+          
+          <Route path="/course/tech-entrepreneurship" element={
+            <Layout>
+              <WomenEntrepreneurs />
+            </Layout>
+          } />
+
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" />} />
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

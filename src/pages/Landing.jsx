@@ -1,97 +1,50 @@
 import { Link } from "react-router-dom";
-import { Megaphone } from 'lucide-react';
-import { 
-  ArrowRight, BookOpen, Users, Award, Star, CheckCircle, 
-  TrendingUp, Clock, Sparkles, Target, Globe, Shield, 
-  Zap, Gift, Rocket, Heart, Medal, Crown, Gem, 
-  ChevronRight, Play, Video, Download, Coffee,
-  MessageCircle, ThumbsUp, BadgeCheck, Calendar,
-  DollarSign, Percent, ShoppingBag, Flame, Layers,
-  Briefcase, Palette, Code, GraduationCap, UserCheck,
-  ChevronLeft, Monitor, Smartphone, Laptop, Cpu,
-  Brain, Camera, Music, PenTool, Film, Image,
-  ThumbsUp as ThumbsUpIcon, Facebook, Twitter, Linkedin, Instagram,
-  Mail, Phone, MapPin, Headphones, HelpCircle
-} from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { ArrowRight, BookOpen, Users, Award, Star, CheckCircle, TrendingUp, Clock, Sparkles, Target, Globe, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Landing() {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 2,
-    hours: 14,
-    minutes: 30,
-    seconds: 45
-  });
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
-  const [hoveredCourse, setHoveredCourse] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [savedCourses, setSavedCourses] = useState([]);
 
-  const colors = {
-    primary: "#1A3D7C",
-    secondary: "#FF7A00",
-    accent: "#2F5EA8",
-    success: "#008F4C",
-    warning: "#E6B800",
-    dark: "#1F2937",
-    lightGray: "#F3F4F6",
-    blueShade: "#4A6FA5",
-    orangeShade: "#FF9A3C",
-    white: "#FFFFFF"
-  };
+ const testimonials = [
+  {
+    name: "Kwame Mensah",
+    role: "Marketing Manager",
+    text: "iKPACE transformed my career. The courses are practical and immediately applicable.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1535745318714-da922ca9cc81?q=80&w=774&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    name: "Aisha Bello",
+    role: "Freelancer",
+    text: "Best investment in my education. The community support alone is worth it.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1583994009785-37ec30bf9342?q=80&w=388&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    name: "Thabo Ndlovu",
+    role: "Software Developer",
+    text: "The hands-on projects gave me real-world skills I now use daily in my job.",
+    rating: 5,
+    image: "https://randomuser.me/api/portraits/men/54.jpg"
+  },
+  {
+    name: "Zainab Ibrahim",
+    role: "Digital Strategist",
+    text: "The AI tools and mentorship helped me scale my business faster than I imagined.",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1559172802-f5de3d1ed91d?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    name: "Chinedu Okoro",
+    role: "Business Owner",
+    text: "The AI course helped me automate 80% of my content creation. Amazing ROI!",
+    rating: 5,
+    image: "https://randomuser.me/api/portraits/men/63.jpg"
+  }
+];
 
-  // Hero slides data
-  const heroSlides = [
-    {
-      id: "learn-smarter",
-      title: "Learn Smarter with iKPACE",
-      description: "Practical skills for the modern workforce",
-      image: "https://images.pexels.com/photos/1181675/pexels-photo-1181675.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      cta: "Get Started",
-      link: "/register",
-      badge: "New Platform",
-      highlight: "From $7.00",
-      stats: {
-        students: "Active learners",
-        rating: "4.8/5 rating",
-        courses: "6 courses"
-      }
-    },
-    {
-      id: "virtual-assistant-pro",
-      title: "Virtual Assistant Professional",
-      description: "Become a certified VA in 6 weeks - $7.00",
-      image: "https://images.pexels.com/photos/3769021/pexels-photo-3769021.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      cta: "Join Now",
-      link: "/course/virtual-assistant-pro",
-      badge: "Popular",
-      highlight: "Start Your VA Career",
-      stats: {
-        students: "25+ enrolled",
-        rating: "4.8 rating",
-        duration: "6 weeks"
-      }
-    },
-    {
-      id: "women-tech-scholarship",
-      title: "Women in Tech Scholarship",
-      description: "50% tuition support for women. Limited slots!",
-      image: "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      cta: "Apply Today",
-      link: "/course/women-tech-scholarship",
-      badge: "Scholarship",
-      highlight: "50% Off",
-      stats: {
-        scholars: "5 awarded",
-        rating: "4.9 rating",
-        deadline: "Apply now"
-      }
-    }
-  ];
 
+<<<<<<< HEAD
   // Slide navigation functions
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === heroSlides.length - 1 ? 0 : prev + 1));
@@ -333,170 +286,199 @@ export default function Landing() {
       color: colors.orangeShade
     }
   ];
+=======
+   const [currentIndex, setCurrentIndex] = useState(0);
+   const [paused, setPaused] = useState(false);
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
 
+  // Auto Slide
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else if (prev.days > 0) {
-          return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-        }
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+    if (paused) return;
 
-  // Auto-play slides
-  useEffect(() => {
-    let interval;
-    if (isAutoPlaying) {
-      interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-      }, 5000);
-    }
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) =>
+        prev === testimonials.length - 2 ? 0 : prev + 1
+      );
+    }, 4000);
+
     return () => clearInterval(interval);
-  }, [isAutoPlaying, heroSlides.length]);
+  }, [paused, testimonials.length]);
+
+
+  const popularCourses = [
+    {
+      id: "1",
+      title: "Digital Marketing Mastery",
+      description: "Complete strategy for online marketing success",
+      price: 7.00,
+      students: "1,247+",
+      rating: 4.9,
+      duration: "8 weeks",
+      badge: "BESTSELLER"
+    },
+    {
+      id: "2",
+      title: "AI Content Creation Pro", 
+      description: "Master AI tools for automated content creation",
+      price: 7.00,
+      students: "892+",
+      rating: 4.8,
+      duration: "6 weeks",
+      badge: "TRENDING"
+    },
+    {
+      id: "3",
+      title: "Social Media Ads Expert",
+      description: "Advanced advertising across all platforms",
+      price: 9.00,
+      students: "567+",
+      rating: 4.7,
+      duration: "4 weeks",
+      badge: "POPULAR"
+    }
+  ];
+
+  const features = [
+    {
+      icon: <BookOpen className="w-10 h-10 text-primary" />,
+      title: "Expert-Led Courses",
+      description: "Learn from industry professionals with real-world experience"
+    },
+    {
+      icon: <Users className="w-10 h-10 text-primary" />,
+      title: "Community Support",
+      description: "Join 10,000+ learners in our active community"
+    },
+    {
+      icon: <Award className="w-10 h-10 text-primary" />,
+      title: "Certification",
+      description: "Get certified and boost your career prospects"
+    },
+    {
+      icon: <Clock className="w-10 h-10 text-primary" />,
+      title: "Self-Paced Learning",
+      description: "Learn at your own pace with lifetime access"
+    }
+  ];
+
+
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen">
       {/* Promotional Banner */}
-      <div className="relative overflow-hidden" style={{ background: `linear-gradient(90deg, ${colors.primary}, ${colors.accent})` }}>
-        <div className="relative h-12 flex items-center justify-center px-4">
-          <div className="flex items-center gap-4 text-white text-sm">
-            <Zap size={16} className="text-yellow-300 animate-pulse" />
-            <span className="font-bold">🔥 3 COURSES FOR $15</span>
-            <div className="w-px h-4 bg-white/30" />
-            <span>FREE BONUS</span>
-            <div className="w-px h-4 bg-white/30" />
-            <span className="hidden md:inline">70% OFF</span>
-            <Link 
-              to="/pricing" 
-              className="bg-white px-3 py-1 rounded-full text-xs font-bold hover:scale-105 transition-all"
-              style={{ color: colors.primary }}
-            >
-              Claim <Gift size={12} className="inline ml-1" />
+      <div className="bg-gradient-to-r from-accent-yellow via-secondary to-primary text-white">
+        <div className="max-w-7xl mx-auto px-4 py-3 text-center">
+          <p className="font-bold text-lg">
+            ?? LIMITED TIME: Get 3 courses for $18 (Save $3!) �{" "}
+            <Link to="/pricing" className="underline font-extrabold">
+              Claim Offer Now ?
             </Link>
-          </div>
+          </p>
         </div>
       </div>
 
       {/* Hero Section */}
-      <section className="relative h-[500px] md:h-[600px] overflow-hidden">
-        <div className="absolute inset-0">
-          {heroSlides.map((slide, index) => (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                index === currentSlide ? 'opacity-100' : 'opacity-0'
-              }`}
-            >
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.image})` }} />
-              <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${colors.primary}E6, ${colors.primary}99)` }} />
+      <section className="relative bg-gradient-to-br from-primary via-primary-dark to-secondary text-white py-24 px-4 overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=2000')] opacity-10"></div>
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
+              <Sparkles size={20} />
+              <span className="font-medium">Trusted by 10,000+ learners worldwide</span>
             </div>
-          ))}
-        </div>
-
-        <div className="relative h-full flex items-center">
-          <div className="max-w-7xl mx-auto px-4 w-full">
-            {heroSlides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className={`transition-all duration-1000 ${
-                  index === currentSlide ? 'opacity-100' : 'opacity-0 hidden'
-                }`}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+              Master <span className="text-secondary-light">Digital Skills</span>,
+              <br />
+              <span className="text-accent-yellow">Transform Your Career</span>
+            </h1>
+            <p className="text-2xl mb-12 max-w-3xl mx-auto opacity-90">
+              Join thousands building practical digital skills with AI-powered learning, 
+              expert instruction, and a supportive global community.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Link
+                to="/courses"
+                className="group bg-white text-primary hover:bg-gray-100 font-bold text-xl px-12 py-5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl flex items-center gap-3"
               >
-                <div className="max-w-3xl">
-                  <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold mb-6">
-                    {slide.badge}
-                  </span>
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-                    {slide.title}
-                  </h1>
-                  <p className="text-lg md:text-xl text-white/90 mb-8">{slide.description}</p>
-                  <div className="flex gap-4">
-                    <Link
-                      to={slide.link}
-                      className="group px-8 py-4 rounded-full font-bold hover:scale-105 transition-all flex items-center gap-2 shadow-xl"
-                      style={{ background: colors.secondary, color: colors.white }}
-                    >
-                      {slide.cta} <ArrowRight size={18} className="group-hover:translate-x-1" />
-                    </Link>
-                    <Link
-                      to="/courses"
-                      className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-full font-bold hover:bg-white/30 transition-all"
-                    >
-                      Browse All
-                    </Link>
-                  </div>
-                </div>
+                Start Learning Now � $7/course
+                <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+              </Link>
+              <Link
+                to="/pricing"
+                className="bg-transparent border-3 border-white text-white hover:bg-white/10 font-bold text-xl px-12 py-5 rounded-full transition-all"
+              >
+                View All Plans
+              </Link>
+            </div>
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-2">10K+</div>
+                <div className="text-gray-300">Students</div>
               </div>
-            ))}
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-2">50+</div>
+                <div className="text-gray-300">Countries</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-2">4.9?</div>
+                <div className="text-gray-300">Rating</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-2">95%</div>
+                <div className="text-gray-300">Completion</div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Navigation */}
-        <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 w-10 h-10 rounded-full flex items-center justify-center text-white">
-          <ChevronLeft size={20} />
-        </button>
-        <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 w-10 h-10 rounded-full flex items-center justify-center text-white">
-          <ChevronRight size={20} />
-        </button>
-
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`h-2 rounded-full transition-all ${
-                index === currentSlide ? 'w-8 bg-white' : 'w-2 bg-white/50'
-              }`}
-            />
-          ))}
         </div>
       </section>
 
-      {/* Core Features - 6 Benefits */}
-      <section className="py-12 bg-white">
+      {/* Features Section */}
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose <span style={{ color: colors.secondary }}>iKPACE</span>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Why <span className="text-primary">iKPACE</span> Stands Out
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Everything you need to succeed
+            <p className="text-2xl text-gray-600 max-w-3xl mx-auto">
+              Everything you need to succeed in the digital economy
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {coreFeatures.map((item, index) => (
-              <div key={index} className="text-center p-3">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: item.color + '10', color: item.color }}>
-                  {item.icon}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-shadow border border-gray-100">
+                <div className="mb-6">
+                  {feature.icon}
                 </div>
-                <h3 className="font-bold text-gray-900 text-xs mb-1">{item.title}</h3>
-                <p className="text-[10px] text-gray-600">{item.description}</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+<<<<<<< HEAD
       {/* Courses Section - Clean & Simple - MODIFIED AS REQUESTED */}
       <section className="py-12" style={{ background: colors.lightGray }}>
+=======
+      {/* Popular Courses Section */}
+      <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
         <div className="max-w-7xl mx-auto px-4">
-          {/* Simple Header */}
-          <div className="text-center mb-8">
-            <span className="inline-block px-4 py-2 rounded-full text-sm font-bold mb-4" style={{ background: colors.primary + '10', color: colors.primary }}>
-              🎓 OUR COURSES
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Learn <span style={{ color: colors.secondary }}>New Skills</span>
+          <div className="text-center mb-16">
+            <div className="inline-block mb-4">
+              <span className="bg-primary text-white px-6 py-2 rounded-full font-bold text-lg">
+                MOST POPULAR PROGRAMS
+              </span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Top-Rated Courses
             </h2>
+<<<<<<< HEAD
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Start your journey today for just $7
             </p>
@@ -536,16 +518,52 @@ export default function Landing() {
                   />
                   <div className="absolute top-3 right-3">
                     <span className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-bold shadow-sm" style={{ color: colors.primary }}>
+=======
+            <p className="text-2xl text-gray-600">
+              Start with any course - they're all beginner-friendly
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {popularCourses.map((course) => (
+              <div key={course.id} className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-200">
+                <div className="h-48 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-90"></div>
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-accent-yellow text-gray-900 px-4 py-1 rounded-full font-bold text-sm">
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
                       {course.badge}
                     </span>
                   </div>
-                  <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-white text-xs">
-                    {course.category}
+                  <div className="absolute bottom-6 left-6">
+                    <div className="text-3xl font-bold text-white">${course.price.toFixed(2)}</div>
+                    <div className="text-white/90">per course</div>
                   </div>
-                  <button
-                    onClick={() => toggleSaveCourse(course.id)}
-                    className="absolute bottom-3 right-3 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:scale-110 transition-transform"
+                </div>
+                <div className="p-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="flex items-center text-gray-600">
+                      <Clock size={18} className="mr-2" />
+                      {course.duration}
+                    </span>
+                    <span className="flex items-center text-amber-600 font-bold">
+                      <Star size={18} className="fill-current mr-1" />
+                      {course.rating}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{course.title}</h3>
+                  <p className="text-gray-600 mb-6">{course.description}</p>
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="flex items-center text-gray-600">
+                      <Users size={18} className="mr-2" />
+                      {course.students} students
+                    </span>
+                  </div>
+                  <Link
+                    to={`/course/${course.id}`}
+                    className="block w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 px-6 rounded-xl text-center text-lg transition-colors"
                   >
+<<<<<<< HEAD
                     <Heart 
                       size={14} 
                       className={savedCourses.includes(course.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'} 
@@ -601,11 +619,16 @@ export default function Landing() {
                       View Details <ArrowRight size={14} />
                     </Link>
                   </div>
+=======
+                    View Course Details
+                  </Link>
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
                 </div>
               </div>
             ))}
           </div>
 
+<<<<<<< HEAD
           {/* View All Button */}
           <div className="text-center mt-8">
             <Link 
@@ -874,34 +897,137 @@ export default function Landing() {
             >
               Start Learning <ArrowRight size={16} className="inline ml-1" />
             </Link>
+=======
+          <div className="text-center">
+>>>>>>> 353c35758d053828fb4b53420e5962016ce96fc6
             <Link
               to="/courses"
-              className="px-8 py-3 rounded-full font-bold border-2 hover:bg-gray-50 transition-all"
-              style={{ borderColor: colors.primary, color: colors.primary }}
+              className="inline-flex items-center text-2xl font-bold text-primary hover:text-primary-dark group"
             >
-              Browse Courses
+              View All Courses
+              <ArrowRight size={28} className="ml-4 group-hover:translate-x-3 transition-transform" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Animation Styles */}
-      <style>{`
-        @keyframes slide-slow {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        
-        .animate-slide-slow {
-          animation: slide-slow 40s linear infinite;
-          width: fit-content;
-          display: flex;
-        }
-        
-        .hover\\:pause-animation:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
+      {/* Testimonials */}
+       <section className="relative py-24 bg-[#F5F5F5] overflow-hidden">
+
+      {/* Background Glow */}
+      <div className="absolute -top-32 -left-32 w-[400px] h-[400px] bg-[#1A3D7C]/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#FF7A00]/10 rounded-full blur-3xl"></div>
+
+      <div className="relative max-w-6xl mx-auto px-6">
+
+        {/* Heading */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-[#1A3D7C] mb-4">
+            What Our Clients Say
+          </h2>
+          <p className="text-[#333333]">
+            Trusted by professionals who value innovation and performance.
+          </p>
+        </div>
+
+        {/* Carousel Wrapper */}
+        <div
+          className="overflow-hidden"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <div
+            className="flex transition-transform duration-700 ease-in-out"
+            style={{
+              transform: `translateX(-${currentIndex * 50}%)`,
+            }}
+          >
+            {testimonials.map((item, index) => (
+              <div
+                key={index}
+                className="w-full md:w-1/2 flex-shrink-0 px-4"
+              >
+                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 h-full">
+
+                  {/* Avatar */}
+                  <div className="flex items-center object-cover gap-4 mb-6">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-16 h-16 rounded-full border-4 border-[#FF7A00]"
+                    />
+                    <div>
+                      <h4 className="font-semibold text-[#1A3D7C]">
+                        {item.name}
+                      </h4>
+                      <span className="text-sm text-[#4A6FA5]">
+                        {item.role}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Stars */}
+                  <div className="text-[#FFD600] mb-4">
+                    ★★★★★
+                  </div>
+
+                  {/* Review */}
+                  <p className="text-[#333333] italic">
+                    "{item.text}"
+                  </p>
+
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+      {/* Final CTA */}
+      <section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="bg-gradient-to-r from-primary/5 to-secondary/5 p-12 rounded-3xl border-2 border-primary/20">
+            <Target className="w-20 h-20 text-primary mx-auto mb-8" />
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Ready to Start Your Journey?
+            </h2>
+            <p className="text-2xl text-gray-600 mb-10 max-w-2xl mx-auto">
+              Join 10,000+ students who transformed their careers with iKPACE
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link
+                to="/register"
+                className="group bg-primary hover:bg-primary-dark text-white font-bold text-xl px-12 py-5 rounded-full transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3"
+              >
+                Start Free Trial
+                <ArrowRight size={24} className="group-hover:translate-x-2 transition-transform" />
+              </Link>
+              <Link
+                to="/courses"
+                className="bg-white text-primary border-2 border-primary hover:bg-primary/5 font-bold text-xl px-12 py-5 rounded-full transition-all"
+              >
+                Browse Courses
+              </Link>
+            </div>
+            <div className="mt-10 flex flex-wrap justify-center gap-6 text-gray-600">
+              <div className="flex items-center gap-2">
+                <Shield size={20} />
+                <span>30-day money-back guarantee</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe size={20} />
+                <span>Access from anywhere</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Award size={20} />
+                <span>Certificate included</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
