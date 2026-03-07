@@ -70,6 +70,9 @@ import TechLeadership from './pages/TechLeadership';
 import CodingBeginners from './pages/CodingBeginners';
 import WomenEntrepreneurs from './pages/WomenEntrepreneurs';
 
+// ========== NEW IMPORT FOR CHECK TABLES ==========
+import CheckTables from './pages/CheckTables';
+
 // Layout component to wrap all pages with Navbar and Footer
 function Layout({ children }) {
   return (
@@ -103,6 +106,7 @@ function App() {
           
           {/* ========== LEARNING & CURRICULUM ROUTES ========== */}
           <Route path="/learn/:courseId" element={<Layout><CoursePlayer /></Layout>} />           {/* Learning page after enrollment */}
+          <Route path="/CoursePlayer/:courseId" element={<Layout><CoursePlayer /></Layout>} />    {/* ✅ FIXED: Added direct CoursePlayer route */}
           <Route path="/course-curriculum/:slug" element={<Layout><CourseCurriculum /></Layout>} />  {/* Course curriculum page */}
           
           {/* ========== TOPIC VIEW ROUTES ========== */}
@@ -111,6 +115,7 @@ function App() {
           
           {/* Alternative if you prefer enhanced version: */}
           {/* <Route path="/learn/:courseId" element={<Layout><EnhancedCoursePlayer /></Layout>} /> */}
+          {/* <Route path="/CoursePlayer/:courseId" element={<Layout><EnhancedCoursePlayer /></Layout>} /> */}
           
           <Route path="/pricing" element={<Layout><Pricing /></Layout>} />
           <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
@@ -161,6 +166,9 @@ function App() {
           <Route path="/course/tech-leadership" element={<Layout><TechLeadership /></Layout>} />
           <Route path="/course/coding-beginners" element={<Layout><CodingBeginners /></Layout>} />
           <Route path="/course/tech-entrepreneurship" element={<Layout><WomenEntrepreneurs /></Layout>} />
+
+          {/* ========== CHECK TABLES ROUTE (TEMPORARY) ========== */}
+          <Route path="/check-tables" element={<CheckTables />} />
         </Routes>
       </Router>
     </AuthProvider>
