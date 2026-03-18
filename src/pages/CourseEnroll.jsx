@@ -60,17 +60,17 @@ export default function CourseDetail() {
     }))
   }
 
-  // ==================== ALL COURSES WITH HONEST NUMBERS ====================
+  // ==================== ALL COURSES WITH UPDATED DURATIONS ====================
   const allCourses = {
-    // Virtual Assistant Course
+    // Virtual Assistant Course - UPDATED to 8 weeks
     'virtual-assistant-pro': {
       id: 'virtual-assistant-pro',
       title: 'Virtual Assistant Professional',
-      subtitle: 'Launch your remote VA career in 6 weeks',
+      subtitle: 'Launch your remote VA career in 8 weeks',
       description: 'Master administrative skills, communication, and client acquisition to become a successful virtual assistant.',
-      fullDescription: 'This 6-week program covers everything you need to become a professional virtual assistant. Learn to manage emails, calendars, documents, and social media for clients. Graduate with a professional portfolio and certification.',
+      fullDescription: 'This 8-week program covers everything you need to become a professional virtual assistant. Learn to manage emails, calendars, documents, and social media for clients. Graduate with a professional portfolio and certification.',
       price: FIXED_PRICE,
-      duration: '6 Weeks',
+      duration: '8 Weeks',
       students: 32,
       rating: 4.9,
       reviews: 18,
@@ -85,8 +85,7 @@ export default function CourseDetail() {
         'Professional certificate',
         'Portfolio creation',
         'Client acquisition guide',
-        'Lifetime access',
-        '7 days money back'
+        'Lifetime access'
       ],
       color: `from-[${colors.primary}] to-[${colors.secondary}]`,
       learningOutcomes: [
@@ -105,7 +104,7 @@ export default function CourseDetail() {
       ],
       toolsNeeded: ['Google Workspace', 'Google Calendar', 'Scheduling tools', 'Email client'],
       timeCommitment: '4-6 hours per week',
-      weeksToComplete: '6 weeks',
+      weeksToComplete: '8 weeks',
       lessons: 18,
       projects: 3,
       modules: [
@@ -140,7 +139,19 @@ export default function CourseDetail() {
           topics: ['Creating a CV & portfolio', 'Freelance platforms', 'Pricing services']
         },
         {
-          title: 'Week 6: Final Project',
+          title: 'Week 6: Advanced VA Skills',
+          duration: '3 hours',
+          lessons: 3,
+          topics: ['Project management tools', 'Advanced client communication', 'Time management']
+        },
+        {
+          title: 'Week 7: Specialized Services',
+          duration: '3 hours',
+          lessons: 3,
+          topics: ['Email marketing basics', 'CRM tools', 'Social media management']
+        },
+        {
+          title: 'Week 8: Final Project',
           duration: '4 hours',
           lessons: 3,
           topics: ['Create VA portfolio', 'Mock client task', 'Certification']
@@ -162,15 +173,15 @@ export default function CourseDetail() {
       ]
     },
 
-    // Social Media Marketing
+    // Social Media Marketing - UPDATED to 8 weeks
     'social-media-marketing': {
       id: 'social-media-marketing',
       title: 'Social Media Marketing',
       subtitle: 'Master content creation, ads, and growth strategies',
       description: 'Learn to create engaging content, run ads, and grow your audience.',
-      fullDescription: 'This 6-week course teaches you social media marketing fundamentals. Master content creation, scheduling, analytics, and paid advertising strategies across major platforms.',
+      fullDescription: 'This 8-week course teaches you social media marketing fundamentals. Master content creation, scheduling, analytics, and paid advertising strategies across major platforms.',
       price: FIXED_PRICE,
-      duration: '6 Weeks',
+      duration: '8 Weeks',
       students: 28,
       rating: 4.8,
       reviews: 15,
@@ -185,8 +196,7 @@ export default function CourseDetail() {
         'Campaign templates',
         'Analytics guide',
         'Certificate',
-        'Lifetime access',
-        '7 days money back'
+        'Lifetime access'
       ],
       color: `from-[${colors.secondary}] to-[${colors.orangeShade}]`,
       learningOutcomes: [
@@ -205,9 +215,9 @@ export default function CourseDetail() {
       ],
       toolsNeeded: ['Canva', 'Meta Business Suite', 'Google Analytics', 'Scheduling tools'],
       timeCommitment: '4-6 hours per week',
-      weeksToComplete: '6 weeks',
-      lessons: 13,
-      projects: 2,
+      weeksToComplete: '8 weeks',
+      lessons: 16,
+      projects: 3,
       modules: [
         {
           title: 'Week 1: Social Media Basics',
@@ -240,10 +250,22 @@ export default function CourseDetail() {
           topics: ['Insights & engagement tracking', 'Improving performance']
         },
         {
-          title: 'Week 6: Campaign Project',
-          duration: '4 hours',
+          title: 'Week 6: Advanced Content Strategy',
+          duration: '3 hours',
           lessons: 2,
-          topics: ['Create full campaign plan', 'Present strategy']
+          topics: ['Video content', 'User-generated content', 'Trend analysis']
+        },
+        {
+          title: 'Week 7: Community Management',
+          duration: '3 hours',
+          lessons: 2,
+          topics: ['Engagement strategies', 'Handling feedback', 'Building loyalty']
+        },
+        {
+          title: 'Week 8: Campaign Project',
+          duration: '4 hours',
+          lessons: 3,
+          topics: ['Create full campaign plan', 'Present strategy', 'Portfolio piece']
         }
       ],
       testimonials: [
@@ -262,15 +284,15 @@ export default function CourseDetail() {
       ]
     },
 
-    // Canva & Graphic Design
+    // Canva & Graphic Design - UPDATED to 8 weeks
     'canva-graphic-design': {
       id: 'canva-graphic-design',
       title: 'Canva & Graphic Design',
       subtitle: 'Create stunning visuals & build your design portfolio',
       description: 'Learn to create professional designs, logos, and branding materials.',
-      fullDescription: 'This 4-week course teaches you color theory, typography, and design principles. Create logos, flyers, posters, and complete social media branding kits using Canva. Graduate with a professional portfolio.',
+      fullDescription: 'This 8-week course teaches you color theory, typography, and design principles. Create logos, flyers, posters, and complete social media branding kits using Canva. Graduate with a professional portfolio.',
       price: FIXED_PRICE,
-      duration: '4 Weeks',
+      duration: '8 Weeks',
       students: 19,
       rating: 4.7,
       reviews: 12,
@@ -285,8 +307,7 @@ export default function CourseDetail() {
         'Design templates',
         'Portfolio project',
         'Certificate',
-        'Lifetime access',
-        '7 days money back'
+        'Lifetime access'
       ],
       color: `from-[${colors.success}] to-[#00C853]`,
       learningOutcomes: [
@@ -304,9 +325,9 @@ export default function CourseDetail() {
       ],
       toolsNeeded: ['Canva (free or Pro)', 'Computer or tablet', 'Internet connection'],
       timeCommitment: '4-6 hours per week',
-      weeksToComplete: '4 weeks',
-      lessons: 9,
-      projects: 3,
+      weeksToComplete: '8 weeks',
+      lessons: 14,
+      projects: 4,
       modules: [
         {
           title: 'Week 1: Design Fundamentals',
@@ -327,10 +348,34 @@ export default function CourseDetail() {
           topics: ['Logo basics', 'Flyer & poster design']
         },
         {
-          title: 'Week 4: Final Portfolio',
+          title: 'Week 4: Social Media Graphics',
           duration: '4 hours',
           lessons: 2,
-          topics: ['Design social media kit', 'Branding project']
+          topics: ['Instagram posts', 'Facebook covers', 'Story designs']
+        },
+        {
+          title: 'Week 5: Advanced Design Techniques',
+          duration: '4 hours',
+          lessons: 2,
+          topics: ['Animations', 'Video editing basics', 'Interactive designs']
+        },
+        {
+          title: 'Week 6: Brand Identity',
+          duration: '4 hours',
+          lessons: 2,
+          topics: ['Creating brand kits', 'Consistency across platforms', 'Style guides']
+        },
+        {
+          title: 'Week 7: Marketing Materials',
+          duration: '4 hours',
+          lessons: 2,
+          topics: ['Brochures', 'Presentations', 'Email headers']
+        },
+        {
+          title: 'Week 8: Final Portfolio',
+          duration: '4 hours',
+          lessons: 2,
+          topics: ['Design social media kit', 'Branding project', 'Portfolio presentation']
         }
       ],
       testimonials: [
@@ -349,7 +394,7 @@ export default function CourseDetail() {
       ]
     },
 
-    // Smart Kids Coding
+    // Smart Kids Coding - 4 weeks (unchanged)
     'smart-kids-coding': {
       id: 'smart-kids-coding',
       title: 'Smart Kids Coding',
@@ -372,8 +417,7 @@ export default function CourseDetail() {
         'Fun projects',
         'Certificate',
         'Game creation',
-        'Parent updates',
-        '7 days money back'
+        'Parent updates'
       ],
       color: 'from-[#FF6D00] to-[#FFD600]',
       learningOutcomes: [
@@ -437,7 +481,7 @@ export default function CourseDetail() {
       ]
     },
 
-    // Freelancing & Online Income
+    // Freelancing & Online Income - 4 weeks (unchanged)
     'freelancing-online-income': {
       id: 'freelancing-online-income',
       title: 'Freelancing & Online Income',
@@ -460,8 +504,7 @@ export default function CourseDetail() {
         'Profile templates',
         'Proposal guide',
         'Pricing calculator',
-        'Certificate',
-        '7 days money back'
+        'Certificate'
       ],
       color: `from-[${colors.success}] to-[#B2FF59]`,
       learningOutcomes: [
@@ -525,15 +568,15 @@ export default function CourseDetail() {
       ]
     },
 
-    // AI Prompt Engineering
+    // AI Prompt Engineering - UPDATED to 8 weeks
     'ai-prompt-engineering': {
       id: 'ai-prompt-engineering',
       title: 'AI Prompt Engineering',
       subtitle: 'Master AI tools for content creation',
       description: 'Learn to use ChatGPT, Midjourney, and other AI tools effectively.',
-      fullDescription: 'This 6-week course teaches you to master AI prompt engineering. Learn techniques for content creation, automation, and problem-solving using ChatGPT, Claude, and other AI tools.',
+      fullDescription: 'This 8-week course teaches you to master AI prompt engineering. Learn techniques for content creation, automation, and problem-solving using ChatGPT, Claude, and other AI tools.',
       price: FIXED_PRICE,
-      duration: '6 Weeks',
+      duration: '8 Weeks',
       students: 18,
       rating: 4.9,
       reviews: 11,
@@ -548,8 +591,7 @@ export default function CourseDetail() {
         'Prompt library',
         'Real projects',
         'Certification',
-        'AI tools guide',
-        '7 days money back'
+        'AI tools guide'
       ],
       color: `from-[${colors.blueShade}] to-[${colors.accent}]`,
       learningOutcomes: [
@@ -567,9 +609,9 @@ export default function CourseDetail() {
       ],
       toolsNeeded: ['ChatGPT', 'Claude AI', 'Midjourney', 'Notion'],
       timeCommitment: '3-4 hours per week',
-      weeksToComplete: '6 weeks',
-      lessons: 15,
-      projects: 4,
+      weeksToComplete: '8 weeks',
+      lessons: 18,
+      projects: 5,
       modules: [
         {
           title: 'Week 1-2: Prompt Engineering Basics',
@@ -588,6 +630,12 @@ export default function CourseDetail() {
           duration: '6 hours',
           lessons: 5,
           topics: ['Content creation', 'Automation', 'Data analysis']
+        },
+        {
+          title: 'Week 7-8: Advanced Projects',
+          duration: '6 hours',
+          lessons: 3,
+          topics: ['Building AI workflows', 'Integration', 'Portfolio projects']
         }
       ],
       testimonials: [
@@ -650,7 +698,6 @@ export default function CourseDetail() {
                 badgeColor: `bg-gradient-to-r from-[${colors.primary}] to-[${colors.secondary}]`,
                 tags: data.tags || ['Learning', 'Skills', 'Career'],
                 features: [
-                  '7 days money back guarantee',
                   'Certificate of completion',
                   'Lifetime access',
                   'Community access'
@@ -726,87 +773,6 @@ export default function CourseDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-        {/* Mobile Header */}
-        <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
-          <div className="px-4 py-3 flex items-center justify-between">
-            <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
-              iKPACE
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 z-40 animate-slideDown">
-              <div className="space-y-2">
-                <Link 
-                  to="/" 
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link 
-                  to="/courses" 
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Courses
-                </Link>
-                <Link 
-                  to="/support" 
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Support
-                </Link>
-                <Link 
-                  to="/contact" 
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Contact
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Desktop Header */}
-        <div className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Link 
-                  to="/courses" 
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Courses</span>
-                </Link>
-                <div className="w-px h-4 bg-gray-300"></div>
-                <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
-                  iKPACE
-                </Link>
-              </div>
-              <div className="flex items-center gap-6">
-                <Link to="/support" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Help
-                </Link>
-                <Link to="/contact" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Contact
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-20">
           <div className="text-center py-12 sm:py-20">
             <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-2 mx-auto mb-4 sm:mb-6" style={{ borderColor: colors.primary }}></div>
@@ -821,22 +787,6 @@ export default function CourseDetail() {
   if (!course) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-        {/* Mobile Header */}
-        <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
-          <div className="px-4 py-3 flex items-center justify-between">
-            <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
-              iKPACE
-            </Link>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 md:py-20">
           <div className="text-center py-12 sm:py-20">
             <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-4 sm:mb-6" />
@@ -858,7 +808,6 @@ export default function CourseDetail() {
 
   // Ensure features is always an array
   const courseFeatures = Array.isArray(course.features) ? course.features : [
-    '7 days money back guarantee',
     'Certificate of completion',
     'Lifetime access',
     'Community access'
@@ -869,84 +818,16 @@ export default function CourseDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Mobile Header */}
-      <div className="lg:hidden border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
-        <div className="px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
-            iKPACE
-          </Link>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="Toggle menu"
+      {/* Simple Back Button - Added to replace the removed headers */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <Link 
+            to="/courses" 
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-lg p-4 z-40 animate-slideDown">
-            <div className="space-y-2">
-              <Link 
-                to="/" 
-                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link 
-                to="/courses" 
-                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Courses
-              </Link>
-              <Link 
-                to="/support" 
-                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Support
-              </Link>
-              <Link 
-                to="/contact" 
-                className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Desktop Header */}
-      <div className="hidden lg:block border-b border-gray-200 bg-white sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link 
-                to="/courses" 
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Courses</span>
-              </Link>
-              <div className="w-px h-4 bg-gray-300"></div>
-              <Link to="/" className="font-bold text-xl" style={{ color: colors.primary }}>
-                iKPACE
-              </Link>
-            </div>
-            <div className="flex items-center gap-6">
-              <Link to="/support" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                Help
-              </Link>
-              <Link to="/contact" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                Contact
-              </Link>
-            </div>
-          </div>
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Courses</span>
+          </Link>
         </div>
       </div>
 
@@ -1028,7 +909,6 @@ export default function CourseDetail() {
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6">
                 <div className="mb-6">
                   <div className="text-4xl font-bold text-white">{FIXED_PRICE}</div>
-                  <div className="text-sm text-white/80 mt-1">One-time payment • Lifetime access</div>
                 </div>
 
                 <button
@@ -1345,17 +1225,12 @@ export default function CourseDetail() {
               <div className="rounded-2xl p-4 sm:p-6 text-white shadow-lg" style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` }}>
                 <h4 className="text-base sm:text-xl font-bold mb-2 sm:mb-4">Start Learning Today!</h4>
                 <div className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{FIXED_PRICE}</div>
-                <div className="text-white/80 text-xs sm:text-sm mb-3 sm:mb-6">One-time payment • Lifetime access</div>
                 <button
                   onClick={handleEnrollNow}
                   className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl text-sm sm:text-lg transition-all hover:scale-105"
                 >
                   Enroll Now - {FIXED_PRICE}
                 </button>
-                <div className="text-center text-xs sm:text-sm text-white/80 mt-3 sm:mt-4">
-                  <div className="mb-1">7 days money back guarantee</div>
-                  <div>Certificate included</div>
-                </div>
               </div>
             </div>
           </div>

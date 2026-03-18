@@ -23,38 +23,9 @@ export default function ReturnToWork() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      {/* Top Navigation Bar */}
-      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
-            <Link to="/" className="font-bold text-lg sm:text-xl" style={{ color: colors.primary }}>
-              iKPACE
-            </Link>
-            <div className="flex items-center gap-3 sm:gap-6">
-              <Link to="/courses" className="text-sm sm:text-base hover:underline hidden sm:block" style={{ color: colors.primary }}>
-                Courses
-              </Link>
-              <Link to="/about" className="text-sm sm:text-base hover:underline hidden sm:block" style={{ color: colors.primary }}>
-                About
-              </Link>
-              <Link to="/about/success-stories" className="text-sm sm:text-base hover:underline hidden sm:block" style={{ color: colors.primary }}>
-                Success Stories
-              </Link>
-              <Link 
-                to="/register" 
-                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity"
-                style={{ background: colors.primary }}
-              >
-                Register
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Breadcrumb */}
+      {/* Simple Breadcrumb - Minimal */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 overflow-x-auto pb-2">
+        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-500 overflow-x-auto pb-2 scrollbar-hide">
           <Link to="/" className="hover:underline whitespace-nowrap" style={{ color: colors.primary }}>Home</Link>
           <span>/</span>
           <Link to="/about" className="hover:underline whitespace-nowrap" style={{ color: colors.primary }}>About</Link>
@@ -154,7 +125,7 @@ export default function ReturnToWork() {
           </div>
         </div>
 
-        {/* Success Stories Highlight - NEW SECTION */}
+        {/* Success Stories Highlight */}
         <div className="mb-8 sm:mb-12 md:mb-16">
           <Link to="/about/success-stories" className="block group">
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-purple-100 hover:border-purple-300 transition-all">
@@ -673,48 +644,28 @@ export default function ReturnToWork() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white mt-8 sm:mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-            <div>
-              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4">iKPACE</h3>
-              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400">
-                <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-                <li><Link to="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4">Programs</h3>
-              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400">
-                <li><Link to="/courses" className="hover:text-white transition-colors">All Programs</Link></li>
-                <li><Link to="/return-to-work" className="hover:text-white transition-colors">Return to Work</Link></li>
-                <li><Link to="/coding-beginners" className="hover:text-white transition-colors">Coding for Beginners</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4">Community</h3>
-              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400">
-                <li><Link to="/alumni" className="hover:text-white transition-colors">Alumni Network</Link></li>
-                <li><Link to="/about/success-stories" className="hover:text-white transition-colors">Success Stories</Link></li>
-                <li><Link to="/events" className="hover:text-white transition-colors">Events</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold text-sm sm:text-base md:text-lg mb-2 sm:mb-3 md:mb-4">Get Started</h3>
-              <ul className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-400">
-                <li><Link to="/register" className="hover:text-white transition-colors">Register</Link></li>
-                <li><Link to="/login" className="hover:text-white transition-colors">Login</Link></li>
-                <li><Link to="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-4 sm:mt-6 md:mt-8 pt-4 sm:pt-6 md:pt-8 text-center text-xs sm:text-sm text-gray-400">
-            <p>&copy; 2024 iKPACE. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Simple Back to Home Link */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 text-center">
+        <Link to="/" className="text-xs sm:text-sm hover:underline" style={{ color: colors.primary }}>
+          ← Back to Home
+        </Link>
+      </div>
+
+      {/* Animation Styles */}
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        @media (max-width: 640px) {
+          input, button {
+            font-size: 16px !important;
+          }
+        }
+      `}</style>
     </div>
-  );
+  )
 }
