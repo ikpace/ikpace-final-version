@@ -1,4 +1,5 @@
 // src/pages/CourseLessonManager.jsx
+// ─── SELF-CONTAINED: updateLesson logic is inlined — no external imports needed ─
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabaseClient";
 import {
@@ -10,6 +11,97 @@ import {
   GraduationCap, ArrowLeft, ExternalLink, Download,
   Clock, Flag, Zap, Sparkles, Hash, Star
 } from "lucide-react";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updateLesson — INLINED (no external file needed)
+//
+// Handles: optional field updates + image upload → lesson-images bucket → image_url
+// Only sends defined, non-null values — never overwrites fields you didn't touch.
+//
+// Supabase one-time setup:
+//   ALTER TABLE lessons ADD COLUMN IF NOT EXISTS content_link TEXT;
+//   ALTER TABLE lessons ADD COLUMN IF NOT EXISTS description TEXT;
+//   ALTER TABLE lessons ADD COLUMN IF NOT EXISTS content TEXT;
+//   ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;
+//   ALTER TABLE lessons ADD COLUMN IF NOT EXISTS is_free BOOLEAN DEFAULT false;
+//   Create Storage bucket: "lesson-images" → set to Public
+// ─────────────────────────────────────────────────────────────────────────────
+async function updateLesson({
+  lessonId, title, description, content, lesson_content,
+  assignment, video_url, content_link, order_index,
+  duration_minutes, is_free, imageFile,
+} = {}) {
+  if (!lessonId) {
+    console.error('[updateLesson] lessonId is required')
+    return { lesson: null, error: 'lessonId is required' }
+  }
+
+  // ── Step 1: Upload image if a File was provided ───────────────────────────
+  let uploadedImageUrl = undefined
+
+  if (imageFile instanceof File) {
+    if (!imageFile.type.startsWith('image/'))
+      return { lesson: null, error: 'File must be an image (PNG, JPG, GIF, WEBP).' }
+    if (imageFile.size > 5 * 1024 * 1024)
+      return { lesson: null, error: 'Image must be under 5 MB.' }
+
+    const ext   = imageFile.name.split('.').pop().toLowerCase()
+    const fname = `${lessonId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    console.log('[updateLesson] uploading image →', fname)
+    const { error: uploadError } = await supabase.storage
+      .from('lesson-images')
+      .upload(fname, imageFile, { upsert: true, contentType: imageFile.type })
+
+    if (uploadError) {
+      console.error('[updateLesson] upload error:', uploadError)
+      if (uploadError.message?.toLowerCase().includes('not found') || uploadError.statusCode === 404)
+        return { lesson: null, error: 'Storage bucket "lesson-images" not found. Create it in Supabase Dashboard → Storage → New bucket → name "lesson-images" → set Public.' }
+      if (uploadError.statusCode === 403)
+        return { lesson: null, error: 'Permission denied. Enable public upload policies on the "lesson-images" bucket in Supabase → Storage → Policies.' }
+      return { lesson: null, error: 'Image upload failed: ' + uploadError.message }
+    }
+
+    const { data: urlData } = supabase.storage.from('lesson-images').getPublicUrl(fname)
+    uploadedImageUrl = urlData.publicUrl
+    console.log('[updateLesson] image uploaded →', uploadedImageUrl)
+  }
+
+  // ── Step 2: Build payload — only defined, non-null values ─────────────────
+  const payload = {}
+  if (title             != null) payload.title             = title
+  if (description       != null) payload.description       = description
+  if (content           != null) payload.content           = content
+  if (lesson_content    != null) payload.lesson_content    = lesson_content
+  if (assignment        != null) payload.assignment        = assignment
+  if (video_url         !== undefined) payload.video_url   = video_url || null
+  if (content_link      !== undefined) payload.content_link = content_link || null
+  if (order_index       != null) payload.order_index       = Number(order_index)
+  if (duration_minutes  != null) payload.duration_minutes  = Number(duration_minutes)
+  if (is_free           !== undefined && is_free !== null) payload.is_free = Boolean(is_free)
+  if (uploadedImageUrl  !== undefined) payload.image_url   = uploadedImageUrl
+  payload.updated_at = new Date().toISOString()
+
+  if (Object.keys(payload).length === 1) // only updated_at
+    return { lesson: null, error: 'No fields provided to update.' }
+
+  console.log('[updateLesson] payload →', payload)
+
+  // ── Step 3: Update DB and return fresh row ────────────────────────────────
+  const { data, error } = await supabase
+    .from('lessons')
+    .update(payload)
+    .eq('id', lessonId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('[updateLesson] DB error:', error)
+    return { lesson: null, error: error.message }
+  }
+  console.log('[updateLesson] updated lesson →', data)
+  return { lesson: data, error: null }
+}
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -333,6 +425,8 @@ export default function CourseLessonManager() {
   const [editItem,         setEditItem]         = useState(null)   // { section, data }
   const [editForm,         setEditForm]         = useState({})
   const [searchQ,          setSearchQ]          = useState('')
+  // ── Custom inline delete confirm (replaces window.confirm which is blocked in many envs) ──
+  const [deleteConfirm,    setDeleteConfirm]    = useState(null)   // { table, id, refetch, label }
 
   // ── Data ──────────────────────────────────────────────────────────────────
   const [lessons,        setLessons]        = useState([])
@@ -348,12 +442,21 @@ export default function CourseLessonManager() {
 
   // ── Lesson form ───────────────────────────────────────────────────────────
   const [lTitle,     setLTitle]     = useState('')
+  const [lDesc,      setLDesc]      = useState('')
   const [lContent,   setLContent]   = useState('')
   const [lAssign,    setLAssign]    = useState('')
   const [lVideo,     setLVideo]     = useState('')
   const [lImage,     setLImage]     = useState('')
   const [lMediaType, setLMediaType] = useState('video')
   const [lOrder,     setLOrder]     = useState('1')
+  const [lDuration,  setLDuration]  = useState('')
+  const [lIsFree,    setLIsFree]    = useState(false)
+  const [lContentLink, setLContentLink] = useState('') // URL students follow
+  // Edit modal image upload state
+  const editImageFileRef = useRef(null)
+  const [editImageFile,   setEditImageFile]   = useState(null)
+  const [editImagePreview,setEditImagePreview]= useState('')
+  const [editUploading,   setEditUploading]   = useState(false)
 
   // ── Announcement form ─────────────────────────────────────────────────────
   const [aTitle, setATitle] = useState(''); const [aContent, setAContent] = useState(''); const [aPriority, setAPriority] = useState('normal')
@@ -412,12 +515,18 @@ export default function CourseLessonManager() {
   const fetchFaqs            = async (id) => { const { data } = await supabase.from('course_faqs').select('*').eq('course_id',id).order('order_index'); setFaqs(data||[]) }
   const fetchCourseResources = async (id) => { const { data } = await supabase.from('course_resources').select('*').eq('course_id',id).order('order_index'); setCourseResources(data||[]) }
 
-  // ── Delete helper ─────────────────────────────────────────────────────────
-  const del = async (table, id, refetch, label='item') => {
-    if (!window.confirm(`Delete this ${label}?`)) return
+  // ── Delete helpers — uses inline confirm dialog (NOT window.confirm) ─────────
+  // window.confirm is silently blocked by many browsers inside iframes/React apps
+  const askDelete = (table, id, refetch, label='item') => {
+    setDeleteConfirm({ table, id, refetch, label })
+  }
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return
+    const { table, id, refetch, label } = deleteConfirm
+    setDeleteConfirm(null)
     setLoading(true)
     const { error } = await supabase.from(table).delete().eq('id', id)
-    if (error) toast('error', '❌ ' + error.message)
+    if (error) toast('error', '❌ Delete failed: ' + error.message)
     else { toast('success', `✅ ${label} deleted!`); refetch(selectedCourseId) }
     setLoading(false)
   }
@@ -426,49 +535,145 @@ export default function CourseLessonManager() {
   const openEdit = (section, data) => { setEditItem({ section, data }); setEditForm({ ...data }) }
   const closeEdit = () => { setEditItem(null); setEditForm({}) }
 
-  // ── Save edit — strips read-only DB fields before update ─────────────────
+  // ── Save edit — uses updateLesson utility for lesson section ─────────────
+  // updateLesson handles: image upload → public URL → DB update in one step
   const saveEdit = async () => {
     if (!editItem) return
     setSaving(true)
-
     const { section, data } = editItem
 
-    // Fields that should NEVER be sent to update() — Supabase will reject them
-    const STRIP_FIELDS = ['id', 'created_at', 'updated_at', 'course_id', 'user_id']
-
-    // Build a clean payload with only the editable fields
-    const cleanPayload = Object.fromEntries(
-      Object.entries(editForm).filter(([k]) => !STRIP_FIELDS.includes(k))
-    )
-
-    const tableMap = {
-      lesson:       ['lessons',              fetchLessons],
-      announcement: ['course_announcements', fetchAnnouncements],
-      syllabus:     ['course_syllabus',      fetchSyllabus],
-      module:       ['course_modules',       fetchModules],
-      grade:        ['course_grades',        fetchGrades],
-      material:     ['course_materials',     fetchMaterials],
-      event:        ['course_calendar',      fetchCalendarEvents],
-      faq:          ['course_faqs',          fetchFaqs],
-      resource:     ['course_resources',     fetchCourseResources],
+    // ── LESSON: delegate entirely to updateLesson utility ─────────────────
+    if (section === 'lesson') {
+      setEditUploading(!!editImageFile)
+      const { lesson, error } = await updateLesson({
+        lessonId:         data.id,
+        title:            editForm.title            || undefined,
+        description:      editForm.description      || undefined,
+        content:          editForm.content          || undefined,
+        lesson_content:   editForm.lesson_content   || undefined,
+        assignment:       editForm.assignment       || undefined,
+        video_url:        editForm.video_url        !== undefined ? (editForm.video_url || null) : undefined,
+        content_link:     editForm.content_link     !== undefined ? (editForm.content_link || null) : undefined,
+        order_index:      editForm.order_index      ? parseInt(editForm.order_index)     : undefined,
+        duration_minutes: editForm.duration_minutes ? parseInt(editForm.duration_minutes): undefined,
+        is_free:          editForm.is_free          !== undefined ? Boolean(editForm.is_free) : undefined,
+        imageFile:        editImageFile || undefined,  // File object from edit modal upload
+      })
+      setEditUploading(false)
+      if (error) {
+        toast('error', '❌ ' + error)
+      } else {
+        toast('success', '✅ Lesson updated!')
+        // Sync the returned lesson into local state immediately
+        setLessons(prev => prev.map(l => l.id === data.id ? { ...l, ...lesson } : l))
+        setEditImageFile(null); setEditImagePreview('')
+        closeEdit()
+      }
+      setSaving(false)
+      return
     }
 
-    const [table, refetch] = tableMap[section] || []
-    if (!table) { setSaving(false); return }
+    // ── ALL OTHER SECTIONS: explicit field maps ────────────────────────────
+    const payloadMap = {
+      announcement: {
+        table: 'course_announcements',
+        refetch: fetchAnnouncements,
+        fields: () => ({
+          title:    editForm.title,
+          content:  editForm.content,
+          priority: editForm.priority || 'normal',
+        })
+      },
+      syllabus: {
+        table: 'course_syllabus',
+        refetch: fetchSyllabus,
+        fields: () => ({
+          title:        editForm.title,
+          description:  editForm.description,
+          week_number:  parseInt(editForm.week_number) || 1,
+        })
+      },
+      module: {
+        table: 'course_modules',
+        refetch: fetchModules,
+        fields: () => ({
+          title:        editForm.title,
+          description:  editForm.description,
+          week_number:  parseInt(editForm.week_number) || 1,
+          order_index:  parseInt(editForm.order_index) || 1,
+        })
+      },
+      grade: {
+        table: 'course_grades',
+        refetch: fetchGrades,
+        fields: () => ({
+          title:       editForm.title,
+          grade_type:  editForm.grade_type || 'assignment',
+          max_score:   parseInt(editForm.max_score) || 100,
+          weight:      parseFloat(editForm.weight) || 1,
+          due_date:    editForm.due_date || null,
+        })
+      },
+      material: {
+        table: 'course_materials',
+        refetch: fetchMaterials,
+        fields: () => ({
+          title:         editForm.title,
+          description:   editForm.description,
+          material_type: editForm.material_type || 'pdf',
+          file_url:      editForm.file_url,
+        })
+      },
+      event: {
+        table: 'course_calendar',
+        refetch: fetchCalendarEvents,
+        fields: () => ({
+          title:        editForm.title,
+          event_type:   editForm.event_type || 'live_class',
+          start_time:   editForm.start_time,
+          end_time:     editForm.end_time || null,
+          meeting_link: editForm.meeting_link || null,
+          description:  editForm.description || null,
+        })
+      },
+      faq: {
+        table: 'course_faqs',
+        refetch: fetchFaqs,
+        fields: () => ({
+          question:    editForm.question,
+          answer:      editForm.answer,
+          order_index: parseInt(editForm.order_index) || 1,
+        })
+      },
+      resource: {
+        table: 'course_resources',
+        refetch: fetchCourseResources,
+        fields: () => ({
+          title:       editForm.title,
+          url:         editForm.url,
+          type:        editForm.type || 'link',
+          description: editForm.description || null,
+        })
+      },
+    }
 
-    console.log(`[saveEdit] table=${table} id=${data.id}`, cleanPayload)
+    const cfg = payloadMap[section]
+    if (!cfg) { setSaving(false); return }
+
+    const payload = cfg.fields()
+    console.log(`[saveEdit] table=${cfg.table} id=${data.id}`, payload)
 
     const { error } = await supabase
-      .from(table)
-      .update(cleanPayload)
+      .from(cfg.table)
+      .update(payload)
       .eq('id', data.id)
 
     if (error) {
-      console.error('[saveEdit] Supabase error:', error)
+      console.error('[saveEdit] error:', error)
       toast('error', '❌ Save failed: ' + error.message)
     } else {
       toast('success', '✅ Updated successfully!')
-      refetch(selectedCourseId)
+      cfg.refetch(selectedCourseId)
       closeEdit()
     }
     setSaving(false)
@@ -478,18 +683,25 @@ export default function CourseLessonManager() {
   const addLesson = async (e) => {
     e.preventDefault(); setLoading(true)
     const { error } = await supabase.from('lessons').insert([{
-      course_id:       selectedCourseId,
-      title:           lTitle,
-      lesson_content:  lContent,
-      assignment:      lAssign,
-      video_url:       lVideo || null,
-      
-      order_index:     parseInt(lOrder)
+      course_id:        selectedCourseId,
+      title:            lTitle,
+      description:      lDesc      || null,
+      lesson_content:   lContent   || null,
+      assignment:       lAssign    || null,
+      video_url:        lVideo     || null,
+      image_url:        lImage     || null,
+      content_link:     lContentLink || null,
+      order_index:      parseInt(lOrder)     || 1,
+      duration_minutes: parseInt(lDuration)  || null,
+      is_free:          lIsFree,
     }])
     if (error) toast('error', '❌ ' + error.message)
     else {
       toast('success', '✅ Lesson added!')
-      setLTitle(''); setLContent(''); setLAssign(''); setLVideo(''); setLImage(''); setLOrder((lessons.length+2).toString())
+      setLTitle(''); setLDesc(''); setLContent(''); setLAssign('')
+      setLVideo(''); setLImage(''); setLContentLink('')
+      setLDuration(''); setLIsFree(false)
+      setLOrder((lessons.length + 2).toString())
       fetchLessons(selectedCourseId)
     }
     setLoading(false)
@@ -595,16 +807,23 @@ export default function CourseLessonManager() {
     { id:'resources',     label:'Resources',      emoji:'🔗', count:courseResources.length,color:C.green  },
   ]
 
-  // ── Item card ─────────────────────────────────────────────────────────────
-  const ItemCard = ({ children, onEdit, onDelete, label }) => (
-    <div className="bg-white rounded-2xl p-4 border hover:shadow-md transition-all group" style={{ borderColor:C.gray[200] }}>
+  // ── Item card — edit/delete always visible (hover-only breaks on mobile) ─────
+  const ItemCard = ({ children, onEdit, onDelete }) => (
+    <div className="bg-white rounded-2xl p-4 border hover:shadow-md transition-all"
+      style={{ borderColor:C.gray[200] }}>
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">{children}</div>
-        <div className="flex gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={onEdit} className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5" style={{ background:`${C.navy}12`, color:C.navy }}>
+        <div className="flex gap-1.5 flex-shrink-0">
+          <button onClick={onEdit}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 hover:shadow-md"
+            style={{ background:`${C.navy}12`, color:C.navy }}
+            title="Edit">
             <Edit3 size={13}/>
           </button>
-          <button onClick={onDelete} className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5" style={{ background:`${C.rose}12`, color:C.rose }}>
+          <button onClick={onDelete}
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5 hover:shadow-md"
+            style={{ background:`${C.rose}12`, color:C.rose }}
+            title="Delete">
             <Trash2 size={13}/>
           </button>
         </div>
@@ -617,26 +836,218 @@ export default function CourseLessonManager() {
     <div className="min-h-screen" style={{ background:C.gray[50] }}>
       <Toast msg={msg} onClose={() => setMsg({ type:'', text:'' })}/>
 
+      {/* ── INLINE DELETE CONFIRM DIALOG ─────────────────────────────────── */}
+      {/* Replaces window.confirm which is silently blocked in many browser environments */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)}/>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 z-10">
+            <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+              style={{ background:`${C.rose}12` }}>
+              <Trash2 size={24} style={{ color:C.rose }}/>
+            </div>
+            <h3 className="font-black text-lg text-center mb-2" style={{ color:C.gray[800] }}>
+              Delete {deleteConfirm.label}?
+            </h3>
+            <p className="text-sm text-center mb-6" style={{ color:C.gray[500] }}>
+              This action cannot be undone. The {deleteConfirm.label} will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-gray-200"
+                style={{ background:C.gray[100], color:C.gray[600] }}>
+                Cancel
+              </button>
+              <button onClick={confirmDelete}
+                className="flex-1 py-3 rounded-2xl font-black text-sm text-white transition-all hover:opacity-90 hover:shadow-lg"
+                style={{ background:`linear-gradient(135deg,${C.rose},#F87171)` }}>
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── EDIT MODAL ───────────────────────────────────────────────────── */}
       {editItem && (
-        <EditModal title={`Edit ${editItem.section}`} onClose={closeEdit} onSave={saveEdit} saving={saving}>
+        <EditModal
+          title={editItem.section === 'lesson' ? `Edit Lesson` : `Edit ${editItem.section}`}
+          onClose={() => { closeEdit(); setEditImageFile(null); setEditImagePreview('') }}
+          onSave={saveEdit}
+          saving={saving || editUploading}>
+          {/* ══ LESSON EDIT — full form with all columns + image upload ══════ */}
           {editItem.section === 'lesson' && (
-            <div className="space-y-3">
-              <Input label="Lesson Title *" value={editForm.title||''} onChange={e => setEditForm(p=>({...p,title:e.target.value}))}/>
-              <div className="grid grid-cols-2 gap-3">
-                <Input label="Week Number" type="number" value={editForm.order_index||''} onChange={e => setEditForm(p=>({...p,order_index:parseInt(e.target.value)}))}/>
-              </div>
-              <Textarea label="Lesson Content" rows={5} value={editForm.lesson_content||''} onChange={e => setEditForm(p=>({...p,lesson_content:e.target.value}))}/>
-              <Textarea label="Assignment Instructions" rows={3} value={editForm.assignment||''} onChange={e => setEditForm(p=>({...p,assignment:e.target.value}))}/>
-              <Input label="Video URL (YouTube embed)" value={editForm.video_url||''} onChange={e => setEditForm(p=>({...p,video_url:e.target.value}))}/>
-              <Input label="Image URL" value={editForm.image_url||''} onChange={e => setEditForm(p=>({...p,image_url:e.target.value}))}/>
-              {editForm.video_url && (
-                <div className="rounded-xl overflow-hidden" style={{ aspectRatio:'16/9' }}>
-                  <iframe src={editForm.video_url} className="w-full h-full" frameBorder="0" allowFullScreen title="preview"/>
+            <div className="space-y-4">
+
+              {/* Title + order */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <Input label="Lesson Title *"
+                    value={editForm.title||''}
+                    onChange={e => setEditForm(p=>({...p, title:e.target.value}))}
+                    placeholder="e.g. Introduction to Virtual Assistance"/>
                 </div>
-              )}
-              {editForm.image_url && !editForm.video_url && (
-                <img src={editForm.image_url} alt="preview" className="w-full rounded-xl object-cover max-h-40"/>
+                <Input label="Week / Order *" type="number" min="1"
+                  value={editForm.order_index||''}
+                  onChange={e => setEditForm(p=>({...p, order_index:e.target.value}))}/>
+              </div>
+
+              {/* Description */}
+              <Textarea label="Short Description (shown in lesson list)" rows={2}
+                value={editForm.description||''}
+                onChange={e => setEditForm(p=>({...p, description:e.target.value}))}
+                placeholder="Brief summary shown to students before they open the lesson…"/>
+
+              {/* Lesson content */}
+              <Textarea label="Lesson Content (main lesson notes / instructions)" rows={5}
+                value={editForm.lesson_content||''}
+                onChange={e => setEditForm(p=>({...p, lesson_content:e.target.value}))}
+                placeholder="Full lesson text, steps, explanations…"/>
+
+              {/* Assignment */}
+              <Textarea label="Assignment Instructions" rows={3}
+                value={editForm.assignment||''}
+                onChange={e => setEditForm(p=>({...p, assignment:e.target.value}))}
+                placeholder="Task students must complete after watching the lesson…"/>
+
+              {/* Content link — main new field */}
+              <div>
+                <label className="block text-xs font-bold mb-1" style={{ color:C.gray[600] }}>
+                  🔗 Content Link — URL students click to complete the lesson
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={editForm.content_link||''}
+                    onChange={e => setEditForm(p=>({...p, content_link:e.target.value}))}
+                    placeholder="https://docs.google.com/forms/... or any instruction URL"
+                    className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                    style={{ background:C.gray[50], border:`1.5px solid ${C.gray[200]}`, color:C.gray[800] }}
+                    onFocus={e => e.target.style.borderColor = C.navy}
+                    onBlur={e => e.target.style.borderColor = C.gray[200]}/>
+                  {editForm.content_link && (
+                    <a href={editForm.content_link} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-white flex-shrink-0"
+                      style={{ background:C.green }}>
+                      <ExternalLink size={12}/> Test
+                    </a>
+                  )}
+                </div>
+                <p className="text-[10px] mt-1" style={{ color:C.gray[400] }}>
+                  This link appears as a button in the Course Player so students can open it directly.
+                </p>
+              </div>
+
+              {/* Video URL */}
+              <div>
+                <label className="block text-xs font-bold mb-1" style={{ color:C.gray[600] }}>Video URL (YouTube embed or direct mp4)</label>
+                <input
+                  type="url"
+                  value={editForm.video_url||''}
+                  onChange={e => setEditForm(p=>({...p, video_url:e.target.value}))}
+                  placeholder="https://www.youtube.com/embed/VIDEO_ID"
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                  style={{ background:C.gray[50], border:`1.5px solid ${C.gray[200]}`, color:C.gray[800] }}
+                  onFocus={e => e.target.style.borderColor = C.navy}
+                  onBlur={e => e.target.style.borderColor = C.gray[200]}/>
+                {editForm.video_url && (
+                  <div className="mt-2 rounded-xl overflow-hidden" style={{ aspectRatio:'16/9', background:C.gray[100] }}>
+                    <iframe src={editForm.video_url} className="w-full h-full" frameBorder="0" allowFullScreen title="video preview"/>
+                  </div>
+                )}
+              </div>
+
+              {/* Image section */}
+              <div>
+                <label className="block text-xs font-bold mb-2" style={{ color:C.gray[600] }}>
+                  🖼️ Lesson Image
+                </label>
+                {/* Current image */}
+                {(editImagePreview || editForm.image_url) && !editImageFile && (
+                  <div className="mb-2 rounded-xl overflow-hidden border" style={{ borderColor:C.gray[200] }}>
+                    <img src={editImagePreview || editForm.image_url} alt="current"
+                      className="w-full object-cover max-h-44"/>
+                  </div>
+                )}
+                {/* New image preview */}
+                {editImageFile && (
+                  <div className="mb-2 rounded-xl overflow-hidden border-2" style={{ borderColor:C.orange }}>
+                    <img src={editImagePreview} alt="new" className="w-full object-cover max-h-44"/>
+                    <div className="px-3 py-1.5 text-[10px] font-bold" style={{ background:`${C.orange}15`, color:C.orange }}>
+                      ✓ New image ready — will upload when you save
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload + URL row */}
+                <div className="flex gap-2 items-start">
+                  {/* Upload button */}
+                  <button type="button"
+                    onClick={() => editImageFileRef.current?.click()}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
+                    style={{ background:`${C.navyMid}15`, color:C.navyMid, border:`1.5px solid ${C.navyMid}30` }}>
+                    <Upload size={12}/> {editImageFile ? 'Change Image' : 'Upload Image'}
+                  </button>
+                  <input
+                    ref={editImageFileRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/gif,image/webp"
+                    className="hidden"
+                    onChange={e => {
+                      const f = e.target.files?.[0]
+                      if (!f) return
+                      setEditImageFile(f)
+                      setEditImagePreview(URL.createObjectURL(f))
+                      e.target.value = '' // reset so same file can be reselected
+                    }}/>
+                  {/* Or paste URL */}
+                  <div className="flex-1">
+                    <input
+                      type="url"
+                      value={editImageFile ? '' : (editForm.image_url||'')}
+                      onChange={e => { setEditImageFile(null); setEditImagePreview(''); setEditForm(p=>({...p, image_url:e.target.value})) }}
+                      placeholder="…or paste image URL"
+                      className="w-full px-3 py-2.5 rounded-xl text-xs outline-none transition-all"
+                      style={{ background:C.gray[50], border:`1.5px solid ${C.gray[200]}`, color:C.gray[800] }}
+                      onFocus={e => e.target.style.borderColor = C.navy}
+                      onBlur={e => e.target.style.borderColor = C.gray[200]}/>
+                  </div>
+                  {(editForm.image_url || editImageFile) && (
+                    <button type="button" onClick={() => { setEditImageFile(null); setEditImagePreview(''); setEditForm(p=>({...p, image_url:''})) }}
+                      className="flex-shrink-0 p-2.5 rounded-xl" style={{ background:C.gray[100] }}>
+                      <X size={13} style={{ color:C.gray[500] }}/>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] mt-1" style={{ color:C.gray[400] }}>
+                  Uploads to Supabase Storage bucket <code className="font-mono bg-gray-100 px-1 rounded">lesson-images</code>. Max 5 MB.
+                </p>
+              </div>
+
+              {/* Duration + is_free */}
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Duration (minutes)" type="number" min="1"
+                  value={editForm.duration_minutes||''}
+                  onChange={e => setEditForm(p=>({...p, duration_minutes:e.target.value}))}
+                  placeholder="e.g. 15"/>
+                <div className="flex flex-col justify-end">
+                  <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer mb-1" style={{ color:C.gray[600] }}>
+                    <input type="checkbox"
+                      checked={!!editForm.is_free}
+                      onChange={e => setEditForm(p=>({...p, is_free:e.target.checked}))}
+                      className="rounded"/>
+                    Free Preview Lesson
+                  </label>
+                  <p className="text-[10px]" style={{ color:C.gray[400] }}>Students can view without paying</p>
+                </div>
+              </div>
+
+              {/* Saving indicator */}
+              {editUploading && (
+                <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background:`${C.orange}10` }}>
+                  <RefreshCw size={13} className="animate-spin" style={{ color:C.orange }}/>
+                  <p className="text-xs font-bold" style={{ color:C.orange }}>Uploading image, please wait…</p>
+                </div>
               )}
             </div>
           )}
@@ -738,6 +1149,13 @@ export default function CourseLessonManager() {
             </div>
           )}
           <div className="flex items-center gap-2">
+            {selectedCourseId && (
+              <a href={`/test-course-player/${selectedCourseId}`} target="_blank" rel="noopener noreferrer"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 hover:-translate-y-0.5 shadow"
+                style={{ background:`linear-gradient(135deg,${C.green},${C.teal})` }}>
+                <Eye size={13}/> Preview Player
+              </a>
+            )}
             <button onClick={() => selectedCourseId && fetchAll(selectedCourseId)}
               className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-gray-100 transition">
               <RefreshCw size={15} style={{ color:C.gray[500] }}/>
@@ -846,25 +1264,69 @@ export default function CourseLessonManager() {
                 <div className="space-y-5">
                   {/* Add form */}
                   <div className="bg-white rounded-2xl shadow-sm overflow-hidden" style={{ border:`1px solid ${C.gray[200]}` }}>
-                    <div className="px-5 py-4 border-b flex items-center gap-3" style={{ borderColor:C.gray[100], background:`${C.navy}04` }}>
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:`${C.navy}15` }}>
-                        <Plus size={15} style={{ color:C.navy }}/>
+                    <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor:C.gray[100], background:`${C.navy}04` }}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:`${C.navy}15` }}>
+                          <Plus size={15} style={{ color:C.navy }}/>
+                        </div>
+                        <p className="font-black text-sm" style={{ color:C.navy }}>Add New Lesson</p>
                       </div>
-                      <p className="font-black text-sm" style={{ color:C.navy }}>Add New Lesson</p>
+                      {selectedCourseId && (
+                        <a href={`/test-course-player/${selectedCourseId}`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white hover:opacity-90 transition-all"
+                          style={{ background:`linear-gradient(135deg,${C.green},${C.teal})` }}>
+                          <Eye size={12}/> Preview Player
+                        </a>
+                      )}
                     </div>
                     <form onSubmit={addLesson} className="p-5 space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* Title + order + duration */}
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <div className="sm:col-span-2">
                           <Input label="Lesson Title *" value={lTitle} onChange={e=>setLTitle(e.target.value)} placeholder="e.g. Introduction to Virtual Assistance" required/>
                         </div>
-                        <Input label="Week Number *" type="number" value={lOrder} onChange={e=>setLOrder(e.target.value)} min="1" required/>
+                        <Input label="Week / Order *" type="number" value={lOrder} onChange={e=>setLOrder(e.target.value)} min="1" required/>
+                        <Input label="Duration (mins)" type="number" value={lDuration} onChange={e=>setLDuration(e.target.value)} placeholder="15" min="1"/>
                       </div>
-                      <Textarea label="Lesson Content" rows={4} value={lContent} onChange={e=>setLContent(e.target.value)} placeholder="Detailed lesson content students will read alongside the video or image…"/>
-                      <Textarea label="Assignment Instructions" rows={3} value={lAssign} onChange={e=>setLAssign(e.target.value)} placeholder="e.g. Write a professional email introducing yourself to a potential client…"/>
+
+                      {/* Description */}
+                      <Textarea label="Short Description" rows={2} value={lDesc} onChange={e=>setLDesc(e.target.value)} placeholder="Brief summary shown before students open the lesson…"/>
+
+                      {/* Lesson content */}
+                      <Textarea label="Lesson Content (main body)" rows={4} value={lContent} onChange={e=>setLContent(e.target.value)} placeholder="Full lesson text, steps, explanations students will read…"/>
+
+                      {/* Assignment */}
+                      <Textarea label="Assignment Instructions" rows={3} value={lAssign} onChange={e=>setLAssign(e.target.value)} placeholder="Task students must complete after watching the lesson…"/>
+
+                      {/* Content link */}
+                      <div>
+                        <label className="block text-xs font-bold mb-1" style={{ color:C.gray[600] }}>
+                          🔗 Content Link — URL students click to complete the lesson
+                        </label>
+                        <input
+                          type="url"
+                          value={lContentLink}
+                          onChange={e=>setLContentLink(e.target.value)}
+                          placeholder="https://docs.google.com/forms/... or any instruction URL"
+                          className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+                          style={{ background:C.gray[50], border:`1.5px solid ${C.gray[200]}`, color:C.gray[800] }}
+                          onFocus={e=>e.target.style.borderColor=C.navy}
+                          onBlur={e=>e.target.style.borderColor=C.gray[200]}/>
+                        <p className="text-[10px] mt-0.5" style={{ color:C.gray[400] }}>
+                          Appears as an "Open Lesson Link" button in the Course Player.
+                        </p>
+                      </div>
+
+                      {/* Free toggle */}
+                      <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer" style={{ color:C.gray[600] }}>
+                        <input type="checkbox" checked={lIsFree} onChange={e=>setLIsFree(e.target.checked)} className="rounded"/>
+                        Free Preview Lesson (non-enrolled students can view)
+                      </label>
+
                       {/* Media picker */}
                       <div>
                         <label className="block text-xs font-bold mb-2" style={{ color:C.gray[600] }}>
-                          📽️ Lesson Media — Video, Image, or Both
+                          📽️ Lesson Media — Video URL, Image Upload, or Both
                         </label>
                         <MediaPicker
                           videoUrl={lVideo} setVideoUrl={setLVideo}
@@ -872,6 +1334,7 @@ export default function CourseLessonManager() {
                           mediaType={lMediaType} setMediaType={setLMediaType}
                         />
                       </div>
+
                       <Btn type="submit" variant="primary" disabled={loading} className="w-full sm:w-auto">
                         {loading ? <><RefreshCw size={13} className="animate-spin"/>Adding…</> : <><Plus size={13}/>Add Lesson</>}
                       </Btn>
@@ -881,25 +1344,65 @@ export default function CourseLessonManager() {
                   {/* List */}
                   <div>
                     <div className="flex items-center justify-between mb-3">
-                      <p className="font-black text-sm" style={{ color:C.navy }}>{lessons.length} Lessons</p>
+                      <p className="font-black text-sm" style={{ color:C.navy }}>
+                        {lessons.length} Lesson{lessons.length !== 1 ? 's' : ''}
+                      </p>
+                      {selectedCourseId && (
+                        <a href={`/test-course-player/${selectedCourseId}`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white hover:opacity-90 hover:shadow-md transition-all"
+                          style={{ background:`linear-gradient(135deg,${C.green},${C.teal})` }}>
+                          <Eye size={12}/> Open Course Player
+                        </a>
+                      )}
                     </div>
                     <div className="space-y-3">
                       {lessons.map(l => (
                         <ItemCard key={l.id}
                           onEdit={() => openEdit('lesson', l)}
-                          onDelete={() => del('lessons', l.id, fetchLessons, 'lesson')}>
+                          onDelete={() => askDelete('lessons', l.id, fetchLessons, 'lesson')}>
                           <div className="flex items-start gap-3">
                             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0"
                               style={{ background:`linear-gradient(135deg,${C.navy},${C.navyMid})` }}>{l.order_index}</div>
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-sm" style={{ color:C.navy }}>{l.title}</p>
-                              <p className="text-xs mt-0.5 truncate" style={{ color:C.gray[400] }}>
-                                {l.lesson_content?.substring(0,80)}…
-                              </p>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {l.video_url && <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.navy}10`, color:C.navy }}><Video size={10}/>Video</span>}
-                                {l.image_url && <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.green}10`, color:C.green }}><Image size={10}/>Image</span>}
-                                {l.assignment && <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.orange}10`, color:C.orange }}><FileText size={10}/>Assignment</span>}
+                              {l.lesson_content && (
+                                <p className="text-xs mt-0.5 line-clamp-2" style={{ color:C.gray[400] }}>
+                                  {l.lesson_content.substring(0, 100)}{l.lesson_content.length > 100 ? '…' : ''}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                {l.video_url && (
+                                  <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.navy}10`, color:C.navy }}>
+                                    <Video size={9}/>Video
+                                  </span>
+                                )}
+                                {l.image_url && (
+                                  <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.green}10`, color:C.green }}>
+                                    <Image size={9}/>Image
+                                  </span>
+                                )}
+                                {l.assignment && (
+                                  <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.orange}10`, color:C.orange }}>
+                                    <FileText size={9}/>Assignment
+                                  </span>
+                                )}
+                                {l.content_link && (
+                                  <a href={l.content_link} target="_blank" rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold hover:opacity-80"
+                                    style={{ background:`${C.teal}12`, color:C.teal }}>
+                                    <ExternalLink size={9}/>Link
+                                  </a>
+                                )}
+                                {l.is_free && (
+                                  <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.green}10`, color:C.green }}>
+                                    Free Preview
+                                  </span>
+                                )}
+                                {!l.video_url && !l.image_url && (
+                                  <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold" style={{ background:`${C.amber}10`, color:C.amber }}>
+                                    ⚠ No media yet
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -929,7 +1432,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {announcements.map(a => (
-                    <ItemCard key={a.id} onEdit={() => openEdit('announcement', a)} onDelete={() => del('course_announcements',a.id,fetchAnnouncements,'announcement')}>
+                    <ItemCard key={a.id} onEdit={() => openEdit('announcement', a)} onDelete={() => askDelete('course_announcements',a.id,fetchAnnouncements,'announcement')}>
                       <div className="flex items-start gap-3">
                         <div className="w-2 h-8 rounded-full flex-shrink-0 mt-1" style={{ background: a.priority==='high'?C.rose:a.priority==='normal'?C.navy:C.green }}/>
                         <div>
@@ -963,7 +1466,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {syllabus.map(s => (
-                    <ItemCard key={s.id} onEdit={() => openEdit('syllabus', s)} onDelete={() => del('course_syllabus',s.id,fetchSyllabus,'syllabus week')}>
+                    <ItemCard key={s.id} onEdit={() => openEdit('syllabus', s)} onDelete={() => askDelete('course_syllabus',s.id,fetchSyllabus,'syllabus week')}>
                       <div className="flex items-start gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0" style={{ background:C.green }}>W{s.week_number}</div>
                         <div>
@@ -1001,7 +1504,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {modules.map(m => (
-                    <ItemCard key={m.id} onEdit={() => openEdit('module', m)} onDelete={() => del('course_modules',m.id,fetchModules,'module')}>
+                    <ItemCard key={m.id} onEdit={() => openEdit('module', m)} onDelete={() => askDelete('course_modules',m.id,fetchModules,'module')}>
                       <p className="font-bold text-sm" style={{ color:C.navy }}>Week {m.week_number}: {m.title}</p>
                       <p className="text-xs mt-0.5" style={{ color:C.gray[500] }}>{m.description}</p>
                     </ItemCard>
@@ -1030,7 +1533,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {grades.map(g => (
-                    <ItemCard key={g.id} onEdit={() => openEdit('grade', g)} onDelete={() => del('course_grades',g.id,fetchGrades,'grade')}>
+                    <ItemCard key={g.id} onEdit={() => openEdit('grade', g)} onDelete={() => askDelete('course_grades',g.id,fetchGrades,'grade')}>
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 uppercase" style={{ background:C.amber }}>{g.grade_type?.slice(0,3)}</div>
                         <div>
@@ -1059,7 +1562,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {people.map(p => (
-                    <ItemCard key={p.id} onEdit={() => {}} onDelete={() => del('course_people',p.id,fetchPeople,'person')}>
+                    <ItemCard key={p.id} onEdit={() => {}} onDelete={() => askDelete('course_people',p.id,fetchPeople,'person')}>
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-black flex-shrink-0" style={{ background:C.purple }}>
                           {(p.user_id||'?')[0].toUpperCase()}
@@ -1101,7 +1604,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {materials.map(m => (
-                    <ItemCard key={m.id} onEdit={() => openEdit('material', m)} onDelete={() => del('course_materials',m.id,fetchMaterials,'material')}>
+                    <ItemCard key={m.id} onEdit={() => openEdit('material', m)} onDelete={() => askDelete('course_materials',m.id,fetchMaterials,'material')}>
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background:`${C.rose}12` }}>
                           {m.material_type==='pdf'?'📄':m.material_type==='video'?'🎬':m.material_type==='audio'?'🎵':'🔗'}
@@ -1144,7 +1647,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {events.sort((a,b) => new Date(a.start_time)-new Date(b.start_time)).map(ev => (
-                    <ItemCard key={ev.id} onEdit={() => openEdit('event', ev)} onDelete={() => del('course_calendar',ev.id,fetchCalendarEvents,'event')}>
+                    <ItemCard key={ev.id} onEdit={() => openEdit('event', ev)} onDelete={() => askDelete('course_calendar',ev.id,fetchCalendarEvents,'event')}>
                       <div className="flex items-start gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-[10px] font-black flex-shrink-0"
                           style={{ background: ev.event_type==='live_class'?C.rose:ev.event_type==='assignment_due'?C.orange:C.teal }}>
@@ -1176,7 +1679,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {faqs.map(f => (
-                    <ItemCard key={f.id} onEdit={() => openEdit('faq', f)} onDelete={() => del('course_faqs',f.id,fetchFaqs,'FAQ')}>
+                    <ItemCard key={f.id} onEdit={() => openEdit('faq', f)} onDelete={() => askDelete('course_faqs',f.id,fetchFaqs,'FAQ')}>
                       <p className="font-bold text-sm" style={{ color:C.navy }}>Q: {f.question}</p>
                       <p className="text-xs mt-1 leading-relaxed" style={{ color:C.gray[500] }}>A: {f.answer}</p>
                     </ItemCard>
@@ -1204,7 +1707,7 @@ export default function CourseLessonManager() {
                     </form>
                   )}>
                   {courseResources.map(r => (
-                    <ItemCard key={r.id} onEdit={() => openEdit('resource', r)} onDelete={() => del('course_resources',r.id,fetchCourseResources,'resource')}>
+                    <ItemCard key={r.id} onEdit={() => openEdit('resource', r)} onDelete={() => askDelete('course_resources',r.id,fetchCourseResources,'resource')}>
                       <div className="flex items-start gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background:`${C.green}12` }}>
                           {r.type==='article'?'📰':r.type==='video'?'🎬':r.type==='tool'?'🛠️':'🔗'}
