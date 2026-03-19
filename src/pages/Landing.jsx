@@ -1,4 +1,5 @@
 // src/pages/Landing.jsx
+// No external SEO packages needed — SEO handled via useEffect below
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -12,7 +13,7 @@ import {
   Lock, Wifi, Monitor, Smartphone, MousePointer, Bell,
   Send, Facebook, Twitter, Linkedin, Instagram, Youtube,
   X, Plus, Minus, ChevronDown, ChevronUp, RefreshCw,
-  PlayCircle, PauseCircle, Volume2, VolumeX, Eye
+  PlayCircle, PauseCircle, Volume2, VolumeX, Eye, Menu
 } from "lucide-react";
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ const C = {
   rose:       '#E11D48',
   amber:      '#D97706',
   gray: {
-    50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8F0',
+    50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8E0',
     300:'#CBD5E1', 400:'#94A3B8', 500:'#64748B',
     600:'#475569', 700:'#334155', 800:'#1E293B', 900:'#0F172A'
   }
@@ -239,12 +240,12 @@ function ThumbsUp(props) { return <svg {...props} viewBox="0 0 24 24" fill="none
 // Animated stat number
 function StatCounter({ value, label, icon: Icon, color }) {
   return (
-    <div className="flex flex-col items-center text-center p-4">
-      <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3" style={{ background:`${color}15` }}>
-        <Icon size={22} style={{ color }} />
+    <div className="flex flex-col items-center text-center p-2 sm:p-4">
+      <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3" style={{ background:`${color}15` }}>
+        <Icon size={16} className="sm:w-[18px] sm:h-[18px] md:w-[20px] md:h-[20px]" style={{ color }} />
       </div>
-      <p className="text-3xl font-black mb-1" style={{ color }}>{value}</p>
-      <p className="text-sm" style={{ color: C.gray[500] }}>{label}</p>
+      <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black mb-0.5 sm:mb-1" style={{ color }}>{value}</p>
+      <p className="text-[10px] sm:text-xs md:text-sm" style={{ color: C.gray[500] }}>{label}</p>
     </div>
   )
 }
@@ -252,64 +253,64 @@ function StatCounter({ value, label, icon: Icon, color }) {
 // Course card
 function CourseCard({ course, saved, onSave }) {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group flex flex-col">
+    <div className="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group flex flex-col">
       {/* Image */}
-      <div className="relative h-48 overflow-hidden flex-shrink-0">
+      <div className="relative h-36 xs:h-40 sm:h-44 md:h-48 overflow-hidden flex-shrink-0">
         <img src={course.image} alt={course.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
         {/* Gradient overlay */}
         <div className="absolute inset-0 opacity-40" style={{ background: course.gradient }}/>
         {/* Top badges */}
-        <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-black text-white backdrop-blur-sm" style={{ background:`${course.color}cc` }}>
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+          <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] font-black text-white backdrop-blur-sm" style={{ background:`${course.color}cc` }}>
             {course.category}
           </span>
         </div>
-        <div className="absolute top-3 right-3 flex gap-1.5">
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90" style={{ color: C.gray[700] }}>
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex gap-1">
+          <span className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] font-bold bg-white/90" style={{ color: C.gray[700] }}>
             {course.level}
           </span>
         </div>
         {/* Save button */}
         <button onClick={() => onSave(course.id)}
-          className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-all shadow">
-          <Heart size={14} style={{ color: saved ? C.rose : C.gray[400], fill: saved ? C.rose : 'none' }}/>
+          className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-all shadow">
+          <Heart size={12} className="sm:w-3 sm:h-3 md:w-3.5 md:h-3.5" style={{ color: saved ? C.rose : C.gray[400], fill: saved ? C.rose : 'none' }}/>
         </button>
         {/* Emoji badge */}
-        <div className="absolute bottom-3 left-3 w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-white/90 shadow">
+        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg sm:rounded-xl flex items-center justify-center text-sm sm:text-base bg-white/90 shadow">
           {course.emoji}
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="font-black text-base mb-2 leading-tight" style={{ color: C.navy }}>{course.title}</h3>
-        <p className="text-xs leading-relaxed mb-4 flex-1" style={{ color: C.gray[500] }}>{course.description}</p>
+      <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-1">
+        <h3 className="font-black text-xs sm:text-sm md:text-base mb-1 sm:mb-2 leading-tight line-clamp-2" style={{ color: C.navy }}>{course.title}</h3>
+        <p className="text-[10px] sm:text-xs leading-relaxed mb-2 sm:mb-3 flex-1 line-clamp-2" style={{ color: C.gray[500] }}>{course.description}</p>
 
         {/* Feature chips */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
           {course.features.map((f, i) => (
-            <span key={i} className="text-[10px] px-2.5 py-1 rounded-full font-semibold"
+            <span key={i} className="text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold whitespace-nowrap"
               style={{ background:`${course.color}12`, color:course.color }}>{f}</span>
           ))}
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center gap-3 mb-4 text-xs" style={{ color: C.gray[400] }}>
-          <span className="flex items-center gap-1"><Clock size={11}/> {course.duration}</span>
-          <span className="flex items-center gap-1"><Users size={11}/> {course.students}+</span>
-          <span className="flex items-center gap-1"><Star size={11} className="fill-current" style={{ color:C.yellow }}/> {course.rating}</span>
+        <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 text-[8px] sm:text-[10px] md:text-xs flex-wrap" style={{ color: C.gray[400] }}>
+          <span className="flex items-center gap-0.5 sm:gap-1"><Clock size={10} className="sm:w-3 sm:h-3"/> {course.duration}</span>
+          <span className="flex items-center gap-0.5 sm:gap-1"><Users size={10} className="sm:w-3 sm:h-3"/> {course.students}+</span>
+          <span className="flex items-center gap-0.5 sm:gap-1"><Star size={10} className="sm:w-3 sm:h-3 fill-current" style={{ color:C.yellow }}/> {course.rating}</span>
         </div>
 
         {/* Price + CTA */}
-        <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: C.gray[100] }}>
+        <div className="flex items-center justify-between pt-2 sm:pt-3 border-t" style={{ borderColor: C.gray[100] }}>
           <div>
-            <span className="text-2xl font-black" style={{ color: C.navy }}>${course.price}</span>
-            <span className="text-xs ml-1" style={{ color: C.gray[400] }}>/ course</span>
+            <span className="text-base sm:text-lg md:text-xl lg:text-2xl font-black" style={{ color: C.navy }}>${course.price}</span>
+            <span className="text-[8px] sm:text-[10px] ml-0.5 sm:ml-1" style={{ color: C.gray[400] }}>/ course</span>
           </div>
           <Link to={`/course/${course.id}`}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold text-white hover:opacity-90 transition-all hover:-translate-y-0.5 shadow-md"
+            className="flex items-center gap-1 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold text-white hover:opacity-90 transition-all hover:-translate-y-0.5 shadow-md whitespace-nowrap"
             style={{ background: course.gradient }}>
-            View Details <ArrowRight size={14}/>
+            View <ArrowRight size={10} className="sm:w-3 sm:h-3"/>
           </Link>
         </div>
       </div>
@@ -320,21 +321,39 @@ function CourseCard({ course, saved, onSave }) {
 // FAQ item
 function FAQItem({ q, a, open, toggle }) {
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border:`1px solid ${C.gray[200]}` }}>
+    <div className="rounded-xl sm:rounded-2xl overflow-hidden" style={{ border:`1px solid ${C.gray[200]}` }}>
       <button onClick={toggle}
-        className="w-full flex items-center justify-between p-5 text-left transition-colors hover:bg-gray-50">
-        <span className="font-bold text-sm pr-4" style={{ color: C.navy }}>{q}</span>
-        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+        className="w-full flex items-center justify-between p-3 sm:p-4 md:p-5 text-left transition-colors hover:bg-gray-50">
+        <span className="font-bold text-xs sm:text-sm pr-2 sm:pr-4" style={{ color: C.navy }}>{q}</span>
+        <div className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0"
           style={{ background: open ? C.navy : C.gray[100] }}>
-          {open ? <Minus size={13} className="text-white"/> : <Plus size={13} style={{ color: C.gray[500] }}/>}
+          {open ? <Minus size={10} className="sm:w-3 sm:h-3 text-white"/> : <Plus size={10} className="sm:w-3 sm:h-3" style={{ color: C.gray[500] }}/>}
         </div>
       </button>
       {open && (
-        <div className="px-5 pb-5">
-          <p className="text-sm leading-relaxed" style={{ color: C.gray[500] }}>{a}</p>
+        <div className="px-3 sm:px-4 md:px-5 pb-3 sm:pb-4 md:pb-5">
+          <p className="text-[10px] sm:text-xs md:text-sm leading-relaxed" style={{ color: C.gray[500] }}>{a}</p>
         </div>
       )}
     </div>
+  )
+}
+
+// ─── iKPACE Logo SVG (Optimized for all devices) ────────────────────────────
+function IkpaceLogo({ size = 40, className = '' }) {
+  return (
+    <svg width={size} height={Math.round(size * 1.22)} viewBox="0 0 200 244"
+      xmlns="http://www.w3.org/2000/svg" aria-label="iKPACE" className={className}>
+      <rect width="200" height="244" rx="22" fill={C.navyDark}/>
+      <polygon points="100,28 176,58 100,88 24,58" fill={C.orange}/>
+      <path d="M46,66 L46,107 Q46,136 100,145 Q154,136 154,107 L154,66 Q128,79 100,79 Q72,79 46,66Z" fill={C.orange}/>
+      <path d="M46,66 Q72,79 100,79 Q128,79 154,66 Q128,90 100,91 Q72,90 46,66Z" fill={C.navyDark} opacity="0.30"/>
+      <line x1="176" y1="58" x2="176" y2="104" stroke={C.orange} strokeWidth="4.5" strokeLinecap="round"/>
+      <line x1="164" y1="104" x2="188" y2="104" stroke={C.orange} strokeWidth="3.5" strokeLinecap="round"/>
+      <circle cx="176" cy="116" r="7" fill={C.orange}/>
+      <text x="100" y="182" textAnchor="middle" fontFamily="'Arial Black','Helvetica Neue',Arial,sans-serif" fontWeight="900" fontSize="46" fill="white" letterSpacing="-1">iKpace</text>
+      <text x="100" y="215" textAnchor="middle" fontFamily="'Arial','Helvetica Neue',Arial,sans-serif" fontWeight="700" fontSize="13" fill={C.yellow} letterSpacing="4.5">LEARN SMARTER</text>
+    </svg>
   )
 }
 
@@ -355,7 +374,6 @@ export default function Landing() {
 
   const filteredCourses = selectedCat === 'All' ? courses : courses.filter(c => c.category === selectedCat)
   const dupTestimonials = [...testimonials, ...testimonials, ...testimonials]
-  const totalStudents   = courses.reduce((a, c) => a + c.students, 0)
 
   // Countdown
   useEffect(() => {
@@ -392,25 +410,51 @@ export default function Landing() {
 
   const padZ = n => String(n).padStart(2, '0')
 
+  // ── SEO via useEffect (no external package needed) ─────────────────────
+  useEffect(() => {
+    document.title = 'iKPACE – Learn Smarter Online | Tech School & Digital Skills Courses'
+    const setMeta = (name, content, prop = false) => {
+      const sel = prop ? `meta[property="${name}"]` : `meta[name="${name}"]`
+      let el = document.querySelector(sel)
+      if (!el) { el = document.createElement('meta'); prop ? el.setAttribute('property', name) : el.setAttribute('name', name); document.head.appendChild(el) }
+      el.setAttribute('content', content)
+    }
+    setMeta('description', 'iKPACE is Ghana\'s most affordable online tech school. Learn digital skills — Virtual Assistant, Social Media Marketing, Graphic Design, AI, Coding for Kids & Freelancing. All courses just $7. Certificate included.')
+    setMeta('robots', 'index, follow')
+    setMeta('og:title', 'iKPACE – Learn Smarter Online | Tech & Digital Skills School', true)
+    setMeta('og:description', "Ghana's most affordable online tech school. 6 professional courses. All $7. Certificate included.", true)
+    setMeta('og:type', 'website', true)
+    setMeta('og:url', 'https://www.ikpace.com/', true)
+  }, [])
+
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
 
+      {/* ── Hidden SEO headings ──────────────────────────────────────────── */}
+      <div style={{ position:'absolute', width:'1px', height:'1px', overflow:'hidden', clip:'rect(0,0,0,0)', whiteSpace:'nowrap' }} aria-hidden="true">
+        <h1>Welcome to iKPACE – Learn Smarter Online</h1>
+        <h2>Tech School Courses for Future Developers, Designers & Digital Entrepreneurs</h2>
+      </div>
+
       {/* ══════════════════════════════════════════════════════════════════════
-          1. PROMO BANNER — scrolling marquee
+          HEADER AND FOOTER HAVE BEEN COMPLETELY REMOVED AS REQUESTED
+          The page now starts directly with the promo banner
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden py-2.5" style={{ background:`linear-gradient(90deg, ${C.navyDark}, ${C.navyMid}, ${C.navy})` }}>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          1. PROMO BANNER — scrolling marquee (now at the very top)
+      ══════════════════════════════════════════════════════════════════════ */}
+      <div className="relative overflow-hidden py-2" style={{ background:`linear-gradient(90deg, ${C.navyDark}, ${C.navyMid}, ${C.navy})` }}>
         <div className="flex animate-marquee whitespace-nowrap">
           {[...Array(4)].map((_, rep) => (
-            <span key={rep} className="inline-flex items-center gap-6 text-white text-sm font-semibold px-8">
-              <span className="flex items-center gap-2"><Zap size={13} style={{ color:C.yellow }}/> All courses $7 only</span>
+            <span key={rep} className="inline-flex items-center gap-3 sm:gap-4 md:gap-6 text-white text-[10px] sm:text-xs md:text-sm font-semibold px-4 sm:px-6 md:px-8">
+              <span className="flex items-center gap-1 sm:gap-2"><Zap size={10} className="sm:w-3 sm:h-3" style={{ color:C.yellow }}/> All courses $7 only</span>
               <span style={{ color:C.yellow }}>★</span>
-              <span className="flex items-center gap-2"><Gift size={13} style={{ color:C.orangeLight }}/> Free resources included</span>
+              <span className="flex items-center gap-1 sm:gap-2"><Gift size={10} className="sm:w-3 sm:h-3" style={{ color:C.orangeLight }}/> Free resources</span>
               <span style={{ color:C.yellow }}>★</span>
-              <span className="flex items-center gap-2"><Award size={13} style={{ color:C.green }}/> Certificate on completion</span>
+              <span className="flex items-center gap-1 sm:gap-2"><Award size={10} className="sm:w-3 sm:h-3" style={{ color:C.green }}/> Certificate</span>
               <span style={{ color:C.yellow }}>★</span>
-              <span className="flex items-center gap-2"><Globe size={13} style={{ color:'#67E8F9' }}/> Learn from anywhere in Africa</span>
-              <span style={{ color:C.yellow }}>★</span>
-              <span className="flex items-center gap-2"><Flame size={13} style={{ color:C.rose }}/> New: AI Prompt Engineering course now live</span>
+              <span className="flex items-center gap-1 sm:gap-2"><Globe size={10} className="sm:w-3 sm:h-3" style={{ color:'#67E8F9' }}/> Learn from anywhere</span>
               <span style={{ color:C.yellow }}>★</span>
             </span>
           ))}
@@ -420,7 +464,7 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           2. HERO SECTION — fullscreen carousel
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden" style={{ minHeight: '92vh' }}>
+      <section className="relative overflow-hidden" style={{ minHeight: '85vh' }}>
         {/* Slides */}
         {heroSlides.map((slide, i) => (
           <div key={i} className={`absolute inset-0 transition-opacity duration-1000 ${i === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}>
@@ -428,50 +472,47 @@ export default function Landing() {
             <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage:`url(${slide.image})` }}/>
             {/* Overlay gradient */}
             <div className="absolute inset-0" style={{ background:`linear-gradient(105deg, ${C.navyDark}F2 0%, ${C.navy}CC 40%, ${C.navyMid}88 70%, transparent 100%)` }}/>
-            {/* Decorative shapes */}
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-10" style={{ background:C.orange }}/>
-            <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full opacity-5 blur-3xl" style={{ background:C.yellow }}/>
           </div>
         ))}
 
         {/* Content */}
-        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center py-20 lg:py-28">
+        <div className="relative z-20 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 h-full flex items-center py-16 sm:py-20 md:py-24 lg:py-28">
           {heroSlides.map((slide, i) => (
             <div key={i} className={`w-full transition-all duration-700 ${i === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 absolute pointer-events-none'}`}>
-              <div className="max-w-2xl">
+              <div className="max-w-xl sm:max-w-2xl">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold mb-6 border border-white/20">
+                <div className="inline-flex items-center gap-1 sm:gap-2 bg-white/15 backdrop-blur-sm text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs md:text-sm font-bold mb-3 sm:mb-4 md:mb-6 border border-white/20">
                   <span>{slide.badge}</span>
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-5">
-                  {slide.headline[0]}<br/>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight mb-3 sm:mb-4 md:mb-5">
+                  {slide.headline[0]}<br className="hidden xs:block"/>
                   <span style={{ color:C.orangeLight }}>{slide.headline[1]}</span>
                 </h1>
 
                 {/* Sub */}
-                <p className="text-lg text-white/80 mb-8 max-w-xl leading-relaxed">{slide.sub}</p>
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white/80 mb-4 sm:mb-5 md:mb-6 lg:mb-8 max-w-xl leading-relaxed">{slide.sub}</p>
 
                 {/* CTAs */}
-                <div className="flex flex-wrap gap-3 mb-10">
+                <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8 md:mb-10">
                   <Link to={slide.cta.to}
-                    className="group flex items-center gap-2 px-7 py-4 rounded-2xl font-black text-sm text-white hover:shadow-2xl hover:-translate-y-0.5 transition-all shadow-lg"
+                    className="group flex items-center gap-1 sm:gap-2 px-4 sm:px-5 md:px-6 lg:px-7 py-2 sm:py-2.5 md:py-3 lg:py-4 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs md:text-sm text-white hover:shadow-2xl hover:-translate-y-0.5 transition-all shadow-lg"
                     style={{ background:`linear-gradient(135deg, ${C.orange}, ${C.orangeLight})` }}>
-                    {slide.cta.label} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
+                    {slide.cta.label} <ArrowRight size={12} className="sm:w-3 sm:h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform"/>
                   </Link>
                   <Link to={slide.ctaAlt.to}
-                    className="flex items-center gap-2 px-7 py-4 rounded-2xl font-bold text-sm text-white border-2 border-white/30 hover:bg-white/15 transition-all backdrop-blur-sm">
+                    className="flex items-center gap-1 sm:gap-2 px-4 sm:px-5 md:px-6 lg:px-7 py-2 sm:py-2.5 md:py-3 lg:py-4 rounded-xl sm:rounded-2xl font-bold text-[10px] sm:text-xs md:text-sm text-white border-2 border-white/30 hover:bg-white/15 transition-all backdrop-blur-sm">
                     {slide.ctaAlt.label}
                   </Link>
                 </div>
 
                 {/* Slide stats */}
-                <div className="flex gap-6">
+                <div className="flex gap-4 sm:gap-5 md:gap-6">
                   {[slide.stat1, slide.stat2, slide.stat3].map((s, si) => (
                     <div key={si} className="text-center">
-                      <p className="text-2xl font-black text-white">{s.n}</p>
-                      <p className="text-xs text-white/60">{s.l}</p>
+                      <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-black text-white">{s.n}</p>
+                      <p className="text-[8px] sm:text-[10px] md:text-xs text-white/60">{s.l}</p>
                     </div>
                   ))}
                 </div>
@@ -482,42 +523,30 @@ export default function Landing() {
 
         {/* Prev / Next */}
         <button onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition">
-          <ChevronLeft size={20}/>
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition">
+          <ChevronLeft size={14} className="sm:w-4 sm:h-4 md:w-5 md:h-5"/>
         </button>
         <button onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition">
-          <ChevronRight size={20}/>
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-white/25 transition">
+          <ChevronRight size={14} className="sm:w-4 sm:h-4 md:w-5 md:h-5"/>
         </button>
 
         {/* Dots */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+        <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-1.5 sm:gap-2">
           {heroSlides.map((_, i) => (
             <button key={i} onClick={() => goSlide(i)}
               className="rounded-full transition-all"
-              style={{ width: i === currentSlide ? '28px' : '8px', height:'8px', background: i === currentSlide ? C.orange : 'rgba(255,255,255,0.4)' }}/>
+              style={{ width: i === currentSlide ? '20px' : '6px', height:'6px', background: i === currentSlide ? C.orange : 'rgba(255,255,255,0.4)' }}/>
           ))}
-        </div>
-
-        {/* Floating course pill (desktop) */}
-        <div className="absolute bottom-12 right-6 lg:right-16 z-30 hidden lg:block">
-          <div className="bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 w-64">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background:`${C.navy}12` }}>💼</div>
-            <div>
-              <p className="font-black text-xs" style={{ color:C.navy }}>32 students enrolled</p>
-              <p className="text-[10px]" style={{ color:C.gray[400] }}>Virtual Assistant Pro · $7</p>
-            </div>
-            <div className="w-2 h-2 rounded-full animate-pulse" style={{ background:C.green }}/>
-          </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════════
           3. STATS STRIP
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-12 bg-white border-b" style={{ borderColor:C.gray[100] }}>
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 divide-x divide-gray-100">
+      <section className="py-6 sm:py-8 md:py-10 lg:py-12 bg-white border-b" style={{ borderColor:C.gray[100] }}>
+        <div className="max-w-5xl mx-auto px-3 sm:px-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
             {stats.map((s, i) => (
               <StatCounter key={i} value={s.n} label={s.l} icon={s.icon} color={s.color}/>
             ))}
@@ -528,21 +557,21 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           4. WHY iKPACE — 6 value cards
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-20" style={{ background:C.gray[50] }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4" style={{ background:`${C.navy}12`, color:C.navy }}>
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16" style={{ background:C.gray[50] }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12">
+            <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ background:`${C.navy}12`, color:C.navy }}>
               ⭐ WHY CHOOSE iKPACE
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black mb-4" style={{ color:C.navy }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-2 sm:mb-3" style={{ color:C.navy }}>
               Everything You Need to <span style={{ color:C.orange }}>Succeed</span>
             </h2>
-            <p className="text-lg max-w-xl mx-auto" style={{ color:C.gray[500] }}>
+            <p className="text-xs sm:text-sm md:text-base max-w-xl mx-auto" style={{ color:C.gray[500] }}>
               We don't just teach skills. We prepare you for real careers and real income.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {[
               { icon:BookOpen,   color:C.navy,   bg:`${C.navy}10`,   title:'Expert-Led Content',       desc:'Courses built by industry professionals with real-world experience and up-to-date curriculum.' },
               { icon:Award,      color:C.orange, bg:`${C.orange}10`, title:'Certificates That Count',   desc:'Earn a recognised iKPACE certificate on completion. Add it to your CV and LinkedIn instantly.' },
@@ -552,13 +581,13 @@ export default function Landing() {
               { icon:Globe,      color:C.amber,  bg:`${C.amber}10`,  title:'Learn From Anywhere',       desc:'Fully mobile-friendly platform. Study on phone, tablet, or desktop. Works even on slow connections.' },
             ].map((f, i) => (
               <div key={i}
-                className="bg-white rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
+                className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
                 style={{ border:`1px solid ${C.gray[200]}` }}>
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background:f.bg }}>
-                  <f.icon size={22} style={{ color:f.color }}/>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl md:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 md:mb-4" style={{ background:f.bg }}>
+                  <f.icon size={16} className="sm:w-5 sm:h-5 md:w-6 md:h-6" style={{ color:f.color }}/>
                 </div>
-                <h3 className="font-black text-base mb-2" style={{ color:C.navy }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color:C.gray[500] }}>{f.desc}</p>
+                <h3 className="font-black text-xs sm:text-sm md:text-base mb-1 sm:mb-2" style={{ color:C.navy }}>{f.title}</h3>
+                <p className="text-[10px] sm:text-xs md:text-sm leading-relaxed" style={{ color:C.gray[500] }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -568,33 +597,33 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           5. COUNTDOWN OFFER BANNER
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="py-6 text-white" style={{ background:`linear-gradient(135deg, ${C.orange}, ${C.amber})` }}>
-        <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Flame size={24} className="text-white animate-bounce flex-shrink-0"/>
+      <div className="py-4 sm:py-5 md:py-6 text-white" style={{ background:`linear-gradient(135deg, ${C.orange}, ${C.amber})` }}>
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Flame size={16} className="sm:w-5 sm:h-5 md:w-6 md:h-6 text-white animate-bounce flex-shrink-0"/>
             <div>
-              <p className="font-black text-base">🎁 Bundle Deal — 3 Courses for $15</p>
-              <p className="text-sm opacity-80">Save $6 when you enrol in 3 courses. Limited spots available.</p>
+              <p className="font-black text-xs sm:text-sm md:text-base">🎁 Bundle Deal — 3 Courses for $15</p>
+              <p className="text-[10px] sm:text-xs opacity-80">Save $6 when you enrol in 3 courses.</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex gap-1 sm:gap-2">
               {[
                 { v:padZ(countdown.d), l:'Days'  },
                 { v:padZ(countdown.h), l:'Hours' },
                 { v:padZ(countdown.m), l:'Mins'  },
                 { v:padZ(countdown.s), l:'Secs'  },
               ].map((t, i) => (
-                <div key={i} className="bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 text-center min-w-[52px]">
-                  <p className="text-xl font-black font-mono">{t.v}</p>
-                  <p className="text-[10px] opacity-70">{t.l}</p>
+                <div key={i} className="bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 text-center min-w-[35px] sm:min-w-[40px] md:min-w-[45px]">
+                  <p className="text-xs sm:text-sm md:text-base font-black font-mono">{t.v}</p>
+                  <p className="text-[6px] sm:text-[8px] md:text-[10px] opacity-70">{t.l}</p>
                 </div>
               ))}
             </div>
             <Link to="/pricing"
-              className="px-5 py-3 rounded-xl font-black text-sm bg-white hover:shadow-lg transition-all hover:-translate-y-0.5"
+              className="px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl font-black text-[10px] sm:text-xs md:text-sm bg-white hover:shadow-lg transition-all hover:-translate-y-0.5 whitespace-nowrap"
               style={{ color:C.orange }}>
-              Claim Deal <ArrowRight size={14} className="inline"/>
+              Claim Deal <ArrowRight size={12} className="inline sm:w-3 sm:h-3"/>
             </Link>
           </div>
         </div>
@@ -603,49 +632,49 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           6. COURSES SECTION
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4" style={{ background:`${C.orange}12`, color:C.orange }}>
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ background:`${C.orange}12`, color:C.orange }}>
               🎓 OUR COURSES
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black mb-3" style={{ color:C.navy }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-2 sm:mb-3" style={{ color:C.navy }}>
               Start Learning <span style={{ color:C.orange }}>Any Skill</span>
             </h2>
-            <p className="text-lg max-w-lg mx-auto mb-8" style={{ color:C.gray[500] }}>
+            <p className="text-xs sm:text-sm md:text-base max-w-lg mx-auto mb-4 sm:mb-5 md:mb-6" style={{ color:C.gray[500] }}>
               All courses just $7. Beginner-friendly. Certificate included.
             </p>
 
             {/* Category filter */}
-            <div className="flex flex-wrap gap-2 justify-center">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center">
               {categories.map(cat => (
                 <button key={cat} onClick={() => setSelectedCat(cat)}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                  className="px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs md:text-sm font-semibold transition-all whitespace-nowrap"
                   style={{
                     background: selectedCat === cat ? C.navy : 'white',
                     color:      selectedCat === cat ? '#fff' : C.gray[500],
                     border:     `1.5px solid ${selectedCat === cat ? C.navy : C.gray[200]}`,
                     boxShadow:  selectedCat === cat ? `0 4px 14px ${C.navy}30` : 'none'
                   }}>
-                  {cat === 'All' ? '🎯 All Courses' : cat}
+                  {cat === 'All' ? '🎯 All' : cat}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Course grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {filteredCourses.map(course => (
               <CourseCard key={course.id} course={course} saved={savedCourses.includes(course.id)} onSave={toggleSave}/>
             ))}
           </div>
 
           {/* View all */}
-          <div className="text-center mt-10">
+          <div className="text-center mt-6 sm:mt-8 md:mt-10">
             <Link to="/courses"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-sm text-white hover:shadow-xl hover:-translate-y-0.5 transition-all shadow-lg"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-5 sm:px-6 md:px-7 lg:px-8 py-2.5 sm:py-3 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm text-white hover:shadow-xl hover:-translate-y-0.5 transition-all shadow-lg"
               style={{ background:`linear-gradient(135deg, ${C.navy}, ${C.navyMid})` }}>
-              Browse All Courses <ArrowRight size={16}/>
+              Browse All Courses <ArrowRight size={14} className="sm:w-4 sm:h-4"/>
             </Link>
           </div>
         </div>
@@ -654,138 +683,84 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           7. HOW IT WORKS
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-20" style={{ background:C.gray[50] }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4" style={{ background:`${C.green}12`, color:C.green }}>
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16" style={{ background:C.gray[50] }}>
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12">
+            <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ background:`${C.green}12`, color:C.green }}>
               🗺️ HOW IT WORKS
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black mb-3" style={{ color:C.navy }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-2 sm:mb-3" style={{ color:C.navy }}>
               From Signup to <span style={{ color:C.orange }}>Certified</span> in 4 Steps
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {howItWorks.map((step, i) => (
-              <div key={i} className="relative bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-all"
+              <div key={i} className="relative bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-center hover:shadow-lg transition-all"
                 style={{ border:`1px solid ${C.gray[200]}` }}>
                 {/* Step number */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white shadow"
+                <div className="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center text-[8px] sm:text-[10px] md:text-xs font-black text-white shadow"
                   style={{ background:`linear-gradient(135deg, ${C.navy}, ${C.orange})` }}>
                   {step.step}
                 </div>
-                {/* Connector arrow (not last) */}
-                {i < howItWorks.length - 1 && (
-                  <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-10">
-                    <ChevronRight size={20} style={{ color:C.gray[300] }}/>
-                  </div>
-                )}
-                <div className="text-4xl mb-3 mt-2">{step.icon}</div>
-                <h3 className="font-black text-sm mb-2" style={{ color:C.navy }}>{step.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color:C.gray[500] }}>{step.desc}</p>
+                <div className="text-2xl sm:text-3xl md:text-4xl mb-2 sm:mb-3 mt-2">{step.icon}</div>
+                <h3 className="font-black text-xs sm:text-sm md:text-base mb-1 sm:mb-2" style={{ color:C.navy }}>{step.title}</h3>
+                <p className="text-[10px] sm:text-xs md:text-sm leading-relaxed" style={{ color:C.gray[500] }}>{step.desc}</p>
               </div>
             ))}
           </div>
 
-          <div className="text-center mt-10">
+          <div className="text-center mt-6 sm:mt-8 md:mt-10">
             <Link to="/register"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-sm text-white hover:shadow-xl transition-all shadow-lg"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-5 sm:px-6 md:px-7 lg:px-8 py-2.5 sm:py-3 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm text-white hover:shadow-xl transition-all shadow-lg"
               style={{ background:`linear-gradient(135deg, ${C.orange}, ${C.orangeLight})` }}>
-              <Rocket size={16}/> Get Started for $7
+              <Rocket size={14} className="sm:w-4 sm:h-4"/> Get Started for $7
             </Link>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          8. iKPACE ADVANTAGE — two-column
+          8. iKPACE ADVANTAGE — two-column (simplified for mobile)
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-            {/* Left: image stack */}
-            <div className="relative h-[420px] hidden lg:block">
-              <div className="absolute top-0 left-0 w-72 h-80 rounded-3xl overflow-hidden shadow-2xl">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&auto=format&fit=crop&q=80" alt="Students" className="w-full h-full object-cover"/>
-                <div className="absolute inset-0 opacity-20" style={{ background:C.navy }}/>
-              </div>
-              <div className="absolute bottom-0 right-0 w-64 h-60 rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                <img src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=600&auto=format&fit=crop&q=80" alt="Learning" className="w-full h-full object-cover"/>
-              </div>
-              {/* Floating cards */}
-              <div className="absolute top-4 right-4 bg-white rounded-2xl shadow-xl p-4 w-48">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:`${C.green}15` }}>
-                    <CheckCircle size={16} style={{ color:C.green }}/>
-                  </div>
-                  <div>
-                    <p className="text-xs font-black" style={{ color:C.navy }}>Certified!</p>
-                    <p className="text-[10px]" style={{ color:C.gray[400] }}>Sarah J. — VA Pro</p>
-                  </div>
-                </div>
-                <div className="flex">
-                  {[1,2,3,4,5].map(i=><Star key={i} size={11} className="fill-current" style={{ color:C.yellow }}/>)}
-                </div>
-              </div>
-              <div className="absolute bottom-20 left-0 bg-white rounded-2xl shadow-xl p-4 w-52">
-                <p className="text-[10px] font-bold mb-1" style={{ color:C.gray[400] }}>Community Members</p>
-                <p className="text-2xl font-black mb-1" style={{ color:C.navy }}>130+</p>
-                <div className="flex -space-x-1">
-                  {['💼','🎨','📱','🤖','📊'].map((e,i) => (
-                    <div key={i} className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-xs" style={{ background:`${C.navy}20` }}>{e}</div>
-                  ))}
-                </div>
-              </div>
-              {/* Decorative glow */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 rounded-full blur-3xl opacity-15" style={{ background:C.orange }}/>
-            </div>
-
-            {/* Right: content */}
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 lg:gap-16 items-center">
             <div>
-              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-6" style={{ background:`${C.navy}12`, color:C.navy }}>
+              <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4 md:mb-5" style={{ background:`${C.navy}12`, color:C.navy }}>
                 ⭐ THE iKPACE ADVANTAGE
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black mb-5" style={{ color:C.navy }}>
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-3 sm:mb-4 md:mb-5" style={{ color:C.navy }}>
                 More Than Just<br/><span style={{ color:C.orange }}>Technical Skills</span>
               </h2>
-              <p className="text-base leading-relaxed mb-8" style={{ color:C.gray[500] }}>
+              <p className="text-xs sm:text-sm md:text-base leading-relaxed mb-5 sm:mb-6 md:mb-8" style={{ color:C.gray[500] }}>
                 iKPACE goes beyond technical training. Our curriculum covers vital professional soft skills — communication, teamwork, and time management — giving you the edge to stand out in any job or freelance environment.
               </p>
 
-              <div className="grid sm:grid-cols-2 gap-4 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-5 sm:mb-6 md:mb-8">
                 {[
                   { icon:Brain,       color:C.navy,   title:'Technical Excellence',  desc:'Industry-relevant curriculum' },
                   { icon:MessageCircle,color:C.orange, title:'Soft Skills Mastery',   desc:'Communication & leadership'  },
                   { icon:Target,      color:C.green,  title:'Career Coaching',        desc:'CV & interview preparation'  },
                   { icon:CheckSquare, color:C.teal,   title:'Job-Ready Projects',     desc:'Real-world assignments'       },
                 ].map((f, i) => (
-                  <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background:`${f.color}08`, border:`1px solid ${f.color}18` }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${f.color}15` }}>
-                      <f.icon size={17} style={{ color:f.color }}/>
+                  <div key={i} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl" style={{ background:`${f.color}08`, border:`1px solid ${f.color}18` }}>
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0" style={{ background:`${f.color}15` }}>
+                      <f.icon size={12} className="sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" style={{ color:f.color }}/>
                     </div>
                     <div>
-                      <p className="font-bold text-sm mb-0.5" style={{ color:C.gray[800] }}>{f.title}</p>
-                      <p className="text-xs" style={{ color:C.gray[400] }}>{f.desc}</p>
+                      <p className="font-bold text-[10px] sm:text-xs md:text-sm mb-0.5" style={{ color:C.gray[800] }}>{f.title}</p>
+                      <p className="text-[8px] sm:text-[10px] md:text-xs" style={{ color:C.gray[400] }}>{f.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               <Link to="/register"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl font-black text-sm text-white hover:shadow-xl transition-all shadow-lg group"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-5 sm:px-6 md:px-7 py-2.5 sm:py-3 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm text-white hover:shadow-xl transition-all shadow-lg group"
                 style={{ background:`linear-gradient(135deg, ${C.navy}, ${C.orange})` }}>
-                Start Your Journey Today <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
+                Start Your Journey Today <ArrowRight size={14} className="sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform"/>
               </Link>
-
-              {/* Trust row */}
-              <div className="flex flex-wrap items-center gap-5 mt-6 pt-6 border-t" style={{ borderColor:C.gray[100] }}>
-                {['94% satisfaction rate', '130+ hours content', '6 professional courses'].map((t, i) => (
-                  <span key={i} className="flex items-center gap-1.5 text-xs" style={{ color:C.gray[500] }}>
-                    <CheckCircle size={13} style={{ color:C.green }}/>{t}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -794,47 +769,43 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           9. LEARNING OUTCOMES — by course
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-20" style={{ background:C.gray[50] }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4" style={{ background:`${C.orange}12`, color:C.orange }}>
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16" style={{ background:C.gray[50] }}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12">
+            <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ background:`${C.orange}12`, color:C.orange }}>
               🎯 LEARNING OUTCOMES
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black mb-3" style={{ color:C.navy }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-2 sm:mb-3" style={{ color:C.navy }}>
               What You'll Be Able to <span style={{ color:C.orange }}>Do</span> After Each Course
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {courses.map(course => (
               <div key={course.id}
-                className="bg-white rounded-2xl p-5 hover:shadow-lg transition-all"
+                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-5 hover:shadow-lg transition-all"
                 style={{ border:`1px solid ${C.gray[200]}` }}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background:`${course.color}15` }}>
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl flex items-center justify-center text-sm sm:text-base" style={{ background:`${course.color}15` }}>
                     {course.emoji}
                   </div>
                   <div>
-                    <p className="font-black text-sm" style={{ color:C.navy }}>{course.title}</p>
-                    <p className="text-[10px]" style={{ color:C.gray[400] }}>{course.duration}</p>
+                    <p className="font-black text-xs sm:text-sm" style={{ color:C.navy }}>{course.title}</p>
+                    <p className="text-[8px] sm:text-[10px]" style={{ color:C.gray[400] }}>{course.duration}</p>
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1 sm:space-y-1.5">
                   {course.features.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2.5">
-                      <CheckCircle size={13} style={{ color:course.color, flexShrink:0 }}/>
-                      <span className="text-xs" style={{ color:C.gray[600] }}>{f}</span>
+                    <div key={i} className="flex items-center gap-1.5 sm:gap-2">
+                      <CheckCircle size={10} className="sm:w-3 sm:h-3" style={{ color:course.color, flexShrink:0 }}/>
+                      <span className="text-[8px] sm:text-[10px] md:text-xs" style={{ color:C.gray[600] }}>{f}</span>
                     </div>
                   ))}
-                  <div className="flex items-center gap-2.5">
-                    <Award size={13} style={{ color:C.yellow, flexShrink:0 }}/>
-                    <span className="text-xs" style={{ color:C.gray[600] }}>Certificate of completion</span>
-                  </div>
                 </div>
                 <Link to={`/course/${course.id}`}
-                  className="mt-4 flex items-center gap-1 text-xs font-bold hover:gap-2 transition-all"
+                  className="mt-2 sm:mt-3 flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[10px] font-bold hover:gap-1 sm:hover:gap-2 transition-all"
                   style={{ color:course.color }}>
-                  See full curriculum <ChevronRight size={13}/>
+                  See full curriculum <ChevronRight size={8} className="sm:w-3 sm:h-3"/>
                 </Link>
               </div>
             ))}
@@ -845,38 +816,38 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           10. TESTIMONIALS — infinite marquee
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 overflow-hidden" style={{ background:`linear-gradient(135deg, ${C.navyDark}, ${C.navy})` }}>
-        <div className="text-center mb-10 px-4">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4 bg-white/15 text-white">
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16 overflow-hidden" style={{ background:`linear-gradient(135deg, ${C.navyDark}, ${C.navy})` }}>
+        <div className="text-center mb-6 sm:mb-8 px-3 sm:px-4">
+          <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 bg-white/15 text-white">
             💬 STUDENT STORIES
           </span>
-          <h2 className="text-3xl font-black text-white mb-2">Real Feedback from Real Students</h2>
-          <p className="text-white/60 text-sm">Honest testimonials — no filters, no fake numbers.</p>
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white mb-1 sm:mb-2">Real Feedback from Real Students</h2>
+          <p className="text-white/60 text-xs sm:text-sm">Honest testimonials — no filters, no fake numbers.</p>
         </div>
 
         <div className="relative">
           {/* Fade edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background:`linear-gradient(90deg, ${C.navyDark}, transparent)` }}/>
-          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background:`linear-gradient(-90deg, ${C.navy}, transparent)` }}/>
+          <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 md:w-20 lg:w-24 z-10 pointer-events-none" style={{ background:`linear-gradient(90deg, ${C.navyDark}, transparent)` }}/>
+          <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 md:w-20 lg:w-24 z-10 pointer-events-none" style={{ background:`linear-gradient(-90deg, ${C.navy}, transparent)` }}/>
 
           {/* Marquee track */}
           <div className="flex animate-marquee-slow hover:pause whitespace-nowrap">
             {dupTestimonials.map((t, i) => (
-              <div key={i} className="flex-none w-[320px] mx-3 align-top">
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/15 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0"
+              <div key={i} className="flex-none w-[250px] sm:w-[280px] md:w-[300px] lg:w-[320px] mx-2 sm:mx-3 align-top">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 border border-white/15 h-full">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-black text-[10px] sm:text-xs flex-shrink-0"
                       style={{ background:t.color }}>{t.avatar}</div>
                     <div>
-                      <p className="font-black text-sm text-white">{t.name}</p>
-                      <p className="text-[10px] text-white/50">{t.role}</p>
+                      <p className="font-black text-xs sm:text-sm text-white">{t.name}</p>
+                      <p className="text-[8px] sm:text-[10px] text-white/50">{t.role}</p>
                     </div>
                   </div>
-                  <div className="flex gap-0.5 mb-3">
-                    {[...Array(t.rating)].map((_, ri) => <Star key={ri} size={12} className="fill-current" style={{ color:C.yellow }}/>)}
+                  <div className="flex gap-0.5 mb-2">
+                    {[...Array(t.rating)].map((_, ri) => <Star key={ri} size={10} className="sm:w-3 sm:h-3 fill-current" style={{ color:C.yellow }}/>)}
                   </div>
-                  <p className="text-sm text-white/85 leading-relaxed mb-3 whitespace-normal">{t.text}</p>
-                  <span className="inline-block text-[10px] px-2.5 py-1 rounded-full text-white/70" style={{ background:'rgba(255,255,255,0.1)' }}>
+                  <p className="text-[10px] sm:text-xs md:text-sm text-white/85 leading-relaxed mb-2 whitespace-normal">{t.text}</p>
+                  <span className="inline-block text-[8px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-white/70" style={{ background:'rgba(255,255,255,0.1)' }}>
                     📚 {t.course}
                   </span>
                 </div>
@@ -889,81 +860,61 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           11. COMMUNITY SECTION
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 items-center">
             <div>
-              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-5" style={{ background:`${C.navy}12`, color:C.navy }}>
+              <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ background:`${C.navy}12`, color:C.navy }}>
                 🤝 COMMUNITY
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black mb-4" style={{ color:C.navy }}>
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black mb-3 sm:mb-4" style={{ color:C.navy }}>
                 Learn Better <span style={{ color:C.orange }}>Together</span>
               </h2>
-              <p className="text-base leading-relaxed mb-6" style={{ color:C.gray[500] }}>
+              <p className="text-xs sm:text-sm md:text-base leading-relaxed mb-4 sm:mb-5 md:mb-6" style={{ color:C.gray[500] }}>
                 Our student community is one of our biggest strengths. Ask questions, share progress, find study partners, and get answers from instructors and fellow learners across Africa and beyond.
               </p>
-              <div className="grid grid-cols-2 gap-3 mb-8">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
                 {[
                   { icon:'💬', label:'Peer Discussions'    },
                   { icon:'🤝', label:'Study Groups'        },
                   { icon:'📅', label:'Live Q&A Sessions'   },
                   { icon:'🏆', label:'Student Leaderboard' },
                 ].map((f, i) => (
-                  <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
-                    <span className="text-xl">{f.icon}</span>
-                    <span className="text-sm font-semibold" style={{ color:C.gray[700] }}>{f.label}</span>
+                  <div key={i} className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl" style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
+                    <span className="text-sm sm:text-base">{f.icon}</span>
+                    <span className="text-[10px] sm:text-xs font-semibold" style={{ color:C.gray[700] }}>{f.label}</span>
                   </div>
                 ))}
               </div>
               <Link to="/community"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl font-black text-sm text-white hover:shadow-xl transition-all shadow-lg"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-5 sm:px-6 md:px-7 py-2.5 sm:py-3 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm text-white hover:shadow-xl transition-all shadow-lg"
                 style={{ background:`linear-gradient(135deg, ${C.navy}, ${C.navyMid})` }}>
-                <Users size={16}/> Join the Community
+                <Users size={14} className="sm:w-4 sm:h-4"/> Join the Community
               </Link>
             </div>
 
-            {/* Community visual */}
-            <div className="bg-white rounded-3xl shadow-2xl p-6 border" style={{ borderColor:C.gray[200] }}>
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"/>
-                  <span className="text-sm font-semibold" style={{ color:C.gray[700] }}>8 members online now</span>
+            {/* Community visual (simplified for mobile) */}
+            <div className="bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl p-4 sm:p-5 md:p-6 border" style={{ borderColor:C.gray[200] }}>
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"/>
+                  <span className="text-[10px] sm:text-xs font-semibold" style={{ color:C.gray[700] }}>8 members online</span>
                 </div>
-                <span className="text-xs px-3 py-1 rounded-full" style={{ background:`${C.navy}10`, color:C.navy }}>130+ total</span>
+                <span className="text-[8px] sm:text-[10px] px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full" style={{ background:`${C.navy}10`, color:C.navy }}>130+ total</span>
               </div>
 
               {/* Member avatars */}
-              <div className="flex flex-wrap gap-2 mb-5">
-                {['💼','🎨','📱','🤖','📊','👩‍💻','👨‍🎨','👩‍🏫','🧑‍💼','👨‍💻','👩‍🔬','🧑‍🎓'].map((e, i) => (
-                  <div key={i} className="w-10 h-10 rounded-xl border-2 border-white flex items-center justify-center text-xl shadow-sm"
+              <div className="flex flex-wrap gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+                {['💼','🎨','📱','🤖','📊','👩‍💻','👨‍🎨','👩‍🏫'].map((e, i) => (
+                  <div key={i} className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg border-2 border-white flex items-center justify-center text-xs sm:text-sm shadow-sm"
                     style={{ background:`${C.navy}12` }}>{e}</div>
                 ))}
-                <div className="w-10 h-10 rounded-xl border-2 border-white flex items-center justify-center text-xs font-black shadow-sm"
+                <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg border-2 border-white flex items-center justify-center text-[8px] sm:text-[10px] font-black shadow-sm"
                   style={{ background:C.orange, color:'white' }}>+118</div>
               </div>
 
-              {/* Recent messages */}
-              {[
-                { avatar:'MK', color:C.navy,   name:'Michael K.', msg:'Just landed my first Upwork client! 🎉 VA Pro paid off!',             time:'2m ago' },
-                { avatar:'AO', color:C.green,  name:'Amina O.',   msg:'The AI prompt frameworks are 🔥 already using them for clients.',       time:'8m ago' },
-                { avatar:'SA', color:C.orange, name:'Sarah A.',   msg:'Anyone up for a study session tonight on the Social Media module?',     time:'15m ago'},
-              ].map((m, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 rounded-xl mb-2" style={{ background:C.gray[50] }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-black flex-shrink-0" style={{ background:m.color }}>
-                    {m.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold" style={{ color:C.navy }}>{m.name}</span>
-                      <span className="text-[10px]" style={{ color:C.gray[400] }}>{m.time}</span>
-                    </div>
-                    <p className="text-xs truncate mt-0.5" style={{ color:C.gray[500] }}>{m.msg}</p>
-                  </div>
-                </div>
-              ))}
-
               <Link to="/community"
-                className="block w-full text-center py-3 rounded-xl text-sm font-bold text-white mt-3"
+                className="block w-full text-center py-2 sm:py-2.5 md:py-3 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold text-white mt-2 sm:mt-3"
                 style={{ background:`linear-gradient(135deg, ${C.navy}, ${C.orange})` }}>
                 Join the Discussion →
               </Link>
@@ -975,21 +926,21 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           12. DEVICE COMPATIBILITY STRIP
       ══════════════════════════════════════════════════════════════════════ */}
-      <div className="py-10 border-y" style={{ background:C.gray[50], borderColor:C.gray[200] }}>
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="text-sm font-bold mb-5" style={{ color:C.gray[400] }}>LEARN ON ANY DEVICE, ANYWHERE</p>
-          <div className="flex justify-center items-center gap-8 flex-wrap">
+      <div className="py-6 sm:py-8 md:py-10 border-y" style={{ background:C.gray[50], borderColor:C.gray[200] }}>
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 text-center">
+          <p className="text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ color:C.gray[400] }}>LEARN ON ANY DEVICE, ANYWHERE</p>
+          <div className="flex justify-center items-center gap-4 sm:gap-6 md:gap-8 flex-wrap">
             {[
-              { icon:Smartphone, label:'Mobile Phone'   },
-              { icon:Monitor,    label:'Desktop'        },
-              { icon:Layers,     label:'Tablet'         },
-              { icon:Wifi,       label:'Low Bandwidth'  },
+              { icon:Smartphone, label:'Mobile'   },
+              { icon:Monitor,    label:'Desktop'  },
+              { icon:Layers,     label:'Tablet'   },
+              { icon:Wifi,       label:'Low Data' },
             ].map(({ icon:Icon, label }, i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background:`${C.navy}10` }}>
-                  <Icon size={22} style={{ color:C.navy }}/>
+              <div key={i} className="flex flex-col items-center gap-1 sm:gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-lg sm:rounded-xl flex items-center justify-center" style={{ background:`${C.navy}10` }}>
+                  <Icon size={14} className="sm:w-4 sm:h-4 md:w-5 md:h-5" style={{ color:C.navy }}/>
                 </div>
-                <span className="text-xs font-medium" style={{ color:C.gray[500] }}>{label}</span>
+                <span className="text-[8px] sm:text-[10px] md:text-xs font-medium" style={{ color:C.gray[500] }}>{label}</span>
               </div>
             ))}
           </div>
@@ -999,18 +950,18 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           13. FAQ SECTION
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4" style={{ background:`${C.teal}12`, color:C.teal }}>
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16 bg-white">
+        <div className="max-w-3xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <span className="inline-block px-2 sm:px-3 md:px-4 py-1 rounded-full text-[10px] sm:text-xs font-bold mb-3 sm:mb-4" style={{ background:`${C.teal}12`, color:C.teal }}>
               ❓ FREQUENTLY ASKED QUESTIONS
             </span>
-            <h2 className="text-3xl font-black mb-3" style={{ color:C.navy }}>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-black mb-2 sm:mb-3" style={{ color:C.navy }}>
               Got Questions? <span style={{ color:C.orange }}>We've Got Answers.</span>
             </h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {faqs.map((faq, i) => (
               <FAQItem key={i} q={faq.q} a={faq.a}
                 open={openFaq === i}
@@ -1018,7 +969,7 @@ export default function Landing() {
             ))}
           </div>
 
-          <p className="text-center mt-8 text-sm" style={{ color:C.gray[400] }}>
+          <p className="text-center mt-4 sm:mt-5 md:mt-6 text-[10px] sm:text-xs" style={{ color:C.gray[400] }}>
             Still have questions?{' '}
             <Link to="/support" className="font-bold hover:underline" style={{ color:C.navy }}>Contact Support →</Link>
           </p>
@@ -1028,77 +979,75 @@ export default function Landing() {
       {/* ══════════════════════════════════════════════════════════════════════
           14. NEWSLETTER SIGNUP
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-14 text-white" style={{ background:`linear-gradient(135deg, ${C.orange}, ${C.amber})` }}>
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <Bell size={32} className="mx-auto mb-4 opacity-90"/>
-          <h2 className="text-2xl sm:text-3xl font-black mb-3">Stay in the Loop</h2>
-          <p className="opacity-80 mb-6 text-sm">Get notified about new courses, live sessions, scholarships, and free resources. No spam — ever.</p>
+      <section className="py-10 sm:py-12 md:py-14 text-white" style={{ background:`linear-gradient(135deg, ${C.orange}, ${C.amber})` }}>
+        <div className="max-w-2xl mx-auto px-3 sm:px-4 text-center">
+          <Bell size={20} className="sm:w-6 sm:h-6 md:w-7 md:h-7 mx-auto mb-3 opacity-90"/>
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black mb-2 sm:mb-3">Stay in the Loop</h2>
+          <p className="opacity-80 mb-4 sm:mb-5 text-xs sm:text-sm">Get notified about new courses, live sessions, scholarships, and free resources. No spam — ever.</p>
           {!subscribed ? (
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 sm:gap-3 max-w-md mx-auto">
               <input type="email" value={emailVal} onChange={e => setEmailVal(e.target.value)}
-                placeholder="Enter your email address"
-                className="flex-1 px-4 py-3.5 rounded-xl text-sm outline-none font-medium"
+                placeholder="Enter your email"
+                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm outline-none font-medium"
                 style={{ color:C.gray[800] }}
                 required/>
               <button type="submit"
-                className="px-6 py-3.5 rounded-xl font-black text-sm hover:shadow-lg transition-all flex items-center gap-2 justify-center"
+                className="px-4 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm hover:shadow-lg transition-all flex items-center gap-1.5 sm:gap-2 justify-center"
                 style={{ background:C.navy, color:'white' }}>
-                <Send size={15}/> Subscribe
+                <Send size={12} className="sm:w-3 sm:h-3"/> Subscribe
               </button>
             </form>
           ) : (
-            <div className="flex items-center justify-center gap-3 bg-white/20 rounded-2xl py-4 px-6 max-w-md mx-auto">
-              <CheckCircle size={20} className="text-white"/>
-              <p className="font-bold">You're subscribed! We'll be in touch. 🎉</p>
+            <div className="flex items-center justify-center gap-2 bg-white/20 rounded-xl sm:rounded-2xl py-3 sm:py-4 px-4 sm:px-5 max-w-md mx-auto">
+              <CheckCircle size={16} className="sm:w-5 sm:h-5 text-white"/>
+              <p className="text-xs sm:text-sm font-bold">You're subscribed! 🎉</p>
             </div>
           )}
-          <p className="text-xs opacity-60 mt-3">Join 130+ learners already subscribed. Unsubscribe anytime.</p>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════════════════════════
           15. FINAL CTA
       ══════════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 text-3xl" style={{ background:`${C.navy}10` }}>🎓</div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 leading-tight" style={{ color:C.navy }}>
+      <section className="py-10 sm:py-12 md:py-14 lg:py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 text-center">
+          <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl sm:rounded-2xl mb-4 sm:mb-5 text-xl sm:text-2xl md:text-3xl" style={{ background:`${C.navy}10` }}>🎓</div>
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-3 sm:mb-4 leading-tight" style={{ color:C.navy }}>
             Your New Career Starts<br/>
             <span style={{ color:C.orange }}>for Just $7</span>
           </h2>
-          <p className="text-lg mb-8 max-w-xl mx-auto" style={{ color:C.gray[500] }}>
+          <p className="text-xs sm:text-sm md:text-base mb-5 sm:mb-6 md:mb-8 max-w-xl mx-auto" style={{ color:C.gray[500] }}>
             Join 130+ learners across Africa who are building marketable skills, earning certificates, and launching careers with iKPACE.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-5 sm:mb-6 md:mb-8">
             <Link to="/register"
-              className="group flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-black text-sm text-white hover:shadow-2xl hover:-translate-y-0.5 transition-all shadow-lg"
+              className="group flex items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-6 md:px-7 lg:px-8 py-2.5 sm:py-3 md:py-4 rounded-xl sm:rounded-2xl font-black text-xs sm:text-sm text-white hover:shadow-2xl hover:-translate-y-0.5 transition-all shadow-lg"
               style={{ background:`linear-gradient(135deg, ${C.navy}, ${C.orange})` }}>
-              <Rocket size={16}/> Start Learning Today <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
+              <Rocket size={14} className="sm:w-4 sm:h-4"/> Start Learning Today <ArrowRight size={14} className="sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform"/>
             </Link>
             <Link to="/courses"
-              className="flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm border-2 hover:bg-gray-50 transition-all"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 px-5 sm:px-6 md:px-7 lg:px-8 py-2.5 sm:py-3 md:py-4 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm border-2 hover:bg-gray-50 transition-all"
               style={{ borderColor:C.navy, color:C.navy }}>
               Browse All Courses
             </Link>
           </div>
 
           {/* Trust badges */}
-          <div className="flex flex-wrap justify-center gap-5">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5">
             {[
-              { icon:Shield, text:'Secure Paystack Payment' },
-              { icon:RefreshCw, text:'No hidden fees'        },
-              { icon:Award,  text:'Certificate on completion'},
-              { icon:Globe,  text:'Learn from anywhere'      },
+              { icon:Shield, text:'Secure Payment' },
+              { icon:RefreshCw, text:'No hidden fees'},
+              { icon:Award,  text:'Certificate'},
+              { icon:Globe,  text:'Learn anywhere'},
             ].map(({ icon:Icon, text }, i) => (
-              <span key={i} className="flex items-center gap-1.5 text-xs" style={{ color:C.gray[400] }}>
-                <Icon size={13} style={{ color:C.green }}/>{text}
+              <span key={i} className="flex items-center gap-1 text-[8px] sm:text-[10px] md:text-xs" style={{ color:C.gray[400] }}>
+                <Icon size={10} className="sm:w-3 sm:h-3" style={{ color:C.green }}/>{text}
               </span>
             ))}
           </div>
         </div>
       </section>
-
 
       {/* ── STYLES ─────────────────────────────────────────────────────────── */}
       <style>{`
@@ -1123,6 +1072,14 @@ export default function Landing() {
         }
         .hover\\:pause:hover {
           animation-play-state: paused;
+        }
+
+        /* Line clamp utilities */
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         * { box-sizing: border-box; }

@@ -285,6 +285,16 @@ export default function TestCoursePlayer() {
   // ── Mark complete animation ──────────────────────────────────────────────
   const [justCompleted,     setJustCompleted]     = useState(false)
 
+  // ── Score panel + display settings overlay ────────────────────────────────
+  const [showScorePanel,    setShowScorePanel]    = useState(false)
+  const [showDisplaySettings, setShowDisplaySettings] = useState(false)
+  const [displaySettings,   setDisplaySettings]   = useState({
+    showTrackSize: true, showAreaNames: true, extendGridLines: false,
+    showLineNames: false, showMiniMap: true, compactLessons: false,
+  })
+  const [quizHistory,       setQuizHistory]       = useState([])  // all quiz attempts this session
+  const [mobileBottomTab,   setMobileBottomTab]   = useState('lessons') // lessons|content|tools|score
+
   // ── Load ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (courseId) {
@@ -421,108 +431,16 @@ export default function TestCoursePlayer() {
     setCourseResources(data || [])
   }
 
-  // ── Refresh a single lesson from DB (called after external edits) ─────────
-  const refreshCurrentLesson = async (lessonId) => {
-    if (!lessonId) return
-    const { data, error } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('id', lessonId)
-      .single()
-    if (!error && data) {
-      // Update both the lesson list and the current lesson view
-      setLessons(prev => prev.map(l => l.id === data.id ? data : l))
-      setCurrentLesson(data)
-    }
-  }
-
-  // ── Realtime subscription: auto-refresh when LessonManager edits a lesson ──
-  useEffect(() => {
-    if (!courseId) return
-
-    const channel = supabase
-      .channel(`lessons-realtime-${courseId}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'lessons', filter: `course_id=eq.${courseId}` },
-        (payload) => {
-          const updated = payload.new
-          console.log('[Realtime] Lesson updated:', updated.id, updated.title)
-          // Always refresh lesson list
-          setLessons(prev => prev.map(l => l.id === updated.id ? updated : l))
-          // If the updated lesson is currently open, refresh the view immediately
-          setCurrentLesson(prev => {
-            if (prev && prev.id === updated.id) return updated
-            return prev
-          })
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'lessons', filter: `course_id=eq.${courseId}` },
-        () => {
-          // New lesson added in LessonManager — re-fetch full list
-          fetchLessonsOnly(courseId)
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'lessons', filter: `course_id=eq.${courseId}` },
-        (payload) => {
-          const deletedId = payload.old?.id
-          setLessons(prev => prev.filter(l => l.id !== deletedId))
-          // If deleted lesson was open, clear it
-          setCurrentLesson(prev => {
-            if (prev && prev.id === deletedId) return null
-            return prev
-          })
-        }
-      )
-      .subscribe((status) => {
-        console.log('[Realtime] Lessons channel status:', status)
-      })
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [courseId])
-
-  // ── Fetch only lessons list (used by realtime INSERT handler) ─────────────
-  const fetchLessonsOnly = async (cid) => {
-    const { data } = await supabase
-      .from('lessons')
-      .select('*')
-      .eq('course_id', cid || courseId)
-      .order('order_index', { ascending: true })
-    if (data) setLessons(data)
-  }
-
   // ── Actions ───────────────────────────────────────────────────────────────
   const handleLessonChange = async (lesson) => {
     if (!lesson) return
-
-    // Always fetch the freshest version of the lesson from DB
-    // so edits made in CourseLessonManager are immediately visible
-    let freshLesson = lesson
-    try {
-      const { data, error } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('id', lesson.id)
-        .single()
-      if (!error && data) freshLesson = data
-    } catch(e) { /* fall back to passed lesson */ }
-
-    setCurrentLesson(freshLesson)
-    // Also update lessons list entry in case it was stale
-    setLessons(prev => prev.map(l => l.id === freshLesson.id ? freshLesson : l))
-
+    setCurrentLesson(lesson)
     setActiveLessonTab('content')
     setAssignmentSubmission(''); setSubmission(null)
     setAiQuestions([]); setQuizAnswers({}); setQuizResults(null); setQuizStarted(false)
     setShowDiscussion(false); setJustCompleted(false)
-    await loadLessonData(freshLesson.id)
-    await saveProgress(freshLesson.id)
+    await loadLessonData(lesson.id)
+    await saveProgress(lesson.id)
     setMobileMenuOpen(false)
   }
 
@@ -595,8 +513,16 @@ export default function TestCoursePlayer() {
     })
     setQuizScore(score)
     setQuizResults(results)
+    // Track quiz history for score panel
+    const pct = Math.round((score / aiQuestions.length) * 100)
+    setQuizHistory(prev => [...prev, {
+      lessonTitle: currentLesson?.title,
+      score, total: aiQuestions.length, pct,
+      passed: score >= Math.ceil(aiQuestions.length / 2),
+      time: new Date().toLocaleTimeString('en', { hour:'2-digit', minute:'2-digit' })
+    }])
     try {
-      await supabase.from('quiz_attempts').insert([{ user_id:user.id, lesson_id:currentLesson.id, score:Math.round((score/aiQuestions.length)*100), passed:score>=Math.ceil(aiQuestions.length/2), completed_at:new Date().toISOString() }])
+      await supabase.from('quiz_attempts').insert([{ user_id:user.id, lesson_id:currentLesson.id, score:pct, passed:score>=Math.ceil(aiQuestions.length/2), completed_at:new Date().toISOString() }])
     } catch(e) {}
   }
 
@@ -923,12 +849,23 @@ export default function TestCoursePlayer() {
             </div>
           </div>
 
-          {/* Right: AI quiz + mobile tools + avatar */}
+          {/* Right: AI quiz + score + settings + avatar */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <button onClick={startAIQuiz}
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white transition hover:shadow-lg"
               style={{ background:`linear-gradient(135deg,${C.purple},${C.navyMid})` }}>
               <Brain size={13}/> AI Quiz
+            </button>
+            {/* Score button */}
+            <button onClick={() => setShowScorePanel(true)}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition hover:shadow-md"
+              style={{ background:`${C.orange}12`, color:C.orange, border:`1px solid ${C.orange}30` }}>
+              <Trophy size={13}/> {progress}%
+            </button>
+            {/* Display settings */}
+            <button onClick={() => setShowDisplaySettings(true)}
+              className="hidden sm:flex p-2 rounded-xl hover:bg-gray-100 transition" title="Display Settings">
+              <Settings size={16} style={{ color:C.gray[400] }}/>
             </button>
             <button onClick={() => setMobileToolsOpen(true)}
               className="lg:hidden relative p-2 rounded-xl hover:bg-gray-100 transition">
@@ -1110,7 +1047,7 @@ export default function TestCoursePlayer() {
         </aside>
 
         {/* ── MAIN CONTENT ──────────────────────────────────────────────────── */}
-        <main className="flex-1 min-w-0 p-4 lg:p-6 pb-24 lg:pb-6 overflow-y-auto">
+        <main className="flex-1 min-w-0 p-4 lg:p-6 pb-28 lg:pb-6 overflow-y-auto">
           {currentLesson ? (
             <div>
               {/* Lesson header */}
@@ -1125,35 +1062,14 @@ export default function TestCoursePlayer() {
                         <CheckCircle size={11}/> Completed
                       </span>
                     )}
-                    {/* Media badges */}
-                    {currentLesson.video_url && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex items-center gap-1" style={{ background:`${C.navy}12`, color:C.navy }}>
-                        <Video size={9}/> Video
-                      </span>
-                    )}
-                    {currentLesson.image_url && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold flex items-center gap-1 hidden sm:flex" style={{ background:`${C.green}12`, color:C.green }}>
-                        <Eye size={9}/> Image
-                      </span>
-                    )}
                   </div>
                   <h2 className="text-xl sm:text-2xl font-black leading-tight" style={{ color:C.navy }}>{currentLesson.title}</h2>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {/* Manual refresh — pulls latest lesson data from DB */}
-                  <button
-                    onClick={() => refreshCurrentLesson(currentLesson.id)}
-                    title="Refresh lesson content"
-                    className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-gray-100 transition"
-                    style={{ border:`1px solid ${C.gray[200]}` }}>
-                    <RefreshCw size={13} style={{ color:C.gray[400] }}/>
-                  </button>
-                  <button onClick={startAIQuiz}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white sm:hidden"
-                    style={{ background:`linear-gradient(135deg,${C.purple},${C.navyMid})` }}>
-                    <Brain size={13}/> Quiz
-                  </button>
-                </div>
+                <button onClick={startAIQuiz}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white flex-shrink-0 sm:hidden"
+                  style={{ background:`linear-gradient(135deg,${C.purple},${C.navyMid})` }}>
+                  <Brain size={13}/> Quiz
+                </button>
               </div>
 
               {/* Just completed banner */}
@@ -1187,50 +1103,94 @@ export default function TestCoursePlayer() {
               {/* ── CONTENT TAB ──────────────────────────────────────────── */}
               {activeLessonTab === 'content' && (
                 <div>
-                  {/* ── VIDEO: show if video_url exists ── */}
+                  {/* Video */}
                   {currentLesson.video_url && (
-                    <div className="mb-5 rounded-2xl overflow-hidden shadow-lg" style={{ aspectRatio:'16/9' }}>
-                      <iframe
-                        src={currentLesson.video_url}
-                        title={currentLesson.title}
-                        className="w-full h-full"
-                        frameBorder="0"
+                    <div className="mb-5 rounded-2xl overflow-hidden shadow-lg aspect-video">
+                      <iframe src={currentLesson.video_url} title={currentLesson.title}
+                        className="w-full h-full" frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
+                        allowFullScreen/>
                     </div>
                   )}
 
-                  {/* ── IMAGE: show if image_url exists (whether or not there's also a video) ── */}
+                  {/* Image — always show if exists (with or without video) */}
                   {currentLesson.image_url && (
                     <div className="mb-5 rounded-2xl overflow-hidden shadow-md border" style={{ borderColor:C.gray[200] }}>
-                      <img
-                        src={currentLesson.image_url}
-                        alt={currentLesson.title}
-                        className="w-full object-cover"
-                        style={{ maxHeight:'420px' }}
-                        onError={e => { e.target.style.display='none' }}
-                      />
+                      <img src={currentLesson.image_url} alt={currentLesson.title}
+                        className="w-full object-cover" style={{ maxHeight:'400px' }}
+                        onError={e => { e.target.style.display='none' }}/>
                     </div>
                   )}
 
-                  {/* ── PLACEHOLDER: only if neither video nor image ── */}
+                  {/* Placeholder: only if neither video nor image */}
                   {!currentLesson.video_url && !currentLesson.image_url && (
-                    <div className="mb-5 rounded-2xl flex items-center justify-center h-44 sm:h-52"
+                    <div className="mb-5 rounded-2xl flex items-center justify-center h-48"
                       style={{ background:`linear-gradient(135deg,${C.navy}08,${C.navyMid}08)`, border:`1px dashed ${C.gray[300]}` }}>
                       <div className="text-center">
                         <Video size={28} className="mx-auto mb-2" style={{ color:C.gray[300] }}/>
-                        <p className="text-xs" style={{ color:C.gray[400] }}>Video or image will appear here once added by instructor</p>
+                        <p className="text-sm" style={{ color:C.gray[400] }}>Video or image will appear here once added by instructor</p>
                       </div>
                     </div>
                   )}
 
-                  {/* ── LESSON CONTENT TEXT ── */}
-                  <div className="rounded-2xl p-4 sm:p-6" style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
-                    <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color:C.gray[700] }}>
-                      {currentLesson.lesson_content || 'Lesson content will appear here once loaded.'}
-                    </p>
+                  {/* ── CONTENT LINK — shown as a prominent button when set ── */}
+                  {currentLesson.content_link && (
+                    <div className="mb-5 rounded-2xl overflow-hidden shadow-md"
+                      style={{ border:`2px solid ${C.orange}30`, background:`${C.orange}06` }}>
+                      <div className="px-5 py-3 flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{ background:`${C.orange}15` }}>
+                            <ExternalLink size={18} style={{ color:C.orange }}/>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-black text-sm" style={{ color:C.navy }}>Lesson Activity Link</p>
+                            <p className="text-xs truncate" style={{ color:C.gray[400] }}>{currentLesson.content_link}</p>
+                          </div>
+                        </div>
+                        <a href={currentLesson.content_link} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white hover:opacity-90 hover:shadow-md transition-all flex-shrink-0"
+                          style={{ background:`linear-gradient(135deg,${C.orange},${C.amber})` }}>
+                          Open Activity <ArrowRight size={14}/>
+                        </a>
+                      </div>
+                      <div className="px-5 pb-3">
+                        <p className="text-[11px]" style={{ color:C.gray[400] }}>
+                          Click to open this lesson's activity, form, or exercise in a new tab.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Description (short summary) */}
+                  {currentLesson.description && (
+                    <div className="mb-4 p-4 rounded-2xl flex items-start gap-3"
+                      style={{ background:`${C.navy}06`, border:`1px solid ${C.navy}12` }}>
+                      <Info size={15} style={{ color:C.navy, flexShrink:0, marginTop:1 }}/>
+                      <p className="text-sm leading-relaxed" style={{ color:C.gray[700] }}>{currentLesson.description}</p>
+                    </div>
+                  )}
+
+                  {/* Lesson content body */}
+                  <div className="rounded-2xl p-5 sm:p-6" style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
+                    {currentLesson.lesson_content ? (
+                      <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color:C.gray[700] }}>
+                        {currentLesson.lesson_content}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-center py-4" style={{ color:C.gray[400] }}>
+                        Lesson content will appear here once added by the instructor.
+                      </p>
+                    )}
                   </div>
+
+                  {/* Duration badge if set */}
+                  {currentLesson.duration_minutes && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <Clock size={12} style={{ color:C.gray[400] }}/>
+                      <span className="text-xs" style={{ color:C.gray[400] }}>Estimated time: {currentLesson.duration_minutes} min</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1711,7 +1671,228 @@ export default function TestCoursePlayer() {
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: ${C.gray[300]}; border-radius: 4px; }
+        @media(max-width:1024px){
+          .mobile-pb { padding-bottom: 72px !important; }
+        }
       `}</style>
+
+      {/* ══ SCORE PANEL OVERLAY ══════════════════════════════════════════════ */}
+      {showScorePanel && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowScorePanel(false)}/>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto z-10">
+            {/* Header */}
+            <div className="sticky top-0 bg-white rounded-t-3xl border-b px-5 py-4 flex items-center justify-between z-10"
+              style={{ borderColor:C.gray[200] }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background:`${C.orange}15` }}>
+                  <Trophy size={17} style={{ color:C.orange }}/>
+                </div>
+                <div>
+                  <p className="font-black text-sm" style={{ color:C.navy }}>My Score & Progress</p>
+                  <p className="text-[10px]" style={{ color:C.gray[400] }}>Live updates · {course?.title}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowScorePanel(false)} className="p-2 rounded-xl hover:bg-gray-100">
+                <X size={16} style={{ color:C.gray[400] }}/>
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {/* Course progress */}
+              <div className="rounded-2xl p-4" style={{ background:`linear-gradient(135deg,${C.navyDark},${C.navy})` }}>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-black text-sm text-white">Course Completion</p>
+                  <span className="font-black text-2xl" style={{ color:C.orangeLight }}>{progress}%</span>
+                </div>
+                <div className="h-3 rounded-full overflow-hidden" style={{ background:'rgba(255,255,255,0.15)' }}>
+                  <div className="h-full rounded-full transition-all duration-700"
+                    style={{ width:`${progress}%`, background:`linear-gradient(90deg,${C.orange},${C.orangeLight})` }}/>
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-white/60 text-xs">{completedLessons.length} completed</span>
+                  <span className="text-white/60 text-xs">{lessons.length - completedLessons.length} remaining</span>
+                </div>
+              </div>
+
+              {/* Grade summary */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label:'Grade Average', val:`${gradeSummary.average}%`, color:C.navy, icon:<BarChart3 size={16}/> },
+                  { label:'Letter Grade', val:gradeSummary.letter, color:C.green, icon:<Award size={16}/> },
+                  { label:'Lessons Done', val:`${completedLessons.length}/${lessons.length}`, color:C.orange, icon:<CheckCircle size={16}/> },
+                ].map((s,i) => (
+                  <div key={i} className="rounded-2xl p-3 text-center" style={{ background:`${s.color}08`, border:`1px solid ${s.color}20` }}>
+                    <div className="w-7 h-7 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background:`${s.color}15`, color:s.color }}>
+                      {s.icon}
+                    </div>
+                    <p className="font-black text-lg" style={{ color:s.color }}>{s.val}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color:C.gray[400] }}>{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quiz history this session */}
+              {quizHistory.length > 0 && (
+                <div>
+                  <p className="font-black text-sm mb-3 flex items-center gap-2" style={{ color:C.navy }}>
+                    <Brain size={14}/> Quiz Scores This Session
+                  </p>
+                  <div className="space-y-2">
+                    {[...quizHistory].reverse().map((h, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-2xl"
+                        style={{ background: h.passed ? `${C.green}08` : `${C.rose}08`, border:`1px solid ${h.passed?C.green:C.rose}20` }}>
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <div className="w-7 h-7 rounded-xl flex items-center justify-center text-white text-[10px] font-black flex-shrink-0"
+                            style={{ background: h.passed ? C.green : C.rose }}>
+                            {h.passed ? '✓' : '✗'}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold truncate" style={{ color:C.navy }}>{h.lessonTitle}</p>
+                            <p className="text-[10px]" style={{ color:C.gray[400] }}>{h.time}</p>
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <p className="font-black text-base" style={{ color: h.passed ? C.green : C.rose }}>{h.pct}%</p>
+                          <p className="text-[10px]" style={{ color:C.gray[400] }}>{h.score}/{h.total}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Session average */}
+                  <div className="mt-3 p-3 rounded-2xl text-center" style={{ background:`${C.navy}08` }}>
+                    <p className="text-xs" style={{ color:C.gray[500] }}>Session Quiz Average</p>
+                    <p className="font-black text-xl" style={{ color:C.navy }}>
+                      {Math.round(quizHistory.reduce((s,h)=>s+h.pct,0)/quizHistory.length)}%
+                    </p>
+                  </div>
+                </div>
+              )}
+              {quizHistory.length === 0 && (
+                <div className="text-center py-6 rounded-2xl" style={{ background:C.gray[50] }}>
+                  <Brain size={28} className="mx-auto mb-2" style={{ color:C.gray[300] }}/>
+                  <p className="text-sm" style={{ color:C.gray[400] }}>No quizzes taken yet this session.</p>
+                  <p className="text-xs mt-1" style={{ color:C.gray[300] }}>Complete a lesson quiz to see your score here.</p>
+                </div>
+              )}
+
+              {/* Grade items */}
+              {grades.length > 0 && (
+                <div>
+                  <p className="font-black text-sm mb-3 flex items-center gap-2" style={{ color:C.navy }}>
+                    <Award size={14}/> Graded Items
+                  </p>
+                  <div className="space-y-2">
+                    {grades.map(g => (
+                      <div key={g.id} className="flex items-center justify-between p-3 rounded-2xl"
+                        style={{ background:C.gray[50], border:`1px solid ${C.gray[200]}` }}>
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <div className="w-7 h-7 rounded-xl flex items-center justify-center text-white text-[10px] font-black flex-shrink-0 uppercase"
+                            style={{ background:C.amber }}>{(g.grade_type||'A').slice(0,1)}</div>
+                          <p className="text-xs font-semibold truncate" style={{ color:C.gray[700] }}>{g.title}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-3">
+                          <p className="font-black text-sm" style={{ color:C.navy }}>{g.score}/{g.max_score}</p>
+                          {g.max_score > 0 && (
+                            <div className="w-16 h-1 rounded-full overflow-hidden mt-1" style={{ background:C.gray[200] }}>
+                              <div className="h-full rounded-full" style={{ width:`${(g.score/g.max_score)*100}%`, background:`linear-gradient(90deg,${C.green},${C.teal})` }}/>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ DISPLAY SETTINGS OVERLAY ════════════════════════════════════════ */}
+      {showDisplaySettings && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDisplaySettings(false)}/>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm z-10">
+            <div className="border-b px-5 py-4 flex items-center justify-between" style={{ borderColor:C.gray[200] }}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background:`${C.navy}12` }}>
+                  <Settings size={14} style={{ color:C.navy }}/>
+                </div>
+                <p className="font-black text-sm" style={{ color:C.navy }}>Display Settings</p>
+              </div>
+              <button onClick={() => setShowDisplaySettings(false)} className="p-2 rounded-xl hover:bg-gray-100">
+                <X size={14} style={{ color:C.gray[400] }}/>
+              </button>
+            </div>
+            <div className="p-5 space-y-3">
+              {[
+                { key:'showTrackSize',    label:'Show Track Size',      desc:'Display lesson duration estimates' },
+                { key:'showAreaNames',    label:'Show Area Names',      desc:'Show section labels in sidebar'    },
+                { key:'extendGridLines', label:'Extend Grid Lines',    desc:'Full-width week dividers'          },
+                { key:'showLineNames',   label:'Show Line Names',      desc:'Show week numbers on all lessons'  },
+                { key:'showMiniMap',     label:'Show Progress Map',    desc:'Mini progress map in sidebar'      },
+                { key:'compactLessons',  label:'Compact Lesson List',  desc:'Smaller lesson rows in sidebar'    },
+              ].map(s => (
+                <div key={s.key} className="flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 transition"
+                  style={{ border:`1px solid ${C.gray[200]}` }}>
+                  <div className="flex-1 min-w-0 mr-3">
+                    <p className="text-sm font-bold" style={{ color:C.navy }}>{s.label}</p>
+                    <p className="text-[10px]" style={{ color:C.gray[400] }}>{s.desc}</p>
+                  </div>
+                  <button onClick={() => setDisplaySettings(p => ({ ...p, [s.key]:!p[s.key] }))}
+                    className="w-11 h-6 rounded-full transition-all flex-shrink-0 relative"
+                    style={{ background: displaySettings[s.key] ? C.green : C.gray[300] }}>
+                    <div className="absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all"
+                      style={{ left: displaySettings[s.key] ? '24px' : '2px' }}/>
+                  </button>
+                </div>
+              ))}
+              <button onClick={() => setShowDisplaySettings(false)}
+                className="w-full py-3 rounded-2xl font-bold text-sm text-white mt-2"
+                style={{ background:`linear-gradient(135deg,${C.navy},${C.navyMid})` }}>
+                Apply Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MOBILE BOTTOM NAVIGATION BAR ════════════════════════════════════ */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t shadow-2xl"
+        style={{ borderColor:C.gray[200] }}>
+        <div className="grid grid-cols-5 gap-0">
+          {[
+            { id:'lessons', icon:BookOpen,    label:'Lessons', badge:0 },
+            { id:'tools',   icon:LayoutGrid,  label:'Tools',   badge:(announcements.length + unreadCount) > 0 ? announcements.length + unreadCount : 0 },
+            { id:'quiz',    icon:Brain,       label:'Quiz',    badge:0 },
+            { id:'score',   icon:Trophy,      label:'Score',   badge:0 },
+            { id:'settings',icon:Settings,    label:'Settings',badge:0 },
+          ].map(tab => (
+            <button key={tab.id}
+              onClick={() => {
+                if (tab.id === 'lessons')  { setMobileMenuOpen(true); setMobileBottomTab('lessons')  }
+                if (tab.id === 'tools')    { setMobileToolsOpen(true); setMobileBottomTab('tools')   }
+                if (tab.id === 'quiz')     { startAIQuiz(); setMobileBottomTab('quiz')               }
+                if (tab.id === 'score')    { setShowScorePanel(true); setMobileBottomTab('score')    }
+                if (tab.id === 'settings') { setShowDisplaySettings(true); setMobileBottomTab('settings') }
+              }}
+              className="relative flex flex-col items-center justify-center py-2.5 px-1 transition-all"
+              style={{ color: mobileBottomTab===tab.id ? C.navy : C.gray[400] }}>
+              {tab.badge > 0 && (
+                <span className="absolute top-1.5 right-3 w-4 h-4 rounded-full text-[9px] font-black text-white flex items-center justify-center"
+                  style={{ background:C.rose }}>{tab.badge > 9 ? '9+' : tab.badge}</span>
+              )}
+              <tab.icon size={20} style={{ marginBottom:2 }}/>
+              <span className="text-[10px] font-semibold">{tab.label}</span>
+              {mobileBottomTab===tab.id && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full" style={{ background:C.navy }}/>
+              )}
+            </button>
+          ))}
+        </div>
+      </nav>
+
     </div>
   )
 }
