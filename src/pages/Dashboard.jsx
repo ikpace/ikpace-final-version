@@ -1,522 +1,290 @@
 // src/pages/Dashboard.jsx
-// ─── iKPACE Advanced Student Dashboard ───────────────────────────────────────
+// iKPACE Student Dashboard — clean, real data, working signout, IQ quiz, avatar upload
 import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../supabaseClient'
-
 import {
-  BookOpen, Award, Clock, Flame, Bell, CheckCircle, ChevronRight,
-  Star, Users, Activity, LogOut, PlayCircle, CreditCard, Download,
-  Search, Menu, X, TrendingUp, Zap, Sun, Moon, Copy, Check,
-  AlertCircle, MessageCircle, Timer, BarChart3, Sparkles,
-  Home, Trophy, GraduationCap, Shield, Wallet, BadgeCheck,
-  Headphones, Bookmark, FolderOpen, Heart, Video, Target,
-  Flag, LayoutDashboard, Sunrise, Sunset, Coffee, CheckSquare,
-  Square, StickyNote, Plus, Pause, Play, RotateCcw, StopCircle,
-  Lock, BrainCircuit, ClipboardCheck, CalendarDays, MessageSquare,
-  Settings, User, Mail, Rocket, ArrowRight, ChevronDown, ChevronUp,
-  PieChart, Archive
+  BookOpen,
+  CreditCard,
+  LogOut,
+  PlayCircle,
+  CheckCircle,
+  AlertCircle,
+  ChevronRight,
+  Award,
+  User,
+  BarChart3,
+  RefreshCw,
+  Flame,
+  Send,
+  X,
+  TrendingUp,
+  Calendar,
+  Camera,
+  Menu,
+  Home,
+  Brain
 } from 'lucide-react'
 
-// ─── Brand Design System ──────────────────────────────────────────────────────
+// ── Brand tokens ───────────────────────────────────────────────────────────────
 const C = {
-  navy:        '#1A3D7C',
-  navyDark:    '#0F2655',
-  navyMid:     '#2F5EA8',
-  orange:      '#FF7A00',
-  orangeLight: '#FF9A3C',
-  green:       '#008F4C',
-  yellow:      '#E6B800',
-  teal:        '#0D9488',
-  purple:      '#7C3AED',
-  rose:        '#E11D48',
-  amber:       '#D97706',
+  navy:   '#1A3D7C',
+  navyD:  '#0F2655',
+  navyM:  '#2F5EA8',
+  orange: '#FF7A00',
+  orangeL:'#FF9A3C',
+  green:  '#008F4C',
+  red:    '#DC2626',
+  yellow: '#F59E0B',
+  purple: '#7C3AED',
   gray: {
-    50:'#F8FAFC',100:'#F1F5F9',200:'#E2E8F0',
-    300:'#CBD5E1',400:'#94A3B8',500:'#64748B',
-    600:'#475569',700:'#334155',800:'#1E293B',900:'#0F172A'
+    50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8F0',
+    300:'#CBD5E1', 400:'#94A3B8', 500:'#64748B',
+    600:'#475569', 700:'#334155', 900:'#0F172A'
   }
 }
 
-// ─── Pomodoro Timer ───────────────────────────────────────────────────────────
-function PomodoroTimer() {
-  const MODES  = { focus:25*60, short:5*60, long:15*60 }
-  const LABELS = { focus:'🎯 Focus', short:'☕ Break', long:'🌿 Long' }
-  const [mode, setMode]       = useState('focus')
-  const [secs, setSecs]       = useState(MODES.focus)
-  const [running, setRunning] = useState(false)
-  const [sessions, setSessions] = useState(0)
-  const ref = useRef(null)
+// ── Helpers ────────────────────────────────────────────────────────────────────
+const fmtDate  = d => d ? new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'
+const fmtTime  = d => d ? new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : ''
+const fmtMoney = n => `$${Number(n||0).toFixed(2)}`
+const initials = s => s ? s.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'U'
+const firstName= s => s ? s.trim().split(' ')[0] : 'Learner'
+const clamp    = (v,a,b) => Math.min(Math.max(Number(v)||0,a),b)
+const tzName   = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g,' ') } catch { return '' } }
 
-  useEffect(() => {
-    if (running) {
-      ref.current = setInterval(() => {
-        setSecs(s => {
-          if (s <= 1) {
-            clearInterval(ref.current)
-            setRunning(false)
-            if (mode === 'focus') setSessions(p => p + 1)
-            return 0
-          }
-          return s - 1
-        })
-      }, 1000)
-    } else clearInterval(ref.current)
-    return () => clearInterval(ref.current)
-  }, [running, mode])
+const getGreeting = () => {
+  const h = new Date().getHours()
+  if (h < 5)  return { text:'Good night',     emoji:'🌙' }
+  if (h < 12) return { text:'Good morning',   emoji:'☀️' }
+  if (h < 17) return { text:'Good afternoon', emoji:'🌤️' }
+  if (h < 21) return { text:'Good evening',   emoji:'🌅' }
+  return             { text:'Good night',     emoji:'🌙' }
+}
 
-  const switchMode = m => { setMode(m); setSecs(MODES[m]); setRunning(false) }
-  const mm = String(Math.floor(secs / 60)).padStart(2, '0')
-  const ss = String(secs % 60).padStart(2, '0')
-  const pct = ((MODES[mode] - secs) / MODES[mode]) * 100
-  const R = 52, circ = 2 * Math.PI * R
-  const modeClr = mode === 'focus' ? C.orange : mode === 'short' ? C.green : C.navyMid
+// ── UI atoms ──────────────────────────────────────────────────────────────────
+const Card = ({ children, style={}, onClick }) => (
+  <div onClick={onClick} style={{
+    background:'white', borderRadius:16, border:`1px solid ${C.gray[200]}`,
+    boxShadow:'0 1px 8px rgba(0,0,0,0.05)', padding:20, ...style
+  }}>{children}</div>
+)
+
+const Pill = ({ children, color, bg }) => (
+  <span style={{
+    fontSize:11, fontWeight:700, color,
+    background:bg||`${color}15`, padding:'3px 10px',
+    borderRadius:20, display:'inline-block'
+  }}>{children}</span>
+)
+
+const Bar = ({ pct=0, color=C.navy, h=8 }) => {
+  const p = clamp(pct,0,100)
+  return (
+    <div style={{ height:h, borderRadius:h, background:C.gray[100], overflow:'hidden' }}>
+      <div style={{ height:'100%', width:`${p}%`, background:color, borderRadius:h, transition:'width .6s ease', minWidth:p>0?4:0 }}/>
+    </div>
+  )
+}
+
+// ── IQ Quiz Panel (replaces AI chat) ─────────────────────────────────────────
+const IQ_QUESTIONS = {
+  'Virtual Assistant Pro': [
+    { q:'What is the PRIMARY role of a Virtual Assistant?', opts:['Writing code','Managing tasks for clients','Designing logos','Teaching students'], ans:1, exp:'A VA manages tasks, communications, and schedules remotely for clients.' },
+    { q:'Which tool is best for managing client emails?', opts:['Photoshop','Gmail + filters','Excel','WhatsApp'], ans:1, exp:'Gmail with filters and labels is the industry standard for VA email management.' },
+    { q:'What does "onboarding" mean in VA work?', opts:['Logging in','Welcoming and setting up a new client','Sending invoices','Ending a contract'], ans:1, exp:'Onboarding is the process of welcoming and orienting a new client into your workflow.' },
+  ],
+  'Social Media Marketing': [
+    { q:'What does CTR stand for in digital marketing?', opts:['Creative Text Rate','Click-Through Rate','Customer Trust Rating','Content Time Reach'], ans:1, exp:'CTR (Click-Through Rate) measures how many people clicked your ad vs how many saw it.' },
+    { q:'Which platform has the LARGEST global user base?', opts:['Twitter','TikTok','Facebook','Snapchat'], ans:2, exp:'Facebook has over 3 billion monthly active users, making it the largest social platform.' },
+    { q:'What is a "Call to Action" (CTA)?', opts:['A phone call to your client','A prompt asking users to do something','A type of paid ad','A social media comment'], ans:1, exp:'A CTA is any prompt that encourages your audience to take a specific action (e.g. "Buy Now").' },
+  ],
+  'Canva & Graphic Design': [
+    { q:'What does "white space" mean in design?', opts:['Using white color only','Empty space around elements','A type of font','A Canva template'], ans:1, exp:'White space (negative space) gives designs breathing room and improves readability.' },
+    { q:'Which color model is used for PRINT design?', opts:['RGB','HEX','CMYK','HSL'], ans:2, exp:'CMYK (Cyan, Magenta, Yellow, Key/Black) is used for print, while RGB is for screens.' },
+    { q:'What is a "brand kit"?', opts:['A physical toolkit','A set of brand colors, fonts and logos','A Canva subscription','A type of template'], ans:1, exp:'A brand kit defines your visual identity: colors, fonts, logos, and style guidelines.' },
+  ],
+  'Smart Kids Coding': [
+    { q:'What is Scratch?', opts:['A game console','A visual programming language for kids','A type of computer virus','A drawing app'], ans:1, exp:'Scratch is a free visual programming language made by MIT, designed for children to learn coding.' },
+    { q:'In coding, what does a "loop" do?', opts:['Crashes the program','Repeats an action multiple times','Deletes data','Connects to the internet'], ans:1, exp:'A loop repeats a set of instructions a specified number of times or until a condition is met.' },
+    { q:'What is a "sprite" in Scratch?', opts:['A soft drink','A type of variable','A character or object on screen','A sound file'], ans:2, exp:'In Scratch, a sprite is any character, object, or image that you can program to move and interact.' },
+  ],
+  'Freelancing & Online Income': [
+    { q:'What is Upwork?', opts:['A social media app','A freelancing marketplace','A coding language','A design tool'], ans:1, exp:'Upwork is one of the world\'s largest freelancing platforms where clients post jobs and freelancers apply.' },
+    { q:'What should your Upwork profile ALWAYS include?', opts:['Your home address','A clear photo, bio and portfolio','Your bank details','Your phone number'], ans:1, exp:'A professional photo, compelling bio, and portfolio samples dramatically increase your chances of being hired.' },
+    { q:'What is a "retainer" in freelancing?', opts:['A type of invoice','A monthly fixed fee for ongoing work','A client complaint','A platform fee'], ans:1, exp:'A retainer is an agreement where a client pays you a fixed monthly fee for a set amount of work.' },
+  ],
+  'AI Prompt Engineering': [
+    { q:'What is "prompt engineering"?', opts:['Building AI software','Crafting inputs to get better AI outputs','Installing AI models','Drawing with AI'], ans:1, exp:'Prompt engineering is the skill of writing effective instructions to guide AI models to produce the best results.' },
+    { q:'Which company created ChatGPT?', opts:['Google','Microsoft','OpenAI','Apple'], ans:2, exp:'ChatGPT was created by OpenAI, founded in 2015 and headquartered in San Francisco.' },
+    { q:'What does "hallucination" mean in AI?', opts:['AI dreaming','AI generating false or made-up information','AI creating images','AI speaking aloud'], ans:1, exp:'AI hallucination refers to when an AI model confidently generates information that is incorrect or fabricated.' },
+  ],
+}
+
+const DEFAULT_QUESTIONS = [
+  { q:'What does HTML stand for?', opts:['HyperText Markup Language','High Tech Modern Language','Home Tool Markup Language','Hyper Transfer Main Link'], ans:0, exp:'HTML (HyperText Markup Language) is the standard language for creating web pages.' },
+  { q:'Which of these is a good study habit?', opts:['Studying for 10 hours straight','Taking regular short breaks','Skipping sleep','Avoiding notes'], ans:1, exp:'Regular breaks (like the Pomodoro technique) improve focus and long-term retention.' },
+  { q:'What is the best way to retain new information?', opts:['Read once and move on','Teach it to someone else','Memorise by repetition only','Avoid practice'], ans:1, exp:'The "Feynman Technique" — teaching a concept to someone else — is one of the best ways to master it.' },
+]
+
+function IQQuiz({ courseTitle, onClose }) {
+  const questions = IQ_QUESTIONS[courseTitle] || DEFAULT_QUESTIONS
+  const [idx,     setIdx]     = useState(0)
+  const [chosen,  setChosen]  = useState(null)
+  const [score,   setScore]   = useState(0)
+  const [done,    setDone]    = useState(false)
+  const [showExp, setShowExp] = useState(false)
+
+  const q = questions[idx]
+
+  const choose = (i) => {
+    if (chosen !== null) return
+    setChosen(i)
+    setShowExp(true)
+    if (i === q.ans) setScore(s => s+1)
+  }
+
+  const next = () => {
+    if (idx < questions.length - 1) {
+      setIdx(i => i+1); setChosen(null); setShowExp(false)
+    } else {
+      setDone(true)
+    }
+  }
+
+  const restart = () => { setIdx(0); setChosen(null); setScore(0); setDone(false); setShowExp(false) }
+
+  const pct   = Math.round((score / questions.length) * 100)
+  const grade = pct >= 80 ? { label:'Excellent! 🏆', color:C.green } : pct >= 60 ? { label:'Good job! 👍', color:C.orange } : { label:'Keep learning! 📚', color:C.navy }
 
   return (
-    <div className="rounded-2xl p-5 text-white h-full" style={{ background: `linear-gradient(145deg,${C.navyDark},${C.navy})` }}>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-sm flex items-center gap-2">
-          <Timer size={15} style={{ color: C.orange }} />Study Timer
-        </h3>
-        <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full">{sessions} sessions</span>
-      </div>
-      <div className="flex gap-1 mb-4">
-        {Object.keys(MODES).map(m => (
-          <button key={m} onClick={() => switchMode(m)}
-            className="flex-1 py-1.5 rounded-lg text-[10px] font-bold transition-all"
-            style={{ background: mode === m ? modeClr : 'rgba(255,255,255,0.1)', color: mode === m ? '#fff' : 'rgba(255,255,255,0.5)' }}>
-            {LABELS[m]}
-          </button>
-        ))}
-      </div>
-      <div className="flex justify-center mb-4">
-        <div className="relative w-32 h-32">
-          <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-            <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
-            <circle cx="60" cy="60" r={R} fill="none" stroke={modeClr} strokeWidth="7"
-              strokeLinecap="round" strokeDasharray={circ}
-              strokeDashoffset={circ - (pct / 100) * circ}
-              style={{ transition: 'stroke-dashoffset 1s linear' }} />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black font-mono">{mm}:{ss}</span>
-            <span className="text-[10px] opacity-50 capitalize">{mode}</span>
+    <div style={{ position:'fixed', inset:0, zIndex:50, background:'rgba(15,22,85,0.6)', backdropFilter:'blur(4px)',
+      display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+      <div style={{ width:'100%', maxWidth:500, background:'white', borderRadius:24,
+        overflow:'hidden', boxShadow:'0 24px 60px rgba(0,0,0,0.25)', maxHeight:'90vh', display:'flex', flexDirection:'column' }}>
+
+        {/* Header */}
+        <div style={{ padding:'18px 20px', background:`linear-gradient(135deg,${C.navyD},${C.navy})`,
+          display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <div style={{ width:36, height:36, borderRadius:10, background:'rgba(255,255,255,0.15)',
+              display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>🧠</div>
+            <div>
+              <p style={{ color:'white', fontWeight:900, fontSize:15, margin:0 }}>iKPACE Test ur iQ</p>
+              <p style={{ color:'rgba(255,255,255,0.55)', fontSize:11, margin:0 }}>{courseTitle}</p>
+            </div>
           </div>
+          <button onClick={onClose} style={{ background:'rgba(255,255,255,0.15)', border:'none',
+            width:32, height:32, borderRadius:10, cursor:'pointer', color:'white',
+            display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <X size={16}/>
+          </button>
         </div>
-      </div>
-      <div className="flex items-center justify-center gap-3">
-        <button onClick={() => { setSecs(MODES[mode]); setRunning(false) }}
-          className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
-          <RotateCcw size={14} />
-        </button>
-        <button onClick={() => setRunning(r => !r)}
-          className="w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg"
-          style={{ background: running ? C.rose : modeClr }}>
-          {running ? <Pause size={20} /> : <Play size={20} />}
-        </button>
-        <button onClick={() => { setRunning(false); setSecs(0) }}
-          className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
-          <StopCircle size={14} />
-        </button>
-      </div>
-    </div>
-  )
-}
 
-// ─── Streak Calendar ──────────────────────────────────────────────────────────
-function StreakCalendar({ streak = 7, dm }) {
-  const today = new Date()
-  const days  = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-  const last14 = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(today)
-    d.setDate(today.getDate() - (13 - i))
-    return { date: d, active: i >= (14 - streak) }
-  })
-  return (
-    <div className="rounded-2xl p-4 h-full" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm flex items-center gap-2" style={{ color: C.navy }}>
-          <Flame size={14} style={{ color: C.orange }} />Learning Streak
-        </h3>
-        <span className="text-xs font-black px-2.5 py-0.5 rounded-full text-white" style={{ background: C.orange }}>{streak} 🔥</span>
-      </div>
-      <div className="grid grid-cols-7 gap-1 mb-1.5">
-        {days.map((d, i) => <div key={i} className="text-center text-[9px] font-semibold" style={{ color: C.gray[400] }}>{d}</div>)}
-      </div>
-      <div className="grid grid-cols-7 gap-1">
-        {last14.map((day, i) => (
-          <div key={i} className="aspect-square rounded-lg flex items-center justify-center text-[10px] font-bold transition-all"
-            style={{
-              background: day.date.toDateString() === today.toDateString() ? C.orange : day.active ? C.green : dm.subtle,
-              color: (day.active || day.date.toDateString() === today.toDateString()) ? '#fff' : C.gray[400],
-              transform: day.date.toDateString() === today.toDateString() ? 'scale(1.15)' : 'scale(1)',
-              boxShadow: day.date.toDateString() === today.toDateString() ? `0 2px 8px ${C.orange}50` : ''
-            }}>
-            {day.date.getDate()}
-          </div>
-        ))}
-      </div>
-      <div className="mt-3 flex items-center gap-3 text-[10px]" style={{ color: C.gray[400] }}>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded inline-block" style={{ background: C.green }} />Active</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded inline-block" style={{ background: C.orange }} />Today</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded inline-block" style={{ background: dm.subtle }} />Missed</span>
-      </div>
-    </div>
-  )
-}
+        {/* Body */}
+        <div style={{ flex:1, overflowY:'auto', padding:24 }}>
+          {!done ? (
+            <>
+              {/* Progress */}
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+                <span style={{ fontSize:12, color:C.gray[400], fontWeight:600 }}>
+                  Question {idx+1} of {questions.length}
+                </span>
+                <span style={{ fontSize:12, fontWeight:800, color:C.orange }}>
+                  Score: {score}/{idx + (chosen !== null ? 1 : 0)}
+                </span>
+              </div>
+              <Bar pct={((idx + (chosen!==null?1:0)) / questions.length) * 100} color={C.orange} h={6}/>
 
-// ─── Weekly Bar Chart ─────────────────────────────────────────────────────────
-function WeeklyChart({ dm }) {
-  const data = [
-    { d: 'Mon', h: 1.5 }, { d: 'Tue', h: 3.0 }, { d: 'Wed', h: 2.0 },
-    { d: 'Thu', h: 4.0 }, { d: 'Fri', h: 2.5 }, { d: 'Sat', h: 1.0 }, { d: 'Sun', h: 3.5 }
-  ]
-  const max = Math.max(...data.map(x => x.h))
-  const todayIdx = (new Date().getDay() + 6) % 7
-  return (
-    <div className="rounded-2xl p-4 h-full" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm flex items-center gap-2" style={{ color: C.navy }}>
-          <BarChart3 size={14} style={{ color: C.navyMid }} />Weekly Activity
-        </h3>
-        <span className="text-xs" style={{ color: C.gray[400] }}>Hours</span>
-      </div>
-      <div className="flex items-end gap-1.5 h-20 mb-1">
-        {data.map((d, i) => (
-          <div key={i} className="flex-1 flex flex-col items-center gap-1 group cursor-default relative">
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap px-1 py-0.5 rounded"
-              style={{ background: C.navy, color: '#fff' }}>{d.h}h</div>
-            <div className="w-full rounded-t-lg transition-all"
-              style={{
-                height: `${(d.h / max) * 76}px`, minHeight: '4px',
-                background: i === todayIdx ? `linear-gradient(180deg,${C.orange},${C.orangeLight})` : `${C.navy}30`,
-                boxShadow: i === todayIdx ? `0 2px 8px ${C.orange}50` : ''
-              }} />
-            <span className="text-[9px]" style={{ color: i === todayIdx ? C.orange : C.gray[400] }}>{d.d}</span>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-between text-xs mt-1">
-        <span style={{ color: C.gray[400] }}>Total: <strong style={{ color: C.navy }}>17.5h</strong></span>
-        <span style={{ color: C.green }}>↑ 23% vs last week</span>
-      </div>
-    </div>
-  )
-}
+              {/* Question */}
+              <p style={{ fontSize:16, fontWeight:800, color:C.navy, margin:'20px 0 16px', lineHeight:1.4 }}>
+                {q.q}
+              </p>
 
-// ─── Skill Progress ───────────────────────────────────────────────────────────
-function SkillsPanel({ dm }) {
-  const skills = [
-    { name: 'Business Strategy', pct: 72, color: C.navy,   icon: '💼' },
-    { name: 'Digital Marketing', pct: 58, color: C.orange, icon: '📣' },
-    { name: 'UI/UX Design',      pct: 44, color: C.purple, icon: '🎨' },
-    { name: 'Data Analysis',     pct: 35, color: C.teal,   icon: '📊' },
-    { name: 'Communication',     pct: 85, color: C.green,  icon: '💬' },
-  ]
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <h3 className="font-bold text-sm mb-4 flex items-center gap-2" style={{ color: C.navy }}>
-        <BrainCircuit size={14} style={{ color: C.navyMid }} />Skill Progress
-      </h3>
-      <div className="space-y-3">
-        {skills.map((s, i) => (
-          <div key={i}>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-medium flex items-center gap-1.5" style={{ color: dm.heading }}>
-                <span>{s.icon}</span>{s.name}
-              </span>
-              <span className="text-xs font-black" style={{ color: s.color }}>{s.pct}%</span>
-            </div>
-            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: dm.subtle }}>
-              <div className="h-full rounded-full" style={{ width: `${s.pct}%`, background: s.color, transition: 'width .6s ease' }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+              {/* Options */}
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {q.opts.map((opt, i) => {
+                  let bg = C.gray[50], border = C.gray[200], color = C.gray[700]
+                  if (chosen !== null) {
+                    if (i === q.ans)                    { bg=`${C.green}12`; border=C.green; color=C.green }
+                    else if (i === chosen && i !== q.ans){ bg=`${C.red}10`;  border=C.red;   color=C.red   }
+                  } else if (chosen === null) {
+                    // hover handled via onMouseEnter inline not possible easily — keep clean
+                  }
+                  return (
+                    <button key={i} onClick={() => choose(i)} disabled={chosen !== null}
+                      style={{ width:'100%', textAlign:'left', padding:'13px 16px', borderRadius:12,
+                        background:bg, border:`2px solid ${border}`, color, fontSize:14,
+                        fontWeight:600, cursor: chosen===null ? 'pointer' : 'default',
+                        transition:'all .2s', display:'flex', alignItems:'center', gap:12 }}>
+                      <span style={{ width:24, height:24, borderRadius:'50%', flexShrink:0,
+                        background: chosen===null ? C.gray[200] : i===q.ans ? C.green : i===chosen ? C.red : C.gray[200],
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontSize:11, fontWeight:900, color:'white' }}>
+                        {String.fromCharCode(65+i)}
+                      </span>
+                      {opt}
+                      {chosen!==null && i===q.ans && <span style={{ marginLeft:'auto' }}>✓</span>}
+                      {chosen!==null && i===chosen && i!==q.ans && <span style={{ marginLeft:'auto' }}>✗</span>}
+                    </button>
+                  )
+                })}
+              </div>
 
-// ─── Daily Challenge ──────────────────────────────────────────────────────────
-function DailyChallenge() {
-  const [ans, setAns] = useState(null)
-  const q = {
-    q: 'What is the #1 skill of a top Virtual Assistant?',
-    opts: ['Technical expertise', 'Clear communication', 'Speed typing', 'Social media'],
-    correct: 1, xp: 50
-  }
-  return (
-    <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(145deg,${C.navy},${C.navyMid})` }}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm flex items-center gap-2">
-          <Zap size={14} style={{ color: C.yellow }} />Daily Challenge
-        </h3>
-        <span className="text-[10px] bg-yellow-400 text-gray-900 px-2 py-0.5 rounded-full font-black">+{q.xp} XP</span>
-      </div>
-      <p className="text-xs mb-3 opacity-90 leading-relaxed">{q.q}</p>
-      <div className="space-y-1.5">
-        {q.opts.map((o, i) => (
-          <button key={i} onClick={() => !ans && setAns(i)} disabled={!!ans}
-            className="w-full text-left px-3 py-2 rounded-xl text-[11px] font-medium transition-all"
-            style={{
-              background: ans === null ? 'rgba(255,255,255,0.1)'
-                : i === q.correct ? `${C.green}cc`
-                : ans === i && i !== q.correct ? `${C.rose}99`
-                : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${ans !== null && i === q.correct ? C.green : 'rgba(255,255,255,0.1)'}`
-            }}>
-            <span className="inline-flex w-4 h-4 rounded-full items-center justify-center mr-2 text-[9px] bg-white/15">
-              {String.fromCharCode(65 + i)}
-            </span>
-            {o}
-            {ans !== null && i === q.correct && <CheckCircle size={11} className="inline ml-2 text-green-300" />}
-          </button>
-        ))}
-      </div>
-      {ans !== null && (
-        <p className="mt-2 text-[11px] text-center font-semibold"
-          style={{ color: ans === q.correct ? '#86efac' : '#fca5a5' }}>
-          {ans === q.correct ? '🎉 Correct! +50 XP earned!' : '❌ Not quite. The answer is B.'}
-        </p>
-      )}
-    </div>
-  )
-}
+              {/* Explanation */}
+              {showExp && (
+                <div style={{ marginTop:14, padding:'12px 14px', borderRadius:12,
+                  background: chosen===q.ans ? `${C.green}10` : `${C.orange}10`,
+                  border:`1px solid ${chosen===q.ans ? C.green : C.orange}30` }}>
+                  <p style={{ fontSize:13, color:C.gray[700], margin:0, lineHeight:1.55 }}>
+                    <strong>💡 Explanation:</strong> {q.exp}
+                  </p>
+                </div>
+              )}
 
-// ─── Assignment Tracker ───────────────────────────────────────────────────────
-function AssignmentTracker({ dm }) {
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Write client onboarding email', course: 'VA Pro',      due: '2 days',  priority: 'high',   done: false },
-    { id: 2, title: 'Complete Quiz: Module 3',        course: 'VA Pro',      due: '4 days',  priority: 'medium', done: false },
-    { id: 3, title: 'Design social media calendar',   course: 'Marketing',   due: '1 week',  priority: 'low',    done: true  },
-    { id: 4, title: 'Submit final project draft',     course: 'VA Pro',      due: 'Tomorrow',priority: 'high',   done: false },
-  ])
-  const pc = { high: C.rose, medium: C.amber, low: C.green }
-  const toggle = id => setTasks(p => p.map(t => t.id === id ? { ...t, done: !t.done } : t))
-  const pending = tasks.filter(t => !t.done).length
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm flex items-center gap-2" style={{ color: C.navy }}>
-          <ClipboardCheck size={14} style={{ color: C.navyMid }} />Assignments
-        </h3>
-        <span className="text-[10px] px-2 py-0.5 rounded-full text-white font-bold"
-          style={{ background: pending > 0 ? C.rose : C.green }}>{pending} pending</span>
-      </div>
-      <div className="space-y-2">
-        {tasks.map(t => (
-          <div key={t.id} onClick={() => toggle(t.id)}
-            className="flex items-start gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all"
-            style={{
-              background: t.done ? dm.subtle : `${pc[t.priority]}10`,
-              opacity: t.done ? .6 : 1,
-              border: `1px solid ${t.done ? dm.border : pc[t.priority] + '25'}`
-            }}>
-            <div className="mt-0.5 w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
-              style={{ borderColor: t.done ? C.green : pc[t.priority], background: t.done ? C.green : 'transparent' }}>
-              {t.done && <Check size={9} className="text-white" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate" style={{ color: dm.heading, textDecoration: t.done ? 'line-through' : 'none' }}>{t.title}</p>
-              <div className="flex gap-2 mt-0.5">
-                <span className="text-[10px]" style={{ color: C.gray[400] }}>{t.course}</span>
-                <span className="text-[10px] font-semibold" style={{ color: pc[t.priority] }}>Due: {t.due}</span>
+              {chosen !== null && (
+                <button onClick={next} style={{ marginTop:16, width:'100%', padding:'12px',
+                  borderRadius:12, background:`linear-gradient(135deg,${C.navy},${C.navyM})`,
+                  color:'white', fontWeight:800, fontSize:14, border:'none', cursor:'pointer' }}>
+                  {idx < questions.length-1 ? 'Next Question →' : 'See Results 🏆'}
+                </button>
+              )}
+            </>
+          ) : (
+            /* Results */
+            <div style={{ textAlign:'center', padding:'10px 0' }}>
+              <div style={{ fontSize:56, marginBottom:12 }}>
+                {pct >= 80 ? '🏆' : pct >= 60 ? '🎯' : '📚'}
+              </div>
+              <h2 style={{ fontWeight:900, fontSize:24, color:grade.color, marginBottom:6 }}>{grade.label}</h2>
+              <p style={{ fontSize:15, color:C.gray[500], marginBottom:20 }}>
+                You scored <strong style={{ color:C.navy, fontSize:22 }}>{score}/{questions.length}</strong>
+              </p>
+
+              {/* Score circle */}
+              <div style={{ width:100, height:100, borderRadius:'50%', margin:'0 auto 24px',
+                background:`conic-gradient(${grade.color} ${pct*3.6}deg, ${C.gray[100]} 0deg)`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                boxShadow:'0 0 0 8px white inset' }}>
+                <span style={{ fontSize:22, fontWeight:900, color:grade.color }}>{pct}%</span>
+              </div>
+
+              <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
+                <button onClick={restart} style={{ padding:'11px 22px', borderRadius:12,
+                  background:C.navy, color:'white', fontWeight:700, fontSize:13,
+                  border:'none', cursor:'pointer' }}>
+                  Try Again 🔄
+                </button>
+                <button onClick={onClose} style={{ padding:'11px 22px', borderRadius:12,
+                  background:C.gray[100], color:C.gray[700], fontWeight:700, fontSize:13,
+                  border:'none', cursor:'pointer' }}>
+                  Close
+                </button>
               </div>
             </div>
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0 capitalize"
-              style={{ background: `${pc[t.priority]}20`, color: pc[t.priority] }}>{t.priority}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── Quick Notes ──────────────────────────────────────────────────────────────
-function QuickNotes({ dm }) {
-  const cols = ['#FFF9C4', '#C8E6C9', '#BBDEFB', '#F8BBD0', '#E1BEE7']
-  const [notes, setNotes] = useState([
-    { id: 1, text: 'Review Module 3 before Friday',       color: cols[0], done: false },
-    { id: 2, text: 'Practice VA email templates daily',    color: cols[1], done: false },
-    { id: 3, text: 'Watch bonus lecture on client mgmt',   color: cols[2], done: true  },
-  ])
-  const [val, setVal] = useState('')
-  const add = () => {
-    if (!val.trim()) return
-    setNotes(p => [...p, { id: Date.now(), text: val.trim(), color: cols[p.length % cols.length], done: false }])
-    setVal('')
-  }
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <h3 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-        <StickyNote size={14} style={{ color: C.yellow }} />Quick Notes
-      </h3>
-      <div className="flex gap-2 mb-3">
-        <input value={val} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === 'Enter' && add()}
-          placeholder="Add a note…"
-          className="flex-1 text-xs px-3 py-2 rounded-xl border outline-none"
-          style={{ background: dm.subtle, border: `1px solid ${dm.border}`, color: dm.heading }} />
-        <button onClick={add} className="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-          style={{ background: C.navy }}>
-          <Plus size={14} />
-        </button>
-      </div>
-      <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
-        {notes.map(n => (
-          <div key={n.id} className="flex items-start gap-2 p-2.5 rounded-xl"
-            style={{ background: n.color + 'bb' }}>
-            <button onClick={() => setNotes(p => p.map(x => x.id === n.id ? { ...x, done: !x.done } : x))} className="mt-0.5 flex-shrink-0">
-              {n.done ? <CheckSquare size={13} style={{ color: C.green }} /> : <Square size={13} style={{ color: C.gray[400] }} />}
-            </button>
-            <span className="flex-1 text-xs leading-relaxed"
-              style={{ color: C.gray[800], textDecoration: n.done ? 'line-through' : 'none', opacity: n.done ? .6 : 1 }}>
-              {n.text}
-            </span>
-            <button onClick={() => setNotes(p => p.filter(x => x.id !== n.id))}>
-              <X size={11} style={{ color: C.gray[400] }} />
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── Upcoming Schedule ────────────────────────────────────────────────────────
-function UpcomingSchedule({ dm }) {
-  const events = [
-    { time: 'Today 3:00 PM',  title: 'Live Q&A: VA Tools',    course: 'VA Pro',          type: 'live',     color: C.orange },
-    { time: 'Tomorrow 10 AM', title: 'Module 4 Deadline',      course: 'Digital Mktg',    type: 'deadline', color: C.rose   },
-    { time: 'Wed 2:00 PM',    title: 'Peer Study Group',       course: 'UI/UX Design',    type: 'group',    color: C.teal   },
-    { time: 'Fri 11:00 AM',   title: 'Certificate Exam',       course: 'VA Pro',          type: 'exam',     color: C.purple },
-  ]
-  const icons = { live: '🔴', deadline: '⏰', group: '👥', exam: '📝' }
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <h3 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-        <CalendarDays size={14} style={{ color: C.navyMid }} />Upcoming
-      </h3>
-      <div className="space-y-2">
-        {events.map((ev, i) => (
-          <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-xl"
-            style={{ background: `${ev.color}0d`, border: `1px solid ${ev.color}22` }}>
-            <span className="text-sm mt-0.5">{icons[ev.type]}</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold truncate" style={{ color: dm.heading }}>{ev.title}</p>
-              <p className="text-[10px] truncate" style={{ color: C.gray[400] }}>{ev.course}</p>
-            </div>
-            <span className="text-[10px] font-semibold whitespace-nowrap" style={{ color: ev.color }}>{ev.time}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── Mentor Messages ──────────────────────────────────────────────────────────
-function MentorMessages({ dm }) {
-  const msgs = [
-    { from: 'Prof. Ama',  avatar: 'PA', msg: "Great work on your last assignment! 💪", time: '10m', unread: true,  color: C.orange },
-    { from: 'Course Bot', avatar: '🤖', msg: "You're 45% through Module 3. 2 lessons!", time: '1h',  unread: true,  color: C.navyMid },
-    { from: 'Kwame B.',   avatar: 'KB', msg: "Join our study group this Thursday?",      time: '3h',  unread: false, color: C.teal   },
-  ]
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm flex items-center gap-2" style={{ color: C.navy }}>
-          <MessageSquare size={14} style={{ color: C.navyMid }} />Messages
-        </h3>
-        <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-full font-bold">2 new</span>
-      </div>
-      <div className="space-y-2">
-        {msgs.map((m, i) => (
-          <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-xl cursor-pointer transition-all hover:opacity-80"
-            style={{ background: m.unread ? `${m.color}10` : 'transparent', border: `1px solid ${m.unread ? m.color + '25' : 'transparent'}` }}>
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
-              style={{ background: m.color }}>{m.avatar}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between">
-                <span className="text-xs font-bold truncate" style={{ color: dm.heading }}>{m.from}</span>
-                <span className="text-[10px]" style={{ color: C.gray[400] }}>{m.time}</span>
-              </div>
-              <p className="text-[11px] truncate" style={{ color: C.gray[500] }}>{m.msg}</p>
-            </div>
-            {m.unread && <div className="w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0" style={{ background: m.color }} />}
-          </div>
-        ))}
-      </div>
-      <button className="mt-3 w-full py-2 rounded-xl text-xs font-bold text-white" style={{ background: C.navy }}>
-        View All Messages
-      </button>
-    </div>
-  )
-}
-
-// ─── Leaderboard ──────────────────────────────────────────────────────────────
-function Leaderboard({ dm, myName }) {
-  const board = [
-    { rank: 1, name: 'Amara K.',     pts: 4250, badge: '🥇', you: false },
-    { rank: 2, name: 'Samuel O.',    pts: 3890, badge: '🥈', you: false },
-    { rank: 3, name: 'Fatima A.',    pts: 3540, badge: '🥉', you: false },
-    { rank: 4, name: myName || 'You',pts: 1250, badge: '⭐', you: true  },
-    { rank: 5, name: 'Kwame B.',     pts: 980,  badge: null,  you: false },
-  ]
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <h3 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-        <Trophy size={14} style={{ color: C.yellow }} />Leaderboard
-      </h3>
-      <div className="space-y-1.5">
-        {board.map(p => (
-          <div key={p.rank} className="flex items-center gap-2.5 p-2 rounded-xl transition-all"
-            style={{ background: p.you ? `${C.navy}12` : 'transparent', border: `1px solid ${p.you ? C.navy + '25' : 'transparent'}` }}>
-            <span className="text-xs w-4 text-center font-bold" style={{ color: C.gray[400] }}>{p.rank}</span>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-              style={{ background: p.you ? C.navy : C.gray[400] }}>
-              {p.you ? '👤' : p.name.split(' ').map(n => n[0]).join('')}
-            </div>
-            <span className="flex-1 text-xs font-medium truncate" style={{ color: p.you ? C.navy : dm.text }}>
-              {p.name}{p.you && <span className="text-[10px] opacity-50 ml-1">(You)</span>}
-            </span>
-            <span className="text-xs font-black" style={{ color: p.you ? C.orange : C.gray[400] }}>{p.pts.toLocaleString()}</span>
-            {p.badge && <span className="text-sm">{p.badge}</span>}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── Resource Library ─────────────────────────────────────────────────────────
-function ResourceLibrary({ dm }) {
-  const res = [
-    { title: 'VA Toolkit PDF',    type: 'PDF', size: '2.4 MB', icon: '📄', color: C.rose   },
-    { title: 'Email Templates',   type: 'ZIP', size: '1.1 MB', icon: '📦', color: C.orange },
-    { title: 'Marketing Guide',   type: 'PDF', size: '3.8 MB', icon: '📋', color: C.navy   },
-    { title: 'Design Assets',     type: 'ZIP', size: '15 MB',  icon: '🎨', color: C.purple },
-  ]
-  return (
-    <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-      <h3 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-        <FolderOpen size={14} style={{ color: C.navyMid }} />Resource Library
-      </h3>
-      <div className="grid grid-cols-2 gap-2">
-        {res.map((r, i) => (
-          <div key={i} className="p-3 rounded-xl cursor-pointer hover:shadow-md transition-all"
-            style={{ background: dm.subtle, border: `1px solid ${dm.border}` }}>
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-xl">{r.icon}</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded font-black text-white" style={{ background: r.color }}>{r.type}</span>
-            </div>
-            <p className="text-xs font-bold mb-0.5 truncate" style={{ color: dm.heading }}>{r.title}</p>
-            <p className="text-[10px] mb-2" style={{ color: C.gray[400] }}>{r.size}</p>
-            <button className="w-full flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] font-bold text-white"
-              style={{ background: r.color }}>
-              <Download size={9} />Download
-            </button>
-          </div>
-        ))}
+          )}
+        </div>
       </div>
     </div>
   )
@@ -526,1066 +294,784 @@ function ResourceLibrary({ dm }) {
 // MAIN DASHBOARD
 // ═════════════════════════════════════════════════════════════════════════════
 export default function Dashboard() {
-  const { user, profile, signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const navigate = useNavigate()
 
-  // ── User ──────────────────────────────────────────────────────────────────
-  const [studentId,  setStudentId]  = useState('')
-  const [fullName,   setFullName]   = useState('')
-  const [email,      setEmail]      = useState('')
-  const [joinDate,   setJoinDate]   = useState('')
+  // ── Data state ──────────────────────────────────────────────────────────
+  const [loading,     setLoading]     = useState(true)
+  const [error,       setError]       = useState(null)
+  const [fullName,    setFullName]    = useState('')
+  const [email,       setEmail]       = useState('')
+  const [avatarUrl,   setAvatarUrl]   = useState('')
+  const [loginAt,     setLoginAt]     = useState(null)
+  const [enrollments, setEnrollments] = useState([])
+  const [payments,    setPayments]    = useState([])
 
-  // ── Courses ───────────────────────────────────────────────────────────────
-  const [enrolledCourses,    setEnrolledCourses]    = useState([])
-  const [inProgressCourses,  setInProgressCourses]  = useState([])
-  const [completedCourses,   setCompletedCourses]   = useState([])
-  const [courseProgress,     setCourseProgress]     = useState({})
-  const [recentActivity,     setRecentActivity]     = useState([])
-  const [recommendedCourses, setRecommendedCourses] = useState([])
+  // ── UI state ────────────────────────────────────────────────────────────
+  const [tab,        setTab]        = useState('home')
+  const [menuOpen,   setMenuOpen]   = useState(false)
+  const [quizCourse, setQuizCourse] = useState(null)
+  const [nowStr,     setNowStr]     = useState('')
 
-  // ── Payments ──────────────────────────────────────────────────────────────
-  const [payments,   setPayments]   = useState([])
-  const [totalSpent, setTotalSpent] = useState(0)
-  const [lastPayment,setLastPayment]= useState(null)
+  // ── Profile edit state ──────────────────────────────────────────────────
+  const [editName,    setEditName]    = useState('')
+  const [savingName,  setSavingName]  = useState(false)
+  const [nameMsg,     setNameMsg]     = useState('')
+  const [uploadingImg,setUploadingImg]= useState(false)
+  const [imgMsg,      setImgMsg]      = useState('')
+  const fileRef = useRef(null)
 
-  // ── Stats ─────────────────────────────────────────────────────────────────
-  const [achievements,       setAchievements]       = useState([])
-  const [streak,             setStreak]             = useState(7)
-  const [totalLearningTime,  setTotalLearningTime]  = useState(42)
-  const [points,             setPoints]             = useState(1250)
-  const [rank,               setRank]               = useState('Silver Learner')
-  const [lessonsCompleted,   setLessonsCompleted]   = useState(24)
-  const [quizAverage,        setQuizAverage]        = useState(85)
-  const [quizzesTaken,       setQuizzesTaken]       = useState(12)
-  const [certificatesEarned, setCertificatesEarned] = useState(2)
-
-  // ── Milestones ────────────────────────────────────────────────────────────
-  const [milestones] = useState([
-    { id:1, title:'Showcase Skills',  progress:100, completed:true,  icon:'🎯', message:'All tasks completed! 🎉', type:'project' },
-    { id:2, title:'Knowledge Check',  progress:100, completed:true,  icon:'📝', message:'All questions answered! 🎉', type:'quiz' },
-    { id:3, title:'Next Module',      progress:45,  completed:false, icon:'📚', message:"Keep going! You're making progress", type:'module' },
-  ])
-
-  // ── Goals ─────────────────────────────────────────────────────────────────
-  const [goals] = useState([
-    { id:1, title:'Complete 5 courses', target:5,  current:3, progress:60 },
-    { id:2, title:'30-day streak',       target:30, current:7, progress:23 },
-    { id:3, title:'Earn 3 certificates', target:3,  current:2, progress:66 },
-  ])
-
-  // ── Notifications ─────────────────────────────────────────────────────────
-  const [notifications, setNotifications] = useState([])
-  const [unreadCount,   setUnreadCount]   = useState(3)
-
-  // ── Saved items ───────────────────────────────────────────────────────────
-  const [savedItems] = useState([
-    { id:1, title:'AI Prompt Engineering', course_id:'rec1', created_at: new Date().toISOString() },
-    { id:2, title:'UX Design Course',       course_id:'rec2', created_at: new Date().toISOString() },
-  ])
-
-  // ── UI ────────────────────────────────────────────────────────────────────
-  const [loading,         setLoading]         = useState(true)
-  const [error,           setError]           = useState(null)
-  const [darkMode,        setDarkMode]        = useState(false)
-  const [mobileMenuOpen,  setMobileMenuOpen]  = useState(false)
-  const [notifOpen,       setNotifOpen]       = useState(false)
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
-  const [copied,          setCopied]          = useState(false)
-  const [activeTab,       setActiveTab]       = useState('overview')
-  const [searchOpen,      setSearchOpen]      = useState(false)
-  const [searchQ,         setSearchQ]         = useState('')
-  const [greeting,        setGreeting]        = useState('Good day')
-  const [greetingEmoji,   setGreetingEmoji]   = useState('👋')
-  const [currentSlide,    setCurrentSlide]    = useState(0)
-  const slideInterval = useRef(null)
-
-  // ── Dark mode tokens ──────────────────────────────────────────────────────
-  const dm = darkMode
-    ? { bg:C.gray[900], card:C.gray[800], border:C.gray[700], text:C.gray[300], heading:C.gray[100], subtle:C.gray[700] }
-    : { bg:C.gray[50],  card:'#ffffff',   border:C.gray[200], text:C.gray[500], heading:C.gray[900], subtle:C.gray[100] }
-
-  // ── Greeting ──────────────────────────────────────────────────────────────
+  // Live clock
   useEffect(() => {
-    const h = new Date().getHours()
-    if (h < 6)       { setGreeting('Night Owl');      setGreetingEmoji('🌙') }
-    else if (h < 12) { setGreeting('Good Morning');   setGreetingEmoji('☀️') }
-    else if (h < 17) { setGreeting('Good Afternoon'); setGreetingEmoji('🌤️') }
-    else if (h < 20) { setGreeting('Good Evening');   setGreetingEmoji('🌅') }
-    else             { setGreeting('Evening');         setGreetingEmoji('🌙') }
+    const tick = () => setNowStr(new Date().toLocaleString('en-GB',{
+      weekday:'short', day:'numeric', month:'short', year:'numeric',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    }))
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
   }, [])
 
-  // ── Carousel auto-play ────────────────────────────────────────────────────
+  // Auth guard + fetch
   useEffect(() => {
-    if (recommendedCourses.length > 1) {
-      slideInterval.current = setInterval(() =>
-        setCurrentSlide(p => (p + 1) % recommendedCourses.length), 5000)
-    }
-    return () => clearInterval(slideInterval.current)
-  }, [recommendedCourses.length])
+    if (!user) { navigate('/login'); return }
+    fetchAll()
+  }, [user])
 
-  // ── Data fetch ────────────────────────────────────────────────────────────
-  useEffect(() => { user ? fetchAllUserData() : setupMock() }, [user])
-
-  const setupMock = () => {
-    setStudentId('GUEST1234'); setEmail('guest@example.com')
-    setFullName('Guest Learner'); setJoinDate(new Date().toLocaleDateString())
-    setInProgressCourses([
-      { id:'mock1', course_id:'3dfbeb9d-7145-402a-a23c-f5c3b01129e5', progress:45,
-        courses:{ title:'Virtual Assistant Pro', description:'Learn to become a professional VA',
-          thumbnail_url:'', duration_weeks:6, level:'Beginner', category:'Business' } },
-      { id:'mock2', course_id:'mock-2', progress:30,
-        courses:{ title:'Digital Marketing Mastery', description:'Social media, SEO & content',
-          thumbnail_url:'', duration_weeks:8, level:'Beginner', category:'Marketing' } },
-    ])
-    setEnrolledCourses([{ id:'mock1' }, { id:'mock2' }])
-    setCompletedCourses([{ id:'comp1', courses:{ title:'Intro to Freelancing' }, progress:100 }])
-    setRecommendedCourses([
-      { id:'rec1', title:'AI Prompt Engineering',    slug:'ai-prompt-engineering', duration_weeks:6, level:'Intermediate', category:'AI & Tech' },
-      { id:'rec2', title:'Canva Design Pro',          slug:'canva-design',          duration_weeks:4, level:'Beginner',      category:'Design'    },
-      { id:'rec3', title:'Copywriting Secrets',       slug:'copywriting',           duration_weeks:5, level:'Beginner',      category:'Writing'   },
-    ])
-    setPayments([
-      { id:'pay1', course_title:'Virtual Assistant Pro',   amount:70, created_at:new Date().toISOString(),               status:'success' },
-      { id:'pay2', course_title:'Digital Marketing',        amount:85, created_at:new Date(Date.now()-7*864e5).toISOString(), status:'success' },
-      { id:'pay3', course_title:'Canva Design',             amount:65, created_at:new Date(Date.now()-14*864e5).toISOString(),status:'success' },
-    ])
-    setTotalSpent(220)
-    setLastPayment({ course_title:'Virtual Assistant Pro', amount:70 })
-    setAchievements([
-      { id:1, title:'Quick Starter',   description:'Completed first lesson',      icon:'🚀', unlocked:true                },
-      { id:2, title:'Quiz Master',     description:'Score 90%+ on 3 quizzes',     icon:'🧠', unlocked:false, progress:66  },
-      { id:3, title:'Streak Warrior',  description:'7-day learning streak',        icon:'🔥', unlocked:true                },
-      { id:4, title:'Social Butterfly',description:'Join a study group',           icon:'🦋', unlocked:false, progress:0   },
-    ])
-    setNotifications([
-      { id:1, icon:'🎉', text:'You earned the Quick Starter badge!',     time:'2h ago', unread:true  },
-      { id:2, icon:'📹', text:'New lesson added to VA Pro',              time:'5h ago', unread:true  },
-      { id:3, icon:'💬', text:'Prof. Ama replied to your question',      time:'1d ago',  unread:false },
-      { id:4, icon:'🏆', text:"You're in the top 10 this week!",         time:'2d ago',  unread:false },
-    ])
-    setUnreadCount(2)
-    setRecentActivity([
-      { id:1, description:'Completed lesson 3 of Virtual Assistant course', time:'2 hours ago', type:'lesson'   },
-      { id:2, description:'Scored 85% on quiz',                              time:'yesterday',   type:'quiz'     },
-      { id:3, description:'Downloaded VA Toolkit PDF',                        time:'2 days ago',  type:'resource' },
-    ])
-    setLoading(false)
-  }
-
-  const fetchAllUserData = async () => {
+  const fetchAll = async () => {
     try {
       setLoading(true); setError(null)
-      setStudentId(user.id.slice(0, 8).toUpperCase())
-      setEmail(user.email)
-      setJoinDate(new Date(user.created_at).toLocaleDateString())
-      setFullName(profile?.full_name || user.email?.split('@')[0] || 'Learner')
+      setEmail(user.email || '')
+      setLoginAt(user.last_sign_in_at || user.created_at)
 
-      // Enrollments
-      try {
-        const { data: enrollments, error: eErr } = await supabase
-          .from('enrollments')
-          .select(`*, courses(id,title,slug,thumbnail_url,description,category,level,duration_weeks,price)`)
-          .eq('user_id', user.id).eq('status', 'active').order('enrolled_at', { ascending: false })
-        if (eErr) throw eErr
-        const seen = new Set(), unique = []
-        enrollments?.forEach(e => { if (!seen.has(e.course_id)) { seen.add(e.course_id); unique.push(e) } })
-        setEnrolledCourses(unique)
-        const prog = {}; unique.forEach(e => { prog[e.course_id] = { percentage: 45 } })
-        setCourseProgress(prog)
-        setInProgressCourses(unique.map(e => ({ ...e, progress: 45 })))
-      } catch { /* mock already set */ }
+      // Profile
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', user.id)
+        .single()
+
+      const name = prof?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Learner'
+      setFullName(name)
+      setEditName(name)
+      setAvatarUrl(prof?.avatar_url || '')
+
+      // Enrollments — ONLY what this user is enrolled in
+      const { data: enrData, error: enrErr } = await supabase
+        .from('enrollments')
+        .select(`id, course_id, status, progress, enrolled_at, completed_at,
+          courses(id, title, slug, description, thumbnail_url, category, level, duration_weeks, price)`)
+        .eq('user_id', user.id)
+        .order('enrolled_at', { ascending: false })
+
+      if (enrErr) throw enrErr
+      setEnrollments(enrData || [])
 
       // Payments
-      try {
-        const { data: pays } = await supabase.from('payments').select('*')
-          .eq('user_id', user.id).eq('status', 'success').order('created_at', { ascending: false })
-        if (pays?.length) {
-          setPayments(pays)
-          setTotalSpent(pays.reduce((s, p) => s + (p.amount || 0), 0))
-          setLastPayment(pays[0])
-        }
-      } catch { /* ignore */ }
+      const { data: payData } = await supabase
+        .from('payments')
+        .select('id, course_id, course_title, amount, status, reference, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
 
-      setupMock()
+      setPayments(payData || [])
     } catch (err) {
-      setError(err.message)
-      setupMock()
+      setError(err.message || 'Could not load dashboard. Please refresh.')
     } finally {
       setLoading(false)
     }
   }
 
-  // ── Utilities ─────────────────────────────────────────────────────────────
-  const getInitials   = () => fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : email?.charAt(0).toUpperCase() || 'U'
-  const getFirstName  = () => fullName ? fullName.split(' ')[0] : email?.split('@')[0] || 'Learner'
-  const copyId        = () => { navigator.clipboard.writeText(studentId); setCopied(true); setTimeout(() => setCopied(false), 2000) }
-  const formatCurrency= n  => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
-  const formatDate    = d  => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-  const handleSignOut = async () => { await signOut(); navigate('/') }
+  // ── Save name ────────────────────────────────────────────────────────────
+  const saveName = async () => {
+    if (!editName.trim()) return
+    setSavingName(true); setNameMsg('')
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, full_name: editName.trim() }, { onConflict:'id' })
+      if (error) throw error
+      setFullName(editName.trim())
+      setNameMsg('✅ Name updated!')
+    } catch (e) {
+      setNameMsg('❌ ' + e.message)
+    }
+    setSavingName(false)
+    setTimeout(() => setNameMsg(''), 3000)
+  }
 
-  // ── Nav items ─────────────────────────────────────────────────────────────
+  // ── Upload avatar ────────────────────────────────────────────────────────
+  const uploadAvatar = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) { setImgMsg('❌ Image must be under 2MB'); return }
+    setUploadingImg(true); setImgMsg('')
+    try {
+      const ext  = file.name.split('.').pop()
+      const path = `avatars/${user.id}.${ext}`
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type })
+      if (upErr) throw upErr
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      const { error: dbErr } = await supabase
+        .from('profiles')
+        .upsert({ id: user.id, avatar_url: publicUrl }, { onConflict:'id' })
+      if (dbErr) throw dbErr
+
+      setAvatarUrl(publicUrl + '?t=' + Date.now())
+      setImgMsg('✅ Photo updated!')
+    } catch (err) {
+      setImgMsg('❌ ' + err.message)
+    }
+    setUploadingImg(false)
+    setTimeout(() => setImgMsg(''), 3000)
+  }
+
+  // ── Sign out ─────────────────────────────────────────────────────────────
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+    } catch (_) {}
+    navigate('/')
+  }
+
+  // ── Computed ─────────────────────────────────────────────────────────────
+  const total     = enrollments.length
+  const completed = enrollments.filter(e => clamp(e.progress,0,100) >= 100).length
+  const inProg    = enrollments.filter(e => { const p=clamp(e.progress,0,100); return p>0&&p<100 }).length
+  const avgProg   = total ? Math.round(enrollments.reduce((s,e)=>s+clamp(e.progress,0,100),0)/total) : 0
+  const totalPaid = payments.filter(p=>['success','paid'].includes((p.status||'').toLowerCase())).reduce((s,p)=>s+Number(p.amount||0),0)
+  const streak    = enrollments.length ? Math.min(Math.ceil((Date.now()-new Date(enrollments[enrollments.length-1]?.enrolled_at).getTime())/86400000),30) : 0
+
+  const { text:greet, emoji:greetEmoji } = getGreeting()
+  const timezone = tzName()
+  const shortId  = user?.id?.slice(0,8).toUpperCase() || '—'
+
+  // ── Category emoji ────────────────────────────────────────────────────────
+  const catEmoji = cat => ({ Tech:'🤖', Design:'🎨', Marketing:'📱', Kids:'🚀', Business:'💼', Career:'💼' }[cat] || '📚')
+
+  // ── Nav items ────────────────────────────────────────────────────────────
   const navItems = [
-    { id: 'overview',     label: 'Overview',     icon: LayoutDashboard },
-    { id: 'courses',      label: 'My Courses',   icon: BookOpen        },
-    { id: 'analytics',    label: 'Analytics',    icon: BarChart3       },
-    { id: 'achievements', label: 'Achievements', icon: Trophy          },
-    { id: 'payments',     label: 'Payments',     icon: CreditCard      },
-    { id: 'goals',        label: 'Goals',        icon: Target          },
-    { id: 'certificates', label: 'Certificates', icon: BadgeCheck      },
-    { id: 'community',    label: 'Community',    icon: Users           },
-    { id: 'resources',    label: 'Resources',    icon: FolderOpen      },
-    { id: 'support',      label: 'Support',      icon: Headphones      },
+    { id:'home',     label:'Home',       icon:Home       },
+    { id:'courses',  label:'My Courses', icon:BookOpen   },
+    { id:'payments', label:'Payments',   icon:CreditCard },
+    { id:'profile',  label:'Profile',    icon:User       },
   ]
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: dm.bg }}>
-      <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white text-xl font-black animate-pulse"
-          style={{ background: `linear-gradient(135deg,${C.navy},${C.orange})` }}>iK</div>
-        <div className="w-40 h-1 rounded-full overflow-hidden mx-auto" style={{ background: C.gray[200] }}>
-          <div className="h-full rounded-full animate-pulse" style={{ width: '60%', background: `linear-gradient(90deg,${C.navy},${C.orange})` }} />
-        </div>
-        <p className="mt-3 text-xs" style={{ color: C.gray[400] }}>Loading your dashboard…</p>
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
+      background:C.gray[50], fontFamily:"'DM Sans','Segoe UI',sans-serif" }}>
+      <div style={{ textAlign:'center' }}>
+        <div style={{ width:56, height:56, borderRadius:16, margin:'0 auto 14px',
+          background:`linear-gradient(135deg,${C.navy},${C.orange})`,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          color:'white', fontWeight:900, fontSize:20 }}>iK</div>
+        <p style={{ color:C.gray[500], fontSize:14 }}>Loading your dashboard…</p>
       </div>
     </div>
   )
 
-  // ── Error ─────────────────────────────────────────────────────────────────
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: dm.bg }}>
-      <div className="max-w-sm w-full p-6 rounded-2xl shadow-xl text-center" style={{ background: dm.card }}>
-        <AlertCircle size={40} className="mx-auto mb-3 text-red-500" />
-        <h2 className="font-bold text-lg mb-2" style={{ color: dm.heading }}>Something went wrong</h2>
-        <p className="text-sm mb-5" style={{ color: dm.text }}>{error}</p>
-        <button onClick={() => window.location.reload()} className="w-full py-2.5 rounded-xl text-white font-bold" style={{ background: C.navy }}>
-          Try Again
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center',
+      background:C.gray[50], padding:20, fontFamily:"'DM Sans','Segoe UI',sans-serif" }}>
+      <Card style={{ maxWidth:400, width:'100%', textAlign:'center' }}>
+        <AlertCircle size={40} style={{ color:C.red, margin:'0 auto 12px', display:'block' }}/>
+        <h2 style={{ fontWeight:800, fontSize:18, marginBottom:8 }}>Something went wrong</h2>
+        <p style={{ color:C.gray[500], fontSize:14, marginBottom:20 }}>{error}</p>
+        <button onClick={fetchAll} style={{ display:'inline-flex', alignItems:'center', gap:8,
+          background:C.navy, color:'white', padding:'11px 24px', borderRadius:10,
+          fontWeight:700, fontSize:14, border:'none', cursor:'pointer' }}>
+          <RefreshCw size={14}/> Try Again
         </button>
-      </div>
+      </Card>
     </div>
   )
 
-  // ── Tab renderer ─────────────────────────────────────────────────────────
-  const renderTab = () => {
-    switch (activeTab) {
-
-      // ════ OVERVIEW ═══════════════════════════════════════════════════════
-      case 'overview': return (
-        <div className="space-y-5">
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label:'Enrolled',  value:enrolledCourses.length,    icon:BookOpen,    color:C.navy,   bg:`${C.navy}12`    },
-              { label:'Completed', value:completedCourses.length,   icon:CheckCircle, color:C.green,  bg:`${C.green}12`   },
-              { label:'Hours',     value:totalLearningTime,          icon:Clock,       color:C.navyMid,bg:`${C.navyMid}12` },
-              { label:'Points',    value:points.toLocaleString(),    icon:Zap,         color:C.orange, bg:`${C.orange}12`  },
-            ].map((s, i) => (
-              <div key={i} className="rounded-2xl p-4 flex flex-col gap-2" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: s.bg }}>
-                  <s.icon size={17} style={{ color: s.color }} />
-                </div>
-                <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}</p>
-                <p className="text-[11px]" style={{ color: dm.text }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Timer + Challenge */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <PomodoroTimer />
-            <DailyChallenge />
-          </div>
-
-          {/* Continue learning */}
-          {inProgressCourses.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-bold text-sm flex items-center gap-2" style={{ color: C.navy }}>
-                  <PlayCircle size={15} style={{ color: C.orange }} />Continue Learning
-                </h2>
-                <button className="text-xs font-semibold" style={{ color: C.navyMid }}
-                  onClick={() => setActiveTab('courses')}>View all →</button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {inProgressCourses.slice(0, 3).map(e => {
-                  const pct = courseProgress[e.course_id]?.percentage || e.progress || 45
-                  return (
-                    <Link key={e.id} to={`/test-course-player/${e.course_id}`}
-                      className="rounded-2xl p-4 block hover:shadow-lg transition-all group"
-                      style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                          style={{ background: `${C.orange}15` }}>📚</div>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full text-white font-bold"
-                          style={{ background: C.navyMid }}>{e.courses?.level || 'Beginner'}</span>
-                      </div>
-                      <h3 className="font-bold text-sm mb-1 group-hover:underline" style={{ color: C.navy }}>{e.courses?.title}</h3>
-                      <p className="text-xs mb-3" style={{ color: dm.text }}>{e.courses?.duration_weeks}w · {e.courses?.category}</p>
-                      <div className="h-1.5 rounded-full overflow-hidden mb-1" style={{ background: dm.subtle }}>
-                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${C.navy},${C.orange})` }} />
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[10px]" style={{ color: dm.text }}>Progress</span>
-                        <span className="text-xs font-black" style={{ color: C.orange }}>{pct}%</span>
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Milestones */}
-          <div>
-            <h2 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-              <Flag size={14} style={{ color: C.orange }} />Immediate Deliverables
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {milestones.map(m => (
-                <div key={m.id} className="rounded-2xl p-4"
-                  style={{ background: dm.card, border: `2px solid ${m.completed ? C.green + '35' : C.orange + '35'}` }}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">{m.icon}</span>
-                    <h3 className="font-bold text-sm" style={{ color: m.completed ? C.green : C.orange }}>{m.title}</h3>
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: dm.subtle }}>
-                      <div className="h-full rounded-full" style={{ width: `${m.progress}%`, background: m.completed ? C.green : C.orange }} />
-                    </div>
-                    <span className="text-xs font-black" style={{ color: m.completed ? C.green : C.orange }}>{m.progress}%</span>
-                  </div>
-                  <p className="text-[11px]" style={{ color: dm.text }}>{m.message}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Activity + Schedule */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <WeeklyChart dm={dm} />
-            <UpcomingSchedule dm={dm} />
-          </div>
-
-          {/* Assignments + Notes */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <AssignmentTracker dm={dm} />
-            <QuickNotes dm={dm} />
-          </div>
-
-          {/* Skills + Messages */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <SkillsPanel dm={dm} />
-            <MentorMessages dm={dm} />
-          </div>
-
-          {/* Streak calendar */}
-          <StreakCalendar streak={streak} dm={dm} />
-
-          {/* Recommended carousel */}
-          {recommendedCourses.length > 0 && (
-            <div>
-              <h2 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-                <Sparkles size={14} style={{ color: C.yellow }} />Recommended for You
-              </h2>
-              <div className="relative overflow-hidden rounded-2xl">
-                <div className="flex transition-transform duration-500"
-                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-                  {recommendedCourses.map(c => (
-                    <div key={c.id} className="w-full flex-shrink-0 p-4 rounded-2xl"
-                      style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                          style={{ background: `${C.navy}12` }}>
-                          {c.category === 'AI & Tech' ? '🤖' : c.category === 'Design' ? '🎨' : c.category === 'Marketing' ? '📣' : '📚'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-sm mb-0.5" style={{ color: C.navy }}>{c.title}</h3>
-                          <p className="text-xs mb-2" style={{ color: dm.text }}>{c.duration_weeks}w · {c.level} · {c.category}</p>
-                          <Link to={`/course/${c.slug}`}
-                            className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-xl text-white"
-                            style={{ background: `linear-gradient(135deg,${C.navy},${C.orange})` }}>
-                            Enroll Now <ChevronRight size={12} />
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-center gap-1.5 mt-3">
-                  {recommendedCourses.map((_, i) => (
-                    <button key={i} onClick={() => setCurrentSlide(i)}
-                      className="rounded-full transition-all"
-                      style={{ width: currentSlide === i ? '20px' : '6px', height: '6px', background: currentSlide === i ? C.orange : C.gray[300] }} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Recent activity */}
-          {recentActivity.length > 0 && (
-            <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-              <h3 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-                <Activity size={14} style={{ color: C.navyMid }} />Recent Activity
-              </h3>
-              <div className="space-y-2">
-                {recentActivity.map(a => (
-                  <div key={a.id} className="flex items-center gap-3 p-2.5 rounded-xl" style={{ background: dm.subtle }}>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-sm"
-                      style={{ background: `${C.orange}15` }}>
-                      {a.type === 'lesson' ? '📖' : a.type === 'quiz' ? '✍️' : '📥'}
-                    </div>
-                    <span className="flex-1 text-xs" style={{ color: dm.heading }}>{a.description}</span>
-                    <span className="text-[10px] flex-shrink-0" style={{ color: C.gray[400] }}>{a.time}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )
-
-      // ════ MY COURSES ═════════════════════════════════════════════════════
-      case 'courses': return (
-        <div className="space-y-5">
-          <div>
-            <h2 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-              <PlayCircle size={14} style={{ color: C.orange }} />In Progress ({inProgressCourses.length})
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {inProgressCourses.map(e => {
-                const pct = courseProgress[e.course_id]?.percentage || e.progress || 45
-                return (
-                  <Link key={e.id} to={`/test-course-player/${e.course_id}`}
-                    className="rounded-2xl p-4 block hover:shadow-lg transition-all"
-                    style={{ background: dm.card, border: `2px solid ${C.orange}18` }}>
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="text-2xl">📖</span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold text-white"
-                        style={{ background: C.navyMid }}>{e.courses?.level}</span>
-                    </div>
-                    <h3 className="font-bold text-sm mb-1" style={{ color: C.navy }}>{e.courses?.title}</h3>
-                    <p className="text-xs mb-3" style={{ color: dm.text }}>{e.courses?.description}</p>
-                    <div className="h-2 rounded-full overflow-hidden mb-1" style={{ background: dm.subtle }}>
-                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${C.navy},${C.orange})` }} />
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px]" style={{ color: dm.text }}>{e.courses?.duration_weeks} weeks</span>
-                      <span className="text-sm font-black" style={{ color: C.orange }}>{pct}%</span>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-          {completedCourses.length > 0 && (
-            <div>
-              <h2 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-                <CheckCircle size={14} style={{ color: C.green }} />Completed ({completedCourses.length})
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {completedCourses.map(e => (
-                  <div key={e.id} className="rounded-2xl p-4 flex items-center gap-3"
-                    style={{ background: dm.card, border: `2px solid ${C.green}25` }}>
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: `${C.green}15` }}>
-                      <CheckCircle size={20} style={{ color: C.green }} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-sm" style={{ color: C.navy }}>{e.courses?.title}</h3>
-                      <p className="text-xs" style={{ color: C.green }}>✓ Completed · Certificate available</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          <div>
-            <h2 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-              <Sparkles size={14} style={{ color: C.yellow }} />Explore More Courses
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {recommendedCourses.map(c => (
-                <Link key={c.id} to={`/course/${c.slug}`}
-                  className="rounded-2xl p-4 hover:shadow-lg transition-all block"
-                  style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3"
-                    style={{ background: `${C.navy}10` }}>
-                    {c.category === 'AI & Tech' ? '🤖' : c.category === 'Design' ? '🎨' : '📣'}
-                  </div>
-                  <h3 className="font-bold text-sm mb-1" style={{ color: C.navy }}>{c.title}</h3>
-                  <p className="text-xs mb-3" style={{ color: dm.text }}>{c.duration_weeks}w · {c.level}</p>
-                  <span className="text-xs font-bold px-3 py-1.5 rounded-xl text-white inline-block"
-                    style={{ background: `linear-gradient(135deg,${C.navy},${C.orange})` }}>Enroll Now</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      )
-
-      // ════ ANALYTICS ══════════════════════════════════════════════════════
-      case 'analytics': return (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label:'Total Hours',  value:totalLearningTime, suffix:'h', color:C.navy   },
-              { label:'Lessons Done', value:lessonsCompleted,  suffix:'',  color:C.green  },
-              { label:'Quiz Avg',     value:quizAverage,       suffix:'%', color:C.orange },
-              { label:'Quizzes',      value:quizzesTaken,      suffix:'',  color:C.purple },
-            ].map((s, i) => (
-              <div key={i} className="rounded-2xl p-4 text-center" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}{s.suffix}</p>
-                <p className="text-xs mt-1" style={{ color: dm.text }}>{s.label}</p>
-              </div>
-            ))}
-          </div>
-          <WeeklyChart dm={dm} />
-          <SkillsPanel dm={dm} />
-          <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-            <h3 className="font-bold text-sm mb-4" style={{ color: C.navy }}>📊 Course Breakdown</h3>
-            {inProgressCourses.map(e => {
-              const pct = courseProgress[e.course_id]?.percentage || e.progress || 45
-              return (
-                <div key={e.id} className="mb-3">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="font-medium truncate" style={{ color: dm.heading, maxWidth: '70%' }}>{e.courses?.title}</span>
-                    <span className="font-black" style={{ color: C.orange }}>{pct}%</span>
-                  </div>
-                  <div className="h-2 rounded-full overflow-hidden" style={{ background: dm.subtle }}>
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg,${C.navy},${C.orange})` }} />
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-          <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-            <h3 className="font-bold text-sm mb-4" style={{ color: C.navy }}>🏆 Rank Progress</h3>
-            <div className="flex items-center gap-4 mb-3">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style={{ background: `${C.yellow}20` }}>🥈</div>
-              <div className="flex-1">
-                <p className="font-black text-base" style={{ color: C.navy }}>{rank}</p>
-                <p className="text-xs" style={{ color: dm.text }}>{points.toLocaleString()} / 2,000 XP to Gold</p>
-                <div className="mt-2 h-2 rounded-full overflow-hidden" style={{ background: dm.subtle }}>
-                  <div className="h-full rounded-full" style={{ width: `${Math.min((points / 2000) * 100, 100)}%`, background: `linear-gradient(90deg,${C.yellow},${C.orange})` }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-
-      // ════ ACHIEVEMENTS ════════════════════════════════════════════════════
-      case 'achievements': return (
-        <div className="space-y-4">
-          <div className="rounded-2xl p-5 text-white text-center"
-            style={{ background: `linear-gradient(145deg,${C.navyDark},${C.navy})` }}>
-            <Trophy size={36} className="mx-auto mb-2" style={{ color: C.yellow }} />
-            <p className="text-3xl font-black">{achievements.filter(a => a.unlocked).length}</p>
-            <p className="text-sm opacity-70">Achievements Unlocked</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {achievements.map(a => (
-              <div key={a.id} className="rounded-2xl p-4 flex items-center gap-3 transition-all"
-                style={{
-                  background: a.unlocked ? `linear-gradient(135deg,${C.navy}08,${C.orange}08)` : dm.card,
-                  border: `2px solid ${a.unlocked ? C.orange + '35' : dm.border}`,
-                  opacity: a.unlocked ? 1 : .65
-                }}>
-                <span className="text-3xl">{a.icon}</span>
-                <div className="flex-1">
-                  <p className="font-bold text-sm" style={{ color: a.unlocked ? C.navy : dm.text }}>{a.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: dm.text }}>{a.description}</p>
-                  {!a.unlocked && a.progress !== undefined && (
-                    <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: dm.subtle }}>
-                      <div className="h-full rounded-full" style={{ width: `${a.progress}%`, background: C.orange }} />
-                    </div>
-                  )}
-                </div>
-                {a.unlocked ? <BadgeCheck size={20} style={{ color: C.green }} /> : <Lock size={15} style={{ color: C.gray[300] }} />}
-              </div>
-            ))}
-          </div>
-          <Leaderboard dm={dm} myName={getFirstName()} />
-        </div>
-      )
-
-      // ════ PAYMENTS ════════════════════════════════════════════════════════
-      case 'payments': return (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(135deg,${C.navyDark},${C.navy})` }}>
-              <Wallet size={18} className="mb-2 opacity-70" />
-              <p className="text-2xl font-black">{formatCurrency(totalSpent)}</p>
-              <p className="text-xs opacity-60">Total Invested</p>
-            </div>
-            <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(135deg,${C.green},${C.teal})` }}>
-              <BookOpen size={18} className="mb-2 opacity-70" />
-              <p className="text-2xl font-black">{payments.length}</p>
-              <p className="text-xs opacity-60">Courses Bought</p>
-            </div>
-          </div>
-          <h3 className="font-bold text-sm" style={{ color: C.navy }}>Payment History</h3>
-          {payments.map(p => (
-            <div key={p.id} className="rounded-2xl p-4 flex items-center gap-3"
-              style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                style={{ background: `${C.green}12` }}>💳</div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm truncate" style={{ color: dm.heading }}>{p.course_title}</p>
-                <p className="text-xs" style={{ color: dm.text }}>{formatDate(p.created_at)}</p>
-              </div>
-              <div className="text-right">
-                <p className="font-black text-sm" style={{ color: C.green }}>{formatCurrency(p.amount)}</p>
-                <span className="text-[9px] px-2 py-0.5 rounded-full text-white" style={{ background: C.green }}>Paid</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )
-
-      // ════ GOALS ═══════════════════════════════════════════════════════════
-      case 'goals': return (
-        <div className="space-y-4">
-          <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(135deg,${C.orange},${C.amber})` }}>
-            <Target size={22} className="mb-2" />
-            <p className="font-bold">Your Learning Goals</p>
-            <p className="text-xs opacity-70 mt-1">Every step counts. Keep going!</p>
-          </div>
-          {goals.map(g => (
-            <div key={g.id} className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <p className="font-bold text-sm" style={{ color: dm.heading }}>{g.title}</p>
-                  <p className="text-xs" style={{ color: dm.text }}>{g.current} of {g.target} completed</p>
-                </div>
-                <span className="text-sm font-black" style={{ color: g.progress >= 100 ? C.green : C.orange }}>{g.progress}%</span>
-              </div>
-              <div className="h-3 rounded-full overflow-hidden" style={{ background: dm.subtle }}>
-                <div className="h-full rounded-full transition-all"
-                  style={{ width: `${g.progress}%`, background: g.progress >= 100 ? `linear-gradient(90deg,${C.green},${C.teal})` : `linear-gradient(90deg,${C.orange},${C.amber})` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      )
-
-      // ════ CERTIFICATES ════════════════════════════════════════════════════
-      case 'certificates': return (
-        <div className="space-y-4">
-          <div className="rounded-2xl p-6 text-white text-center"
-            style={{ background: `linear-gradient(145deg,${C.navyDark},${C.navy},${C.navyMid})` }}>
-            <Award size={44} className="mx-auto mb-3" style={{ color: C.yellow }} />
-            <p className="text-4xl font-black">{certificatesEarned}</p>
-            <p className="opacity-70 text-sm mt-1">Certificates Earned</p>
-          </div>
-          {completedCourses.length > 0 ? completedCourses.map(e => (
-            <div key={e.id} className="rounded-2xl p-4 border-2 flex items-center gap-4"
-              style={{ background: dm.card, borderColor: `${C.yellow}35` }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: `linear-gradient(135deg,${C.yellow},${C.orange})` }}>
-                <Award size={22} className="text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm" style={{ color: dm.heading }}>{e.courses?.title}</p>
-                <p className="text-xs" style={{ color: C.green }}>Certificate available</p>
-              </div>
-              <button className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white"
-                style={{ background: C.navy }}>
-                <Download size={11} />Download
-              </button>
-            </div>
-          )) : (
-            <div className="rounded-2xl p-8 text-center" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-              <GraduationCap size={36} className="mx-auto mb-3" style={{ color: C.gray[300] }} />
-              <p className="font-bold text-sm" style={{ color: dm.text }}>No certificates yet</p>
-              <p className="text-xs mt-1" style={{ color: C.gray[400] }}>Complete a course to earn your first!</p>
-            </div>
-          )}
-        </div>
-      )
-
-      // ════ COMMUNITY ═══════════════════════════════════════════════════════
-      case 'community': return (
-        <div className="space-y-4">
-          <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(135deg,${C.teal},${C.navyMid})` }}>
-            <Users size={22} className="mb-2" />
-            <p className="font-bold">Community Hub</p>
-            <p className="text-xs opacity-70">Connect, collaborate &amp; grow together</p>
-          </div>
-          <Leaderboard dm={dm} myName={getFirstName()} />
-          <MentorMessages dm={dm} />
-          <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-            <h3 className="font-bold text-sm mb-3 flex items-center gap-2" style={{ color: C.navy }}>
-              <Users size={13} />Study Groups
-            </h3>
-            {[
-              { name:'VA Masters Circle',        members:24, joined:true  },
-              { name:'Digital Marketing Squad',  members:18, joined:false },
-              { name:'Design Enthusiasts',       members:31, joined:false },
-            ].map((g, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-xl mb-2" style={{ background: dm.subtle }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"
-                    style={{ background: C.navy }}>{g.name[0]}</div>
-                  <div>
-                    <p className="text-xs font-bold" style={{ color: dm.heading }}>{g.name}</p>
-                    <p className="text-[10px]" style={{ color: dm.text }}>{g.members} members</p>
-                  </div>
-                </div>
-                <button className="text-xs px-3 py-1 rounded-xl font-bold text-white"
-                  style={{ background: g.joined ? C.green : C.navy }}>{g.joined ? 'Joined' : 'Join'}</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )
-
-      // ════ RESOURCES ═══════════════════════════════════════════════════════
-      case 'resources': return (
-        <div className="space-y-4">
-          <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(135deg,${C.navy},${C.navyMid})` }}>
-            <FolderOpen size={22} className="mb-2" />
-            <p className="font-bold">Resource Library</p>
-            <p className="text-xs opacity-70">All your course materials in one place</p>
-          </div>
-          <ResourceLibrary dm={dm} />
-          <AssignmentTracker dm={dm} />
-          <QuickNotes dm={dm} />
-        </div>
-      )
-
-      // ════ SUPPORT ═════════════════════════════════════════════════════════
-      case 'support': return (
-        <div className="space-y-4">
-          <div className="rounded-2xl p-4 text-white" style={{ background: `linear-gradient(135deg,${C.orange},${C.amber})` }}>
-            <Headphones size={22} className="mb-2" />
-            <p className="font-bold">Support Center</p>
-            <p className="text-xs opacity-70">We're here to help you succeed</p>
-          </div>
-          {[
-            { icon:MessageCircle, label:'Live Chat Support', desc:'Chat with us now',           color:C.teal   },
-            { icon:Mail,          label:'Email Support',     desc:'support@ikpace.com',          color:C.navy   },
-            { icon:BookOpen,      label:'Help Center / FAQ', desc:'Browse common questions',     color:C.green  },
-            { icon:Video,         label:'Video Tutorials',   desc:'Step-by-step how-to guides',  color:C.purple },
-          ].map((s, i) => (
-            <div key={i} className="rounded-2xl p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all"
-              style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${s.color}12` }}>
-                <s.icon size={19} style={{ color: s.color }} />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-sm" style={{ color: dm.heading }}>{s.label}</p>
-                <p className="text-xs" style={{ color: dm.text }}>{s.desc}</p>
-              </div>
-              <ChevronRight size={15} style={{ color: C.gray[400] }} />
-            </div>
-          ))}
-          <div className="rounded-2xl p-4" style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-            <h3 className="font-bold text-sm mb-3" style={{ color: C.navy }}>Submit a Ticket</h3>
-            <input placeholder="Subject" className="w-full rounded-xl p-3 text-xs outline-none mb-3"
-              style={{ background: dm.subtle, border: `1px solid ${dm.border}`, color: dm.heading }} />
-            <textarea placeholder="Describe your issue…" rows={3}
-              className="w-full rounded-xl p-3 text-xs outline-none resize-none mb-3"
-              style={{ background: dm.subtle, border: `1px solid ${dm.border}`, color: dm.heading }} />
-            <button className="w-full py-2.5 rounded-xl text-sm font-bold text-white"
-              style={{ background: `linear-gradient(135deg,${C.navy},${C.orange})` }}>Send Ticket</button>
-          </div>
-        </div>
-      )
-
-      default: return null
-    }
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════════════
   // RENDER
-  // ══════════════════════════════════════════════════════════════════════════
+  // ═══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="min-h-screen font-sans" style={{ background: dm.bg, color: dm.heading }}>
+    <div style={{ minHeight:'100vh', background:C.gray[50],
+      fontFamily:"'DM Sans','Segoe UI',sans-serif", color:C.gray[900] }}>
 
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 px-4 py-3 flex items-center gap-3"
-        style={{ background: darkMode ? `${C.gray[900]}f2` : `#fffffff2`, borderBottom: `1px solid ${dm.border}`, backdropFilter: 'blur(12px)' }}>
+      {/* ══ HEADER — no logo, no sign-out button (we have main site header already) ══ */}
+      {/* This is the DASHBOARD sub-header with tabs + user info only */}
+      <div style={{ background:'white', borderBottom:`1px solid ${C.gray[200]}`,
+        position:'sticky', top:0, zIndex:30, boxShadow:'0 1px 8px rgba(0,0,0,0.05)' }}>
+        <div style={{ maxWidth:1120, margin:'0 auto', padding:'0 20px',
+          height:56, display:'flex', alignItems:'center', gap:8 }}>
 
-        <button className="lg:hidden p-2 rounded-xl hover:bg-gray-100 transition flex-shrink-0"
-          onClick={() => setMobileMenuOpen(true)}>
-          <Menu size={20} style={{ color: C.navy }} />
-        </button>
-
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base shadow"
-            style={{ background: `linear-gradient(135deg,${C.navy},${C.orange})` }}>iK</div>
-          <span className="font-black text-lg hidden sm:block" style={{ color: C.navy }}>iKPACE</span>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl flex-1 max-w-xs mx-2"
-          style={{ background: dm.subtle, border: `1px solid ${dm.border}` }}>
-          <Search size={13} style={{ color: C.gray[400] }} />
-          <input placeholder="Search courses, lessons…" value={searchQ} onChange={e => setSearchQ(e.target.value)}
-            className="bg-transparent text-xs outline-none flex-1" style={{ color: dm.heading }} />
-        </div>
-
-        <div className="flex items-center gap-1 ml-auto">
-          <button className="md:hidden p-2 rounded-xl" onClick={() => setSearchOpen(s => !s)}>
-            <Search size={18} style={{ color: C.gray[500] }} />
-          </button>
-          <button onClick={() => setDarkMode(d => !d)} className="p-2 rounded-xl hover:bg-gray-100 transition">
-            {darkMode ? <Sun size={18} style={{ color: C.yellow }} /> : <Moon size={18} style={{ color: C.gray[500] }} />}
-          </button>
-          <div className="relative">
-            <button onClick={() => setNotifOpen(o => !o)} className="relative p-2 rounded-xl hover:bg-gray-100 transition">
-              <Bell size={18} style={{ color: C.gray[500] }} />
-              {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full border-2 border-white" style={{ background: C.rose }} />}
-            </button>
-            {notifOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl shadow-2xl overflow-hidden z-50"
-                style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: dm.border }}>
-                  <h3 className="font-bold text-sm" style={{ color: C.navy }}>Notifications</h3>
-                  <button onClick={() => setNotifOpen(false)}><X size={15} style={{ color: C.gray[400] }} /></button>
-                </div>
-                <div className="max-h-72 overflow-y-auto">
-                  {notifications.map(n => (
-                    <div key={n.id} className="px-4 py-3 flex items-start gap-3 transition"
-                      style={{ background: n.unread ? `${C.navy}05` : 'transparent', borderBottom: `1px solid ${dm.border}` }}>
-                      <span className="text-base">{n.icon}</span>
-                      <div className="flex-1">
-                        <p className="text-xs" style={{ color: dm.heading }}>{n.text}</p>
-                        <p className="text-[10px] mt-0.5" style={{ color: C.gray[400] }}>{n.time}</p>
-                      </div>
-                      {n.unread && <div className="w-2 h-2 rounded-full mt-1" style={{ background: C.orange }} />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="relative">
-            <button onClick={() => setProfileMenuOpen(o => !o)}>
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow"
-                style={{ background: `linear-gradient(135deg,${C.navy},${C.orange})` }}>{getInitials()}</div>
-            </button>
-            {profileMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl shadow-2xl overflow-hidden z-50"
-                style={{ background: dm.card, border: `1px solid ${dm.border}` }}>
-                <div className="p-4 border-b" style={{ borderColor: dm.border }}>
-                  <p className="font-bold text-sm truncate" style={{ color: dm.heading }}>{fullName}</p>
-                  <p className="text-xs truncate" style={{ color: dm.text }}>{email}</p>
-                </div>
-                <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm transition"
-                  style={{ color: dm.text }} onClick={() => setProfileMenuOpen(false)}>
-                  <User size={14} />Profile Settings
-                </Link>
-                <Link to="/settings" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm transition"
-                  style={{ color: dm.text }} onClick={() => setProfileMenuOpen(false)}>
-                  <Settings size={14} />Settings
-                </Link>
-                <button onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-sm text-red-500 transition">
-                  <LogOut size={14} />Sign Out
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile search */}
-      {searchOpen && (
-        <div className="md:hidden px-4 py-2 border-b" style={{ background: dm.card, borderColor: dm.border }}>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: dm.subtle, border: `1px solid ${dm.border}` }}>
-            <Search size={13} style={{ color: C.gray[400] }} />
-            <input autoFocus placeholder="Search…" value={searchQ} onChange={e => setSearchQ(e.target.value)}
-              className="bg-transparent text-xs outline-none flex-1" style={{ color: dm.heading }} />
-            <button onClick={() => setSearchOpen(false)}><X size={13} style={{ color: C.gray[400] }} /></button>
-          </div>
-        </div>
-      )}
-
-      {/* ── MOBILE OVERLAY MENU ─────────────────────────────────────────────── */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 overflow-y-auto shadow-2xl" style={{ background: dm.card }}>
-            <div className="p-5 text-white relative" style={{ background: `linear-gradient(145deg,${C.navyDark},${C.orange})` }}>
-              <button className="absolute top-4 right-4" onClick={() => setMobileMenuOpen(false)}>
-                <X size={19} className="text-white/70" />
-              </button>
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg mb-3 bg-white/20">{getInitials()}</div>
-              <p className="font-black text-base">{fullName}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] opacity-70">{rank}</span>
-                <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">{points.toLocaleString()} pts</span>
-              </div>
-            </div>
-            <div className="p-3">
-              {navItems.map(item => (
-                <button key={item.id} onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false) }}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl mb-1 transition-all"
-                  style={{ background: activeTab === item.id ? `${C.navy}10` : 'transparent' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ background: activeTab === item.id ? C.navy : dm.subtle }}>
-                    <item.icon size={16} style={{ color: activeTab === item.id ? '#fff' : C.gray[500] }} />
-                  </div>
-                  <span className="text-sm font-medium" style={{ color: activeTab === item.id ? C.navy : dm.text }}>{item.label}</span>
-                  {activeTab === item.id && <ChevronRight size={13} className="ml-auto" style={{ color: C.navy }} />}
-                </button>
-              ))}
-              <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${dm.border}` }}>
-                <button onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-50 transition">
-                  <LogOut size={16} /><span className="text-sm font-medium">Sign Out</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── BODY ────────────────────────────────────────────────────────────── */}
-      <div className="flex">
-
-        {/* LEFT SIDEBAR (desktop) */}
-        <aside className="hidden lg:flex flex-col w-60 flex-shrink-0 sticky top-[61px] h-[calc(100vh-61px)] overflow-y-auto"
-          style={{ background: dm.card, borderRight: `1px solid ${dm.border}` }}>
-
-          {/* User card */}
-          <div className="m-3 rounded-2xl p-4 text-white" style={{ background: `linear-gradient(145deg,${C.navyDark},${C.orange})` }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-sm">{getInitials()}</div>
-              <div className="flex-1 min-w-0">
-                <p className="font-black text-sm truncate">{getFirstName()}</p>
-                <p className="text-[10px] opacity-70 truncate">{rank}</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="opacity-60">ID: {studentId}</span>
-              <button onClick={copyId} className="p-1 bg-white/20 rounded-lg hover:bg-white/30">
-                {copied ? <Check size={10} /> : <Copy size={10} />}
-              </button>
-            </div>
-            <div className="mt-2 h-1 rounded-full bg-white/20">
-              <div className="h-full rounded-full bg-white/60" style={{ width: `${Math.min((points / 2000) * 100, 100)}%` }} />
-            </div>
-            <p className="text-[9px] opacity-50 mt-1">{points} / 2,000 XP to next rank</p>
-          </div>
-
-          {/* Nav links */}
-          <nav className="flex-1 px-3 py-2">
-            {navItems.map(item => (
-              <button key={item.id} onClick={() => setActiveTab(item.id)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mb-0.5 transition-all"
-                style={{ background: activeTab === item.id ? `${C.navy}10` : 'transparent' }}>
-                <item.icon size={16} style={{ color: activeTab === item.id ? C.orange : C.gray[400] }} />
-                <span className="text-sm font-medium" style={{ color: activeTab === item.id ? C.navy : dm.text }}>{item.label}</span>
-                {activeTab === item.id && <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: C.orange }} />}
+          {/* Desktop tabs */}
+          <nav style={{ display:'flex', gap:2, flex:1 }}>
+            {navItems.map(n => (
+              <button key={n.id} onClick={()=>setTab(n.id)} style={{
+                display:'flex', alignItems:'center', gap:6,
+                padding:'8px 14px', borderRadius:10, border:'none', cursor:'pointer',
+                fontSize:13, fontWeight:700, transition:'all .15s',
+                background: tab===n.id ? `${C.navy}10` : 'transparent',
+                color: tab===n.id ? C.navy : C.gray[500]
+              }} className="dash-tab">
+                <n.icon size={15}/>
+                <span className="dash-tab-label">{n.label}</span>
+                {n.id==='courses' && total>0 &&
+                  <span style={{ background:C.orange, color:'white', fontSize:10,
+                    fontWeight:800, borderRadius:20, padding:'1px 6px' }}>{total}</span>}
               </button>
             ))}
           </nav>
 
-          {/* Streak widget */}
-          <div className="mx-3 p-3 rounded-2xl flex items-center gap-3"
-            style={{ background: `${C.orange}10`, border: `1px solid ${C.orange}20` }}>
-            <Flame size={18} style={{ color: C.orange }} />
-            <div>
-              <p className="font-black text-base" style={{ color: C.orange }}>{streak} days</p>
-              <p className="text-[10px]" style={{ color: dm.text }}>Current streak 🔥</p>
+          {/* Right: avatar + name only (no duplicate logo, no duplicate sign-out) */}
+          <div style={{ display:'flex', alignItems:'center', gap:10, flexShrink:0 }}>
+            <div className="dash-userinfo" style={{ textAlign:'right' }}>
+              <p style={{ fontSize:13, fontWeight:800, color:C.navy, margin:0 }}>{firstName(fullName)}</p>
+              <p style={{ fontSize:10, color:C.gray[400], margin:0 }}>{nowStr}</p>
             </div>
-          </div>
 
-          {/* Today's progress */}
-          <div className="mx-3 my-3 p-3 rounded-2xl" style={{ background: dm.subtle, border: `1px solid ${dm.border}` }}>
-            <p className="font-bold text-xs mb-2" style={{ color: C.navy }}>Today's Progress</p>
-            {[
-              { label:'Daily Goal', value:`${Math.round(totalLearningTime / 7)}/4 hrs`, pct: Math.min((totalLearningTime / 7 / 4) * 100, 100), color: C.navy   },
-              { label:'Streak',     value:`${streak} days`,                              pct: (streak / 30) * 100,                                 color: C.orange },
-            ].map((p, i) => (
-              <div key={i} className="mb-2">
-                <div className="flex justify-between text-[10px] mb-1" style={{ color: dm.text }}>
-                  <span>{p.label}</span>
-                  <span className="font-bold" style={{ color: p.color }}>{p.value}</span>
-                </div>
-                <div className="h-1 rounded-full overflow-hidden" style={{ background: dm.border }}>
-                  <div className="h-full rounded-full" style={{ width: `${p.pct}%`, background: p.color }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button onClick={handleSignOut}
-            className="mx-3 mb-3 flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-500 transition">
-            <LogOut size={15} /><span className="text-sm font-medium">Sign Out</span>
-          </button>
-        </aside>
-
-        {/* MAIN CONTENT */}
-        <main className="flex-1 min-w-0 pb-24 lg:pb-8">
-
-          {/* Hero banner */}
-          <div className="m-4 rounded-2xl p-5 text-white overflow-hidden relative"
-            style={{ background: `linear-gradient(145deg,${C.navyDark} 0%,${C.navy} 55%,${C.navyMid} 100%)` }}>
-            <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-10" style={{ background: C.orange }} />
-            <div className="absolute -bottom-6 right-20 w-24 h-24 rounded-full opacity-10" style={{ background: C.yellow }} />
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center font-black text-lg border-2 border-white/30">
-                  {getInitials()}
-                </div>
-                <div>
-                  <p className="text-sm opacity-80 mb-0.5">{greetingEmoji} {greeting}, {getFirstName()}!</p>
-                  <h1 className="text-xl font-black leading-tight">Your Learning Dashboard</h1>
-                  <p className="text-[11px] opacity-50 mt-0.5">{joinDate ? `Member since ${joinDate}` : 'Welcome to iKPACE'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="text-center px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-sm">
-                  <p className="text-xl font-black" style={{ color: C.yellow }}>{streak}</p>
-                  <p className="text-[10px] opacity-60">Day Streak</p>
-                </div>
-                <div className="text-center px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-sm">
-                  <p className="text-xl font-black" style={{ color: C.orangeLight }}>{points.toLocaleString()}</p>
-                  <p className="text-[10px] opacity-60">XP Points</p>
-                </div>
-                <div className="text-center px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-sm cursor-pointer" onClick={copyId}>
-                  <p className="text-sm font-black">{studentId}</p>
-                  <p className="text-[10px] opacity-60">{copied ? 'Copied!' : 'Student ID'}</p>
-                </div>
-              </div>
+            {/* Avatar */}
+            <div style={{ width:36, height:36, borderRadius:10, overflow:'hidden', flexShrink:0,
+              background:`linear-gradient(135deg,${C.navy},${C.orange})`,
+              display:'flex', alignItems:'center', justifyContent:'center',
+              color:'white', fontWeight:900, fontSize:13 }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                : initials(fullName)}
             </div>
-          </div>
 
-          {/* Tab content */}
-          <div className="px-4">{renderTab()}</div>
-        </main>
+            {/* Mobile menu button */}
+            <button className="dash-mobile-menu" onClick={()=>setMenuOpen(true)} style={{
+              background:'none', border:`1.5px solid ${C.gray[200]}`, borderRadius:9,
+              width:36, height:36, display:'flex', alignItems:'center',
+              justifyContent:'center', cursor:'pointer' }}>
+              <Menu size={17} style={{ color:C.navy }}/>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* ── BOTTOM NAV (mobile) ─────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around px-1 py-2 shadow-2xl"
-        style={{ background: dm.card, borderTop: `1px solid ${dm.border}` }}>
-        {[
-          { id:'overview',     icon:Home,     label:'Home'      },
-          { id:'courses',      icon:BookOpen, label:'Courses'   },
-          { id:'analytics',    icon:BarChart3,label:'Stats'     },
-          { id:'community',    icon:Users,    label:'Community' },
-          { id:'achievements', icon:Trophy,   label:'Rewards'   },
-        ].map(item => (
-          <button key={item.id} onClick={() => setActiveTab(item.id)}
-            className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all"
-            style={{ background: activeTab === item.id ? `${C.navy}10` : 'transparent' }}>
-            <item.icon size={20} style={{ color: activeTab === item.id ? C.orange : C.gray[400] }} />
-            <span className="text-[10px] font-semibold" style={{ color: activeTab === item.id ? C.navy : C.gray[400] }}>
-              {item.label}
-            </span>
+      {/* ══ MOBILE DRAWER ═════════════════════════════════════════════════════ */}
+      {menuOpen && (
+        <div style={{ position:'fixed', inset:0, zIndex:40 }} onClick={()=>setMenuOpen(false)}>
+          <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.4)' }}/>
+          <div style={{ position:'absolute', left:0, top:0, bottom:0, width:256,
+            background:'white', boxShadow:'4px 0 24px rgba(0,0,0,0.12)' }}
+            onClick={e=>e.stopPropagation()}>
+            <div style={{ padding:'24px 20px 16px', background:`linear-gradient(135deg,${C.navyD},${C.navyM})` }}>
+              <div style={{ width:52, height:52, borderRadius:14, overflow:'hidden', marginBottom:10,
+                background:`linear-gradient(135deg,${C.navy},${C.orange})`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                color:'white', fontWeight:900, fontSize:18 }}>
+                {avatarUrl ? <img src={avatarUrl} style={{ width:'100%', height:'100%', objectFit:'cover' }}/> : initials(fullName)}
+              </div>
+              <p style={{ color:'white', fontWeight:900, fontSize:16, margin:'0 0 2px' }}>{fullName}</p>
+              <p style={{ color:'rgba(255,255,255,0.5)', fontSize:11, margin:0 }}>{email}</p>
+            </div>
+            <div style={{ padding:12 }}>
+              {navItems.map(n => (
+                <button key={n.id} onClick={()=>{setTab(n.id);setMenuOpen(false)}} style={{
+                  width:'100%', display:'flex', alignItems:'center', gap:12,
+                  padding:'11px 14px', borderRadius:12, border:'none', cursor:'pointer',
+                  background: tab===n.id ? `${C.navy}10` : 'transparent',
+                  color: tab===n.id ? C.navy : C.gray[600],
+                  fontSize:14, fontWeight:700, marginBottom:2 }}>
+                  <n.icon size={16}/>{n.label}
+                </button>
+              ))}
+              <div style={{ borderTop:`1px solid ${C.gray[100]}`, marginTop:12, paddingTop:12 }}>
+                <button onClick={handleSignOut} style={{
+                  width:'100%', display:'flex', alignItems:'center', gap:12,
+                  padding:'11px 14px', borderRadius:12, border:'none', cursor:'pointer',
+                  background:`${C.red}08`, color:C.red, fontSize:14, fontWeight:700 }}>
+                  <LogOut size={16}/> Sign Out
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ PAGE CONTENT ══════════════════════════════════════════════════════ */}
+      <div style={{ maxWidth:1120, margin:'0 auto', padding:'24px 20px 80px' }}>
+
+        {/* ── HOME TAB ────────────────────────────────────────────────────── */}
+        {tab === 'home' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+
+            {/* Welcome banner */}
+            <div style={{ borderRadius:20, padding:'28px 28px 22px', color:'white',
+              position:'relative', overflow:'hidden',
+              background:`linear-gradient(120deg,${C.navyD} 0%,${C.navyM} 100%)` }}>
+              <div style={{ position:'absolute', top:-50, right:-50, width:200, height:200,
+                borderRadius:'50%', background:'rgba(255,122,0,0.1)' }}/>
+              <p style={{ fontSize:13, opacity:.65, margin:'0 0 3px', position:'relative' }}>
+                {greetEmoji} {greet}
+              </p>
+              <h1 style={{ fontSize:'clamp(20px,5vw,28px)', fontWeight:900, margin:'0 0 6px',
+                position:'relative', lineHeight:1.2 }}>
+                Hello, <span style={{ color:C.orangeL }}>{fullName || 'Learner'}</span>! 👋
+              </h1>
+              <p style={{ fontSize:13, opacity:.6, margin:'0 0 18px', position:'relative' }}>
+                Welcome back to iKPACE.
+                {total > 0
+                  ? ` You're enrolled in ${total} course${total!==1?'s':''}.`
+                  : ' Start your learning journey today!'}
+              </p>
+
+              {/* Info chips */}
+              <div style={{ display:'flex', flexWrap:'wrap', gap:8, position:'relative' }}>
+                {[
+                  { icon:'📅', label:'Last login', val: loginAt ? fmtDate(loginAt)+' '+fmtTime(loginAt) : '—' },
+                  { icon:'🌍', label:'Timezone',   val: timezone || '—' },
+                  { icon:'🆔', label:'Student ID', val: shortId },
+                ].map(({ icon, label, val }, i) => (
+                  <div key={i} style={{ background:'rgba(255,255,255,0.12)', borderRadius:10,
+                    padding:'7px 12px' }}>
+                    <p style={{ fontSize:9, opacity:.55, margin:'0 0 1px', textTransform:'uppercase', letterSpacing:'.4px' }}>{label}</p>
+                    <p style={{ fontSize:12, fontWeight:700, margin:0 }}>{icon} {val}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Live clock bar */}
+            <div style={{ textAlign:'center', fontSize:12, color:C.gray[400], letterSpacing:'.3px' }}>
+              🕐 {nowStr}
+            </div>
+
+            {/* Stat cards */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))', gap:12 }}>
+              {[
+                { icon:BookOpen,    label:'Enrolled',    val:total,             color:C.navy   },
+                { icon:PlayCircle,  label:'In Progress', val:inProg,            color:C.orange },
+                { icon:CheckCircle, label:'Completed',   val:completed,         color:C.green  },
+                { icon:TrendingUp,  label:'Avg Progress',val:`${avgProg}%`,     color:C.navyM  },
+                { icon:Flame,       label:'Day Streak',  val:`${streak} 🔥`,   color:C.orange },
+                { icon:CreditCard,  label:'Total Paid',  val:fmtMoney(totalPaid),color:C.navy  },
+              ].map((s,i) => (
+                <Card key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:14 }}>
+                  <div style={{ width:40, height:40, borderRadius:10, background:`${s.color}12`,
+                    display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <s.icon size={17} style={{ color:s.color }}/>
+                  </div>
+                  <div>
+                    <p style={{ fontSize:18, fontWeight:900, color:s.color, margin:0 }}>{s.val}</p>
+                    <p style={{ fontSize:11, color:C.gray[400], margin:'1px 0 0' }}>{s.label}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Continue Learning */}
+            {inProg > 0 && (
+              <div>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                  <h2 style={{ fontWeight:800, fontSize:16, color:C.navy, margin:0 }}>
+                    ▶️ Continue Learning
+                  </h2>
+                  <button onClick={()=>setTab('courses')} style={{ background:'none', border:'none',
+                    color:C.navyM, fontSize:13, fontWeight:700, cursor:'pointer' }}>
+                    All courses →
+                  </button>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))', gap:14 }}>
+                  {enrollments
+                    .filter(e => { const p=clamp(e.progress,0,100); return p>0&&p<100 })
+                    .map(e => {
+                      const c   = e.courses || {}
+                      const pct = clamp(e.progress,0,100)
+                      return (
+                        <Card key={e.id} style={{ padding:0, overflow:'hidden', cursor:'pointer' }}
+                          onClick={()=>navigate(`/test-course-player/${e.course_id}`)}>
+                          <div style={{ height:4, background:`linear-gradient(90deg,${C.navy},${C.orange})` }}/>
+                          <div style={{ padding:16 }}>
+                            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
+                              <h3 style={{ fontWeight:800, fontSize:14, color:C.navy, margin:0, lineHeight:1.3 }}>{c.title}</h3>
+                              <Pill color={C.orange}>In Progress</Pill>
+                            </div>
+                            <p style={{ fontSize:12, color:C.gray[400], margin:'0 0 10px' }}>{c.duration_weeks}w · {c.level}</p>
+                            <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4 }}>
+                              <span style={{ color:C.gray[500] }}>Progress</span>
+                              <span style={{ fontWeight:800, color:C.orange }}>{pct}%</span>
+                            </div>
+                            <Bar pct={pct} color={C.orange}/>
+                            <div style={{ marginTop:12, padding:'9px 0', borderRadius:10,
+                              background:`linear-gradient(135deg,${C.navy},${C.navyM})`,
+                              color:'white', fontWeight:700, fontSize:13,
+                              display:'flex', alignItems:'center', justifyContent:'center', gap:6 }}>
+                              <PlayCircle size={14}/> Continue Learning
+                            </div>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* No courses yet */}
+            {total === 0 && (
+              <Card style={{ textAlign:'center', padding:'40px 24px' }}>
+                <div style={{ fontSize:44, marginBottom:12 }}>📚</div>
+                <h3 style={{ fontWeight:800, fontSize:17, color:C.navy, marginBottom:8 }}>No courses yet</h3>
+                <p style={{ color:C.gray[500], fontSize:14, marginBottom:20 }}>
+                  Browse our courses and start learning today for just $7!
+                </p>
+                <Link to="/courses" style={{ display:'inline-flex', alignItems:'center', gap:7,
+                  background:C.orange, color:'white', padding:'11px 24px', borderRadius:10,
+                  fontWeight:700, fontSize:14, textDecoration:'none' }}>
+                  Browse Courses <ChevronRight size={15}/>
+                </Link>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* ── MY COURSES TAB ──────────────────────────────────────────────── */}
+        {tab === 'courses' && (
+          <div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18 }}>
+              <h2 style={{ fontWeight:900, fontSize:20, color:C.navy, margin:0 }}>
+                My Courses <span style={{ fontSize:15, color:C.gray[400], fontWeight:600 }}>({total})</span>
+              </h2>
+              <Link to="/courses" style={{ display:'inline-flex', alignItems:'center', gap:6,
+                background:C.orange, color:'white', padding:'8px 16px', borderRadius:10,
+                fontWeight:700, fontSize:13, textDecoration:'none' }}>
+                + Enroll More
+              </Link>
+            </div>
+
+            {total === 0 ? (
+              <Card style={{ textAlign:'center', padding:'50px 24px' }}>
+                <div style={{ fontSize:48, marginBottom:14 }}>📚</div>
+                <h3 style={{ fontWeight:800, fontSize:18, color:C.navy, marginBottom:8 }}>No courses enrolled</h3>
+                <p style={{ color:C.gray[500], fontSize:14, marginBottom:22 }}>
+                  Enroll in a course to start your learning journey.
+                </p>
+                <Link to="/courses" style={{ display:'inline-flex', alignItems:'center', gap:7,
+                  background:`linear-gradient(135deg,${C.navy},${C.orange})`, color:'white',
+                  padding:'12px 28px', borderRadius:12, fontWeight:700, fontSize:14, textDecoration:'none' }}>
+                  Browse Courses <ChevronRight size={15}/>
+                </Link>
+              </Card>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+                {enrollments.map(e => {
+                  const c    = e.courses || {}
+                  const pct  = clamp(e.progress,0,100)
+                  const done = pct >= 100
+                  return (
+                    <Card key={e.id} style={{ padding:0, overflow:'hidden' }}>
+                      <div style={{ height:4, background: done
+                        ? `linear-gradient(90deg,${C.green},#00C853)`
+                        : pct>0 ? `linear-gradient(90deg,${C.navy},${C.orange})` : C.gray[200] }}/>
+                      <div style={{ padding:20, display:'flex', flexWrap:'wrap', gap:16, alignItems:'flex-start' }}>
+
+                        {/* Thumbnail */}
+                        <div style={{ width:76, height:76, borderRadius:12, overflow:'hidden', flexShrink:0,
+                          background:`${C.navy}08`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          {c.thumbnail_url
+                            ? <img src={c.thumbnail_url} alt={c.title} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                            : <span style={{ fontSize:30 }}>{catEmoji(c.category)}</span>}
+                        </div>
+
+                        {/* Content */}
+                        <div style={{ flex:1, minWidth:180 }}>
+                          <div style={{ display:'flex', flexWrap:'wrap', gap:8, alignItems:'center', marginBottom:6 }}>
+                            <h3 style={{ fontWeight:800, fontSize:16, color:C.navy, margin:0 }}>{c.title || '—'}</h3>
+                            {done
+                              ? <Pill color={C.green}>✓ Completed</Pill>
+                              : pct>0 ? <Pill color={C.orange}>In Progress</Pill>
+                              : <Pill color={C.gray[500]} bg={C.gray[100]}>Not Started</Pill>}
+                          </div>
+
+                          {c.description && (
+                            <p style={{ fontSize:13, color:C.gray[500], margin:'0 0 10px', lineHeight:1.5 }}>
+                              {c.description.length>100 ? c.description.slice(0,100)+'…' : c.description}
+                            </p>
+                          )}
+
+                          <div style={{ display:'flex', flexWrap:'wrap', gap:10, fontSize:12,
+                            color:C.gray[400], marginBottom:12 }}>
+                            {c.duration_weeks && <span>⏱ {c.duration_weeks} weeks</span>}
+                            {c.level         && <span>📶 {c.level}</span>}
+                            {c.category      && <span>📂 {c.category}</span>}
+                            {e.enrolled_at   && <span>📅 {fmtDate(e.enrolled_at)}</span>}
+                            {done && e.completed_at && <span style={{ color:C.green }}>🏆 Done {fmtDate(e.completed_at)}</span>}
+                          </div>
+
+                          {/* Progress bar */}
+                          <div style={{ marginBottom:14 }}>
+                            <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4 }}>
+                              <span style={{ color:C.gray[500] }}>Progress</span>
+                              <span style={{ fontWeight:800, color: done?C.green:pct>0?C.orange:C.gray[400] }}>{pct}%</span>
+                            </div>
+                            <Bar pct={pct} color={done?C.green:C.orange} h={10}/>
+                          </div>
+
+                          {/* Buttons */}
+                          <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+                            <Link to={`/test-course-player/${e.course_id}`}
+                              style={{ display:'inline-flex', alignItems:'center', gap:6,
+                                background: done?C.green:C.navy, color:'white',
+                                padding:'9px 18px', borderRadius:10, fontWeight:700,
+                                fontSize:13, textDecoration:'none' }}>
+                              <PlayCircle size={13}/>
+                              {done ? 'Review' : pct>0 ? 'Continue Learning' : 'Start Learning'}
+                            </Link>
+
+                            {done && (
+                              <Link to={`/certificate/${e.course_id}`}
+                                style={{ display:'inline-flex', alignItems:'center', gap:6,
+                                  background:`${C.green}12`, color:C.green,
+                                  padding:'9px 16px', borderRadius:10, fontWeight:700,
+                                  fontSize:13, textDecoration:'none', border:`1px solid ${C.green}25` }}>
+                                <Award size={13}/> Certificate
+                              </Link>
+                            )}
+
+                            <Link to={`/course/${c.slug||e.course_id}`}
+                              style={{ display:'inline-flex', alignItems:'center', gap:5,
+                                background:C.gray[100], color:C.gray[700],
+                                padding:'9px 13px', borderRadius:10, fontWeight:600,
+                                fontSize:13, textDecoration:'none' }}>
+                              Details <ChevronRight size={13}/>
+                            </Link>
+
+                            {/* IQ Test button */}
+                            <button onClick={()=>setQuizCourse(c.title||'General')}
+                              style={{ display:'inline-flex', alignItems:'center', gap:6,
+                                background:`${C.purple}12`, color:C.purple,
+                                padding:'9px 13px', borderRadius:10, fontWeight:700,
+                                fontSize:13, border:`1px solid ${C.purple}20`, cursor:'pointer' }}>
+                              🧠 Test ur iQ
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PAYMENTS TAB ─────────────────────────────────────────────────── */}
+        {tab === 'payments' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            <h2 style={{ fontWeight:900, fontSize:20, color:C.navy, margin:0 }}>Payment History</h2>
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(190px,1fr))', gap:12 }}>
+              <Card style={{ background:`linear-gradient(135deg,${C.navyD},${C.navyM})`, color:'white', border:'none' }}>
+                <p style={{ fontSize:10, opacity:.6, margin:'0 0 4px', textTransform:'uppercase', letterSpacing:'.5px' }}>Total Invested</p>
+                <p style={{ fontSize:26, fontWeight:900, margin:0, color:C.orangeL }}>{fmtMoney(totalPaid)}</p>
+                <p style={{ fontSize:12, opacity:.5, margin:'3px 0 0' }}>{payments.length} transaction{payments.length!==1?'s':''}</p>
+              </Card>
+              <Card>
+                <p style={{ fontSize:10, color:C.gray[400], margin:'0 0 4px', textTransform:'uppercase', letterSpacing:'.5px' }}>Courses Purchased</p>
+                <p style={{ fontSize:26, fontWeight:900, margin:0, color:C.navy }}>{total}</p>
+                <p style={{ fontSize:12, color:C.gray[400], margin:'3px 0 0' }}>Successfully enrolled</p>
+              </Card>
+            </div>
+
+            {payments.length === 0 ? (
+              <Card style={{ textAlign:'center', padding:'44px 24px' }}>
+                <CreditCard size={38} style={{ color:C.gray[200], margin:'0 auto 12px', display:'block' }}/>
+                <p style={{ fontWeight:700, fontSize:16, color:C.gray[600], marginBottom:6 }}>No payments yet</p>
+                <p style={{ color:C.gray[400], fontSize:14 }}>Your payment history will appear here once you enroll.</p>
+              </Card>
+            ) : (
+              <Card style={{ padding:0, overflow:'hidden' }}>
+                <div style={{ padding:'14px 20px', borderBottom:`1px solid ${C.gray[100]}`,
+                  fontWeight:800, fontSize:14, color:C.navy }}>All Transactions</div>
+                {payments.map((p,i) => {
+                  const ok = ['success','paid'].includes((p.status||'').toLowerCase())
+                  return (
+                    <div key={p.id} style={{ display:'flex', alignItems:'center', gap:12,
+                      padding:'13px 20px', flexWrap:'wrap',
+                      borderBottom:i<payments.length-1?`1px solid ${C.gray[100]}`:'none',
+                      background:i%2===0?'white':C.gray[50] }}>
+                      <div style={{ width:40, height:40, borderRadius:10, flexShrink:0,
+                        background:`${ok?C.green:C.orange}12`,
+                        display:'flex', alignItems:'center', justifyContent:'center', fontSize:18 }}>
+                        {ok?'✅':'⏳'}
+                      </div>
+                      <div style={{ flex:1, minWidth:120 }}>
+                        <p style={{ fontWeight:700, fontSize:14, color:C.gray[900], margin:'0 0 2px' }}>
+                          {p.course_title || 'Course payment'}
+                        </p>
+                        <p style={{ fontSize:12, color:C.gray[400], margin:0 }}>
+                          {fmtDate(p.created_at)} at {fmtTime(p.created_at)}
+                          {p.reference ? ` · Ref: ${p.reference}` : ''}
+                        </p>
+                      </div>
+                      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                        <span style={{ fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:20,
+                          color:ok?C.green:C.orange, background:ok?`${C.green}12`:`${C.orange}12` }}>
+                          {ok?'Paid':p.status||'Pending'}
+                        </span>
+                        <p style={{ fontWeight:900, fontSize:15, color:C.navy, margin:0 }}>{fmtMoney(p.amount)}</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* ── PROFILE TAB ──────────────────────────────────────────────────── */}
+        {tab === 'profile' && (
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            <h2 style={{ fontWeight:900, fontSize:20, color:C.navy, margin:0 }}>My Profile</h2>
+
+            {/* Avatar + basic info */}
+            <Card>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:20, flexWrap:'wrap' }}>
+
+                {/* Avatar upload */}
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, flexShrink:0 }}>
+                  <div style={{ width:80, height:80, borderRadius:20, overflow:'hidden', position:'relative',
+                    background:`linear-gradient(135deg,${C.navy},${C.orange})`,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    color:'white', fontWeight:900, fontSize:28 }}>
+                    {avatarUrl
+                      ? <img src={avatarUrl} alt="avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                      : initials(fullName)}
+                  </div>
+
+                  <input ref={fileRef} type="file" accept="image/*"
+                    onChange={uploadAvatar} style={{ display:'none' }}/>
+
+                  <button onClick={()=>fileRef.current?.click()} disabled={uploadingImg}
+                    style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'7px 14px',
+                      borderRadius:9, background:C.navy, color:'white', fontWeight:700,
+                      fontSize:12, border:'none', cursor:uploadingImg?'wait':'pointer',
+                      opacity:uploadingImg?0.7:1 }}>
+                    <Camera size={13}/>
+                    {uploadingImg ? 'Uploading…' : 'Change Photo'}
+                  </button>
+
+                  {imgMsg && (
+                    <p style={{ fontSize:12, color: imgMsg.startsWith('✅')?C.green:C.red,
+                      margin:0, textAlign:'center' }}>{imgMsg}</p>
+                  )}
+                  <p style={{ fontSize:11, color:C.gray[400], margin:0, textAlign:'center' }}>Max 2MB · JPG/PNG</p>
+                </div>
+
+                {/* Info */}
+                <div style={{ flex:1, minWidth:200 }}>
+                  <h3 style={{ fontWeight:900, fontSize:18, color:C.navy, margin:'0 0 4px' }}>{fullName}</h3>
+                  <p style={{ fontSize:13, color:C.gray[500], margin:'0 0 10px' }}>{email}</p>
+                  <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+                    <Pill color={C.navy}>iKPACE Student</Pill>
+                    {total>0 && <Pill color={C.green}>{total} Course{total!==1?'s':''}</Pill>}
+                    {completed>0 && <Pill color={C.yellow}>🏆 {completed} Completed</Pill>}
+                  </div>
+
+                  {/* Info grid */}
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:10 }}>
+                    {[
+                      { label:'Student ID',   val:shortId, mono:true },
+                      { label:'Member Since', val:fmtDate(user?.created_at) },
+                      { label:'Last Login',   val:loginAt ? fmtDate(loginAt)+' '+fmtTime(loginAt) : '—' },
+                      { label:'Timezone',     val:timezone||'—' },
+                    ].map(({ label, val, mono }, i) => (
+                      <div key={i} style={{ background:C.gray[50], borderRadius:10, padding:'10px 13px' }}>
+                        <p style={{ fontSize:10, color:C.gray[400], margin:'0 0 2px',
+                          textTransform:'uppercase', letterSpacing:'.4px' }}>{label}</p>
+                        <p style={{ fontSize:13, fontWeight:700, color:C.gray[900], margin:0,
+                          fontFamily:mono?'monospace':'inherit' }}>{val}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Edit name */}
+            <Card>
+              <h3 style={{ fontWeight:800, fontSize:15, color:C.navy, marginBottom:14 }}>Edit Display Name</h3>
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
+                <input value={editName} onChange={e=>setEditName(e.target.value)}
+                  onKeyDown={e=>e.key==='Enter'&&saveName()}
+                  placeholder="Your full name"
+                  style={{ flex:1, minWidth:180, padding:'11px 14px', borderRadius:10,
+                    border:`1.5px solid ${C.gray[200]}`, fontSize:14, outline:'none', color:C.gray[900] }}/>
+                <button onClick={saveName} disabled={savingName||!editName.trim()}
+                  style={{ padding:'11px 22px', borderRadius:10, background:C.navy,
+                    color:'white', fontWeight:700, fontSize:14, border:'none',
+                    cursor:savingName?'wait':'pointer', opacity:savingName?0.7:1 }}>
+                  {savingName ? 'Saving…' : 'Save Name'}
+                </button>
+              </div>
+              {nameMsg && (
+                <p style={{ fontSize:13, color:nameMsg.startsWith('✅')?C.green:C.red,
+                  margin:'10px 0 0' }}>{nameMsg}</p>
+              )}
+            </Card>
+
+            {/* Sign out — properly working */}
+            <Card style={{ display:'flex', flexWrap:'wrap', alignItems:'center',
+              justifyContent:'space-between', gap:12,
+              border:`1px solid ${C.red}20`, background:`${C.red}04` }}>
+              <div>
+                <p style={{ fontWeight:800, fontSize:14, color:C.red, margin:'0 0 3px' }}>Sign Out</p>
+                <p style={{ fontSize:13, color:C.gray[500], margin:0 }}>You will be logged out of your iKPACE account.</p>
+              </div>
+              <button onClick={handleSignOut}
+                style={{ display:'inline-flex', alignItems:'center', gap:8,
+                  background:C.red, color:'white', padding:'11px 22px',
+                  borderRadius:10, fontWeight:700, fontSize:14,
+                  border:'none', cursor:'pointer', flexShrink:0 }}>
+                <LogOut size={15}/> Sign Out
+              </button>
+            </Card>
+          </div>
+        )}
+
+      </div>
+
+      {/* ══ MOBILE BOTTOM NAV ═════════════════════════════════════════════════ */}
+      <nav className="dash-bottom-nav" style={{ position:'fixed', bottom:0, left:0, right:0,
+        background:'white', borderTop:`1px solid ${C.gray[200]}`,
+        display:'flex', justifyContent:'space-around', padding:'8px 0 14px',
+        zIndex:20, boxShadow:'0 -2px 12px rgba(0,0,0,0.06)' }}>
+        {navItems.map(n => (
+          <button key={n.id} onClick={()=>setTab(n.id)} style={{
+            display:'flex', flexDirection:'column', alignItems:'center', gap:3,
+            background: tab===n.id ? `${C.navy}08` : 'none',
+            border:'none', cursor:'pointer', padding:'4px 12px', borderRadius:10 }}>
+            <n.icon size={20} style={{ color:tab===n.id?C.orange:C.gray[400] }}/>
+            <span style={{ fontSize:10, fontWeight:700, color:tab===n.id?C.navy:C.gray[400] }}>{n.label}</span>
           </button>
         ))}
       </nav>
 
+      {/* ══ IQ QUIZ MODAL ═════════════════════════════════════════════════════ */}
+      {quizCourse && <IQQuiz courseTitle={quizCourse} onClose={()=>setQuizCourse(null)}/>}
+
+      {/* ══ STYLES ════════════════════════════════════════════════════════════ */}
       <style>{`
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: ${C.gray[300]}; border-radius: 4px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { padding-bottom: env(safe-area-inset-bottom); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: ${C.gray[200]}; border-radius: 4px; }
+
+        /* Desktop ≥ 700px */
+        @media (min-width: 700px) {
+          .dash-bottom-nav    { display: none !important; }
+          .dash-mobile-menu   { display: none !important; }
+          .dash-tab-label     { display: inline !important; }
+          .dash-userinfo      { display: block !important; }
+        }
+        /* Mobile < 700px */
+        @media (max-width: 699px) {
+          .dash-tab-label     { display: none !important; }
+          .dash-userinfo      { display: none !important; }
+        }
       `}</style>
     </div>
   )
