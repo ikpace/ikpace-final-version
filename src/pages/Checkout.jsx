@@ -1,6 +1,6 @@
 // src/pages/Checkout.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   Lock, Shield, CheckCircle, Award, ChevronRight,
   Clock, Users, Star, Mail, Phone, User, CreditCard,
@@ -272,8 +272,9 @@ function Input({ icon, ...props }) {
 // ═════════════════════════════════════════════════════════════════════════════
 export default function Checkout() {
   const { courseId } = useParams()
-  const navigate     = useNavigate()
-  const { user }     = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { user, loading: authLoading } = useAuth()
 
   const [loading,       setLoading]       = useState(true)
   const [course,        setCourse]        = useState(null)
@@ -291,6 +292,15 @@ export default function Checkout() {
     country:       'Ghana',
     paymentMethod: 'mobile_money',
   })
+
+  // ============================================
+  // ADD LOGIN REDIRECT CHECK
+  // ============================================
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/login', { state: { from: location.pathname } })
+    }
+  }, [user, authLoading, navigate, location])
 
   useEffect(() => {
     const cd = COURSE_DATA[courseId]
@@ -413,6 +423,29 @@ export default function Checkout() {
 
   const relatedCourses = RELATED.filter(r => r.id !== courseId).slice(0, 3)
 
+  // ============================================
+  // LOADING STATES
+  // ============================================
+  
+  // Show auth loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background:C.gray[50] }}>
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center text-white font-black animate-pulse"
+            style={{ background:`linear-gradient(135deg,${C.navy},${C.orange})` }}>iK</div>
+          <p className="text-sm" style={{ color:C.gray[400] }}>Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If no user, return null (will redirect)
+  if (!user) {
+    return null
+  }
+
+  // Show course loading state
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background:C.gray[50] }}>
       <div className="text-center px-4 w-full max-w-xs mx-auto">

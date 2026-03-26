@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   Star, Clock, Users, CheckCircle, Award, Calendar,
   Shield, ShoppingCart, Video, FileText, Download,
@@ -17,10 +17,14 @@ import {
   Plus, Minus, Menu, X, ChevronDown
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function CourseDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const { user, loading: authLoading } = useAuth()
+  
   const [course, setCourse] = useState(null)
   const [loading, setLoading] = useState(true)
   const [enrolled, setEnrolled] = useState(false)
@@ -51,6 +55,16 @@ export default function CourseDetail() {
 
   // Fixed price for all courses
   const FIXED_PRICE = "$7"
+
+  // ============================================
+  // ADD LOGIN REDIRECT CHECK
+  // ============================================
+  useEffect(() => {
+    if (!authLoading && !user) {
+      // Save the current path to redirect back after login
+      navigate('/login', { state: { from: location.pathname } })
+    }
+  }, [user, authLoading, navigate, location])
 
   // Toggle section function
   const toggleSection = (section) => {
@@ -770,6 +784,28 @@ export default function CourseDetail() {
     setBookmarked(!bookmarked)
   }
 
+  // ============================================
+  // LOADING STATES
+  // ============================================
+  
+  // Show auth loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: colors.primary }}></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If no user, return null (will redirect)
+  if (!user) {
+    return null
+  }
+
+  // Show course loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
